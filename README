@@ -1,0 +1,6 @@
+PoDoFoBrowser is a Qt 4 application for browsing the objects in a PDF file and
+modifying their keys easily. It is very useful if you want to look on the
+internal structure of PDF files.
+
+You will need Qt4 and PoDoFo to build PoDoFoBrowser. CMake is used as the build
+system (see the INSTALL file for details), though you can use qmake if you prefer.

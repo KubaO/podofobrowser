@@ -1,0 +1,23 @@
+* text=auto !eol
+/AUTHORS -text
+/CMakeLists.txt -text
+/COPYING -text
+/Doxyfile -text
+/INSTALL -text
+/README -text
+cmake/modules/FindLIBFONTCONFIG.cmake -text
+cmake/modules/FindLIBFREETYPE.cmake -text
+cmake/modules/FindLIBJPEG.cmake -text
+cmake/modules/FindLIBPODOFO.cmake -text
+cmake/modules/FindZLIB.cmake -text
+/podofobrowser.pro -text
+src/CMakeLists.txt -text
+src/main.cpp -text
+src/pdflistviewitem.cpp -text
+src/pdflistviewitem.h -text
+src/podofoaboutdlg.ui -text
+src/podofobrowser.cpp -text
+src/podofobrowser.h -text
+src/podofobrowserbase.ui -text
+templates/cpp -text
+templates/h -text
