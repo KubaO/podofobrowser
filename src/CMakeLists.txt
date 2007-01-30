@@ -5,6 +5,7 @@ QT4_WRAP_UI(podofobrowser_UIC_HEADERS
 
 SET(podofobrowser_MOC_HEADERS
 	podofobrowser.h
+	pdfobjectmodel.h
 	)
 QT4_WRAP_CPP(podofobrowser_MOC_SRCS ${podofobrowser_MOC_HEADERS})
 
@@ -16,8 +17,8 @@ SET_SOURCE_FILES_PROPERTIES(
 	)
 
 ADD_EXECUTABLE(podofobrowser
+	pdfobjectmodel.cpp
 	podofobrowser.cpp
-	pdflistviewitem.cpp
 	main.cpp
 	${podofobrowser_MOC_SRCS}
 	)
@@ -25,7 +26,7 @@ ADD_EXECUTABLE(podofobrowser
 IF(NOT WIN32)
 	SET(extra_libs ${LIBFONTCONFIG_LIB})
 ELSE(NOT WIN32)
-	SET(extra_libs)
+	SET(extra_libs kernel32 user32 gdi32 winspool comdlg32 advapi32 shell32 ole32 oleaut32 uuid WS2_32)
 ENDIF(NOT WIN32)
 
 TARGET_LINK_LIBRARIES(podofobrowser

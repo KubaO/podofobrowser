@@ -32,6 +32,7 @@
 #include <qstring.h>
 
 class Q3ListViewItem;
+class PdfObjectModel;
 
 class PoDoFoBrowser: public Q3MainWindow, private Ui::PoDoFoBrowserBase
 {
@@ -64,7 +65,7 @@ class PoDoFoBrowser: public Q3MainWindow, private Ui::PoDoFoBrowserBase
 
     void loadAllObjects();
 
-    void objectChanged( Q3ListViewItem* );
+    void objectChanged( QTreeWidgetItem* );
     void slotImportStream();
     void slotExportStream();
     void slotTableChanged();
@@ -85,13 +86,14 @@ class PoDoFoBrowser: public Q3MainWindow, private Ui::PoDoFoBrowserBase
 
     void streamChanged( PoDoFo::PdfObject* );
 
-    void loadObjects();
     bool trySave();
 
  private:
 
-    Q3ListViewItem*        m_lastItem;
+    QTreeWidgetItem*      m_lastItem; //XXX
     QString               m_filename;
+
+    PdfObjectModel*	  m_pObjectModel;
 
     PoDoFo::PdfObject*    m_pCurObject;
     PoDoFo::PdfDocument*  m_pDocument;

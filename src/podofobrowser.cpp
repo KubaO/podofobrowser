@@ -21,7 +21,7 @@
 
 #include "podofobrowser.h"
 #include "ui_podofoaboutdlg.h"
-#include "pdflistviewitem.h"
+#include "pdfobjectmodel.h"
 
 #include <qapplication.h>
 #include <qcursor.h>
@@ -60,18 +60,16 @@ private:
 PoDoFoBrowser::PoDoFoBrowser()
     : Q3MainWindow(0, "PoDoFoBrowser", Qt::WDestructiveClose ),
       PoDoFoBrowserBase(),
+      m_pObjectModel( NULL ),
       m_pDocument( NULL )
 {
     setupUi(this);
 
     clear();
 
-    listObjects->setSorting( -1 );
-
-    connect( listObjects, SIGNAL( selectionChanged( Q3ListViewItem* ) ), this, SLOT( objectChanged( Q3ListViewItem* ) ) );
+    connect( listObjects, SIGNAL( selectionChanged( QTreeWidgetItem* ) ), this, SLOT( objectChanged( QTreeWidgetItem* ) ) );
     connect( buttonImport, SIGNAL( clicked() ), this, SLOT( slotImportStream() ) );
     connect( buttonExport, SIGNAL( clicked() ), this, SLOT( slotExportStream() ) );
-    connect( tableKeys, SIGNAL( valueChanged(int,int) ), this, SLOT( slotTableChanged() ) );
 
     show();
     statusBar()->message( tr("Ready"), 2000 );
@@ -131,7 +129,11 @@ void PoDoFoBrowser::clear()
     m_filename = QString::null;
     setCaption( "PoDoFoBrowser" );
     
-    delete m_pDocument;
+    PdfObjectModel* oldModel = static_cast<PdfObjectModel*>(listObjects->model());
+    listObjects->setModel(0);
+    delete oldModel; oldModel = 0;
+
+    delete m_pDocument; m_pDocument=0;
 
     m_pCurObject      = NULL;
     m_lastItem        = NULL;
@@ -139,24 +141,30 @@ void PoDoFoBrowser::clear()
     m_bChanged        = false;
     m_pDocument       = NULL;
     m_bObjectChanged  = false;
-
-    listObjects->clear();
-    tableKeys->setNumRows( 0 );
-    textStream->clear();
 }
 
 void PoDoFoBrowser::fileNew()
 {
-   PdfError         eCode;
+    PdfError         eCode;
 
-   if( !trySave() ) 
-       return;
+    if( !trySave() ) 
+        return;
 
-   this->clear();
+    this->clear();
 
-   m_pDocument = new PdfDocument();
+    m_pDocument = new PdfDocument();
 
-   loadObjects();
+    PdfObjectModel* oldModel = static_cast<PdfObjectModel*>(listObjects->model());
+    try
+    {
+        listObjects->setModel(new PdfObjectModel(m_pDocument, listObjects));
+    }
+    catch (std::exception& e)
+    {
+        qDebug("Caught fatal exception when building model");
+	throw;
+    }
+    delete oldModel; oldModel=0;
 }
 
 void PoDoFoBrowser::fileOpen( const QString & filename )
@@ -167,7 +175,7 @@ void PoDoFoBrowser::fileOpen( const QString & filename )
 
     QApplication::setOverrideCursor( Qt::WaitCursor );
 
-
+    // TODO: leaking old document?
     try {
         m_pDocument = new PdfDocument( filename.latin1() );
     } catch( PdfError & e ) {
@@ -175,11 +183,21 @@ void PoDoFoBrowser::fileOpen( const QString & filename )
         podofoError( e );
         return;
     }
+
+    PdfObjectModel* oldModel = static_cast<PdfObjectModel*>(listObjects->model());
+    try
+    {
+        listObjects->setModel(new PdfObjectModel(m_pDocument, listObjects));
+    }
+    catch (std::exception& e)
+    {
+        qDebug("Caught fatal exception when building model");
+	throw;
+    }
+    delete oldModel; oldModel=0;
     
     m_filename = filename;
     setCaption( m_filename );
-
-    loadObjects();
 
     QApplication::restoreOverrideCursor();
     statusBar()->message(  QString( tr("Loaded file %1 successfully") ).arg( filename ), 2000 );
@@ -194,7 +212,7 @@ bool PoDoFoBrowser::fileSave( const QString & filename )
         if( m_lastItem ) 
         {
             listObjects->blockSignals( true );
-            listObjects->setCurrentItem( m_lastItem );
+            // listObjects->setCurrentItem( m_lastItem ); //XXX
             listObjects->blockSignals( false );
         }
         return false;
@@ -221,8 +239,9 @@ bool PoDoFoBrowser::fileSave( const QString & filename )
     return true;
 }
 
-void PoDoFoBrowser::objectChanged( Q3ListViewItem* item )
+void PoDoFoBrowser::objectChanged( QTreeWidgetItem* item )
 {
+        /* XXX
     PdfError         eCode;
     std::string      str;
     int              i      = 0;
@@ -234,7 +253,7 @@ void PoDoFoBrowser::objectChanged( Q3ListViewItem* item )
         if( m_lastItem ) 
         {
             listObjects->blockSignals( true );
-            listObjects->setCurrentItem( m_lastItem );
+            listObjects->setCurrentItem( m_lastItem ); //XXX
             listObjects->blockSignals( false );
         }
         return;
@@ -243,7 +262,7 @@ void PoDoFoBrowser::objectChanged( Q3ListViewItem* item )
     m_pCurObject     = object;
     m_bObjectChanged = false;
 
-    dynamic_cast<PdfListViewItem*>(item)->init();
+    // XXX item->init()
 
     if( object->IsDictionary() )
     {
@@ -293,6 +312,7 @@ void PoDoFoBrowser::objectChanged( Q3ListViewItem* item )
     streamChanged( object );
 
     m_lastItem = item;
+        */ //XXX
 }
 
 void PoDoFoBrowser::streamChanged( PdfObject* object )
@@ -421,6 +441,7 @@ void PoDoFoBrowser::podofoError( const PdfError & eCode )
 
 bool PoDoFoBrowser::saveObject()
 {
+        /*
     PdfError    eCode;
     PdfVariant  var;
     PdfName     name;
@@ -493,6 +514,7 @@ bool PoDoFoBrowser::saveObject()
     m_bObjectChanged = false;
 
     return true;
+    */
 }
 
 void PoDoFoBrowser::slotImportStream()
@@ -620,6 +642,7 @@ void PoDoFoBrowser::toolsFromHex()
 
 void PoDoFoBrowser::editInsertKey()
 {
+    /*
     if( m_pCurObject )
     {
         tableKeys->setNumRows( tableKeys->numRows() + 1 );
@@ -629,24 +652,28 @@ void PoDoFoBrowser::editInsertKey()
         m_bObjectChanged = true;
         m_bChanged       = true;
     }
+    */
 }
 
 void PoDoFoBrowser::editInsertObject()
 {
+        /*
     PdfObject* pObject;
 
     if( saveObject() )
     {
         pObject = m_pDocument->GetObjects().CreateObject();
-        listObjects->setCurrentItem( new PdfListViewItem( listObjects, pObject ) );
+        // listObjects->setCurrentItem( new PdfListViewItem( listObjects, pObject ) ); //XXX
 
         m_bObjectChanged = true;
         m_bChanged       = true;
     }
+    */
 }
 
 void PoDoFoBrowser::editDeleteKey()
 {
+        /*
     int cur = tableKeys->currentRow();
 
     if( !m_pCurObject )
@@ -659,14 +686,13 @@ void PoDoFoBrowser::editDeleteKey()
         m_bObjectChanged = true;
         m_bChanged       = true;
     }
+    */
 }
 
 void PoDoFoBrowser::editDeleteObject()
 {
-    Q3ListViewItem* item;
-    PdfObject*     pObj;
-    
-    item  = listObjects->currentItem();
+        /*
+    QTreeWidgetItem* item  = listObjects->currentItem();
 
     if( !m_pCurObject && item )
         return;
@@ -680,13 +706,14 @@ void PoDoFoBrowser::editDeleteObject()
     if( QMessageBox::question( this, tr("Delete"), QString( tr("Do you really want to delete the object '%1'?") ).arg( 
                                m_pCurObject->Reference().ToString().c_str() ), QMessageBox::Yes, QMessageBox::No ) == QMessageBox::Yes ) 
     {
-        pObj = m_pDocument->GetObjects().RemoveObject( m_pCurObject->Reference() );
+        PdfObject* pObj = m_pDocument->GetObjects().RemoveObject( m_pCurObject->Reference() );
         if( pObj ) 
         {
             delete pObj;
 
-            listObjects->takeItem( item );
-            delete item;
+	    //XXX update view
+            //listObjects->takeItem( item );
+            //delete item;
         
             m_pCurObject     = NULL;
 
@@ -695,44 +722,7 @@ void PoDoFoBrowser::editDeleteObject()
 
         m_bChanged       = true;
     }
-}
-
-void PoDoFoBrowser::loadObjects()
-{
-    TCIVecObjects       it;
-    Q3ProgressDialog     dlg( this );
-    int                 i   = 0;
-
-    dlg.setLabelText( QString( tr( "Reading %1 objects ...") ).arg( m_pDocument->GetObjects().size() ) );
-    dlg.setTotalSteps( m_pDocument->GetObjects().size() );
-    dlg.show();
-
-    it = m_pDocument->GetObjects().begin();
-    listObjects->setUpdatesEnabled( false );
-    listObjects->viewport()->setUpdatesEnabled( false );
-    listObjects->clear();
-    while( it != m_pDocument->GetObjects().end() )
-    {
-        new PdfListViewItem( listObjects, *it );
-
-        dlg.setProgress( i );
-        qApp->processEvents();
-
-        if( dlg.wasCanceled() )
-        {
-            break;
-        }
-
-        ++i;
-        ++it;
-    }
-    listObjects->viewport()->setUpdatesEnabled( true );
-    listObjects->setUpdatesEnabled( true );
-    listObjects->viewport()->update();
-    listObjects->update();
-
-    if( listObjects->firstChild() )
-        objectChanged( listObjects->firstChild() );
+    */
 }
 
 void PoDoFoBrowser::helpAbout()
@@ -773,7 +763,8 @@ void PoDoFoBrowser::slotTableChanged()
 
 void PoDoFoBrowser::loadAllObjects()
 {
-    Q3ListViewItemIterator it( listObjects );
+        /* XXX
+    QTreeWidgetItemIterator it( listObjects );
     Q3ProgressDialog       dlg( this );
     int                   i = 0;
 
@@ -788,9 +779,10 @@ void PoDoFoBrowser::loadAllObjects()
 
         dlg.setProgress( i );
 
-        static_cast<PdfListViewItem*>(it.current())->init();    
+        // XXX static_cast<PdfListViewItem*>(it.current())->init();    
 
         ++i;
         ++it;
     }
+    */ //XXX
 }

@@ -19,5 +19,6 @@ HEADERS += \
 SOURCES += \
 	src/main.cpp \
 	src/pdflistviewitem.cpp \
-	src/podofobrowser.cpp
+	src/podofobrowser.cpp \
+	src/pdfobjectmodel.cpp
 

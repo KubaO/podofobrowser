@@ -21,37 +21,32 @@
      <height>561</height>
     </rect>
    </property>
-   <layout class="QHBoxLayout" >
+   <layout class="QVBoxLayout" >
     <property name="margin" >
-     <number>11</number>
+     <number>9</number>
     </property>
     <property name="spacing" >
      <number>6</number>
     </property>
     <item>
+     <widget class="QTreeView" name="listObjects" >
+      <property name="mouseTracking" >
+       <bool>false</bool>
+      </property>
+      <property name="alternatingRowColors" >
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QSplitter" name="splitter3" >
       <property name="orientation" >
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="Q3ListView" name="listObjects" >
-       <column>
-        <property name="text" >
-         <string>Object</string>
-        </property>
-       </column>
-      </widget>
       <widget class="QSplitter" name="splitter2" >
        <property name="orientation" >
         <enum>Qt::Vertical</enum>
        </property>
-       <widget class="Q3Table" name="tableKeys" >
-        <property name="numRows" >
-         <number>0</number>
-        </property>
-        <property name="numCols" >
-         <number>2</number>
-        </property>
-       </widget>
        <widget class="QWidget" name="layout3" >
         <layout class="QVBoxLayout" >
          <property name="margin" >
@@ -393,14 +388,14 @@
     <string>Objects are loaded on demand from the PDF file. This action will load all objects immediately which can take some time.</string>
    </property>
   </action>
+  <action name="actionScan_Tree" >
+   <property name="text" >
+    <string>Scan Tree</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11" />
  <customwidgets>
-  <customwidget>
-   <class>Q3ListView</class>
-   <extends>Q3Frame</extends>
-   <header>q3listview.h</header>
-  </customwidget>
   <customwidget>
    <class>Q3ToolBar</class>
    <extends>Q3Frame</extends>
@@ -411,11 +406,6 @@
    <extends>QWidget</extends>
    <header>q3mainwindow.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>Q3Table</class>
-   <extends>Q3Frame</extends>
-   <header>q3table.h</header>
   </customwidget>
   <customwidget>
    <class>Q3TextEdit</class>
@@ -510,38 +500,6 @@
    <signal>activated()</signal>
    <receiver>PoDoFoBrowserBase</receiver>
    <slot>fileExit()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>20</x>
-     <y>20</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>helpIndexAction</sender>
-   <signal>activated()</signal>
-   <receiver>PoDoFoBrowserBase</receiver>
-   <slot>helpIndex()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>20</x>
-     <y>20</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>helpContentsAction</sender>
-   <signal>activated()</signal>
-   <receiver>PoDoFoBrowserBase</receiver>
-   <slot>helpContents()</slot>
    <hints>
     <hint type="sourcelabel" >
      <x>-1</x>
