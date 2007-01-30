@@ -54,6 +54,8 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
+    const PoDoFo::PdfObject* GetObjectForIndex(const QModelIndex & index) const;
+
 private:
     void setupModelData(PoDoFo::PdfDocument* doc);
 

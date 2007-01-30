@@ -222,7 +222,7 @@ void PdfObjectModelNode::PopulateChildren()
            const PdfObject* const obj = parent->GetObject();
            if (obj->IsReference() && obj->GetReference() == ref)
            {
-               qDebug("Reference cycle detected on %s, breaking recursion", ref.ToString().c_str() );
+               //qDebug("Reference cycle detected on %s, breaking recursion", ref.ToString().c_str() );
                return;
            }
            parent = parent->GetParent();
@@ -562,5 +562,16 @@ int PdfObjectModel::rowCount(const QModelIndex &parent) const
 
 int PdfObjectModel::columnCount(const QModelIndex &parent) const
 {
+    //if (!parent.isValid())
+    //    return 0;
     return 3;
+}
+
+const PdfObject* PdfObjectModel::GetObjectForIndex(const QModelIndex & index) const
+{
+    if (!index.isValid())
+        return NULL;
+
+    PdfObjectModelNode * node = static_cast<PdfObjectModelNode*>(index.internalPointer());
+    return node->GetObject();
 }

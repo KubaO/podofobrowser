@@ -60,14 +60,13 @@ private:
 PoDoFoBrowser::PoDoFoBrowser()
     : Q3MainWindow(0, "PoDoFoBrowser", Qt::WDestructiveClose ),
       PoDoFoBrowserBase(),
-      m_pObjectModel( NULL ),
       m_pDocument( NULL )
 {
     setupUi(this);
 
     clear();
 
-    connect( listObjects, SIGNAL( selectionChanged( QTreeWidgetItem* ) ), this, SLOT( objectChanged( QTreeWidgetItem* ) ) );
+    connect( listObjects, SIGNAL( clicked(QModelIndex) ), this, SLOT( objectChanged( const QModelIndex & ) ) );
     connect( buttonImport, SIGNAL( clicked() ), this, SLOT( slotImportStream() ) );
     connect( buttonExport, SIGNAL( clicked() ), this, SLOT( slotExportStream() ) );
 
@@ -128,6 +127,12 @@ void PoDoFoBrowser::clear()
 {
     m_filename = QString::null;
     setCaption( "PoDoFoBrowser" );
+
+    labelStream->setText("");
+    textStream->clear();
+    buttonImport->setEnabled( false );
+    buttonExport->setEnabled( false );
+    textStream->setEnabled(false);
     
     PdfObjectModel* oldModel = static_cast<PdfObjectModel*>(listObjects->model());
     listObjects->setModel(0);
@@ -137,10 +142,7 @@ void PoDoFoBrowser::clear()
 
     m_pCurObject      = NULL;
     m_lastItem        = NULL;
-    m_bEditableStream = false;
-    m_bChanged        = false;
     m_pDocument       = NULL;
-    m_bObjectChanged  = false;
 }
 
 void PoDoFoBrowser::fileNew()
@@ -205,24 +207,11 @@ void PoDoFoBrowser::fileOpen( const QString & filename )
 
 bool PoDoFoBrowser::fileSave( const QString & filename )
 {
-    PdfError         eCode;
-
-    if( !saveObject() ) 
-    {
-        if( m_lastItem ) 
-        {
-            listObjects->blockSignals( true );
-            // listObjects->setCurrentItem( m_lastItem ); //XXX
-            listObjects->blockSignals( false );
-        }
-        return false;
-    }
-
     QApplication::setOverrideCursor( Qt::WaitCursor );
     loadAllObjects();
 
     try {
-        m_pDocument->Write( filename.latin1() );
+        m_pDocument->Write( filename.toLocal8Bit().data() );
     } catch( PdfError & e ) {
         QApplication::restoreOverrideCursor();
         podofoError( e );
@@ -233,147 +222,75 @@ bool PoDoFoBrowser::fileSave( const QString & filename )
     statusBar()->message(  QString( tr("Wrote file %1 successfully") ).arg( filename ), 2000 );
 
     m_filename = filename;
-    m_bChanged = false;
     setCaption( m_filename );
 
     return true;
 }
 
-void PoDoFoBrowser::objectChanged( QTreeWidgetItem* item )
+// Triggered when the selected object in the list view changes
+void PoDoFoBrowser::objectChanged( const QModelIndex & index )
 {
-        /* XXX
-    PdfError         eCode;
-    std::string      str;
-    int              i      = 0;
-    TCIKeyMap        it;
-    PdfObject*       object = static_cast<PdfListViewItem*>(item)->object();
-    
-    if( !saveObject() ) 
+    textStream->clear();
+    buttonImport->setEnabled( false );
+    buttonExport->setEnabled( false );
+    textStream->setEnabled(false);
+
+    PdfObjectModel * const model = static_cast<PdfObjectModel*>(listObjects->model());
+    if (!model)
     {
-        if( m_lastItem ) 
-        {
-            listObjects->blockSignals( true );
-            listObjects->setCurrentItem( m_lastItem ); //XXX
-            listObjects->blockSignals( false );
-        }
+        labelStream->setText("No document available");
         return;
     }
-    
-    m_pCurObject     = object;
-    m_bObjectChanged = false;
 
-    // XXX item->init()
-
-    if( object->IsDictionary() )
+    const PdfObject* object = model->GetObjectForIndex(index);
+    if (!object)
     {
-        tableKeys->setNumRows( object->GetDictionary().GetKeys().size() );
-        tableKeys->setNumCols( 2 );
-        tableKeys->horizontalHeader()->setLabel( 0, tr( "Key" ) );
-        tableKeys->horizontalHeader()->setLabel( 1, tr( "Value" ) );
-
-        it = object->GetDictionary().GetKeys().begin();
-        while( it != object->GetDictionary().GetKeys().end() )
-        {
-            if( !(*it).second->IsDictionary() )
-            {
-                try {
-                    (*it).second->ToString( str );
-                } catch( PdfError & e ) {
-                    podofoError( e );
-                    break;
-                }
-                
-                tableKeys->setText( i, 0, QString( (*it).first.GetName().c_str() ) );
-                tableKeys->setText( i, 1, QString( str.c_str() ) );
-            }
-
-            ++i;
-            ++it;
-        }
-        tableKeys->adjustColumn( 0 );
-        tableKeys->adjustColumn( 1 );
-    }
-    else
-    {
-        try {
-            object->ToString( str );
-        } catch( PdfError & e ) {
-            podofoError( e );
-            return;
-        }
-        
-        tableKeys->setNumRows( 1 );
-        tableKeys->setNumCols( 1 );
-        tableKeys->setText( 0, 0, QString( str.c_str() ) );
-        tableKeys->adjustColumn( 0 );
-        tableKeys->horizontalHeader()->setLabel( 0, tr( "Value" ) );
-    }
-
-    streamChanged( object );
-
-    m_lastItem = item;
-        */ //XXX
-}
-
-void PoDoFoBrowser::streamChanged( PdfObject* object )
-{
-    bool             bErr   = false;
-    char*            pBuf   = NULL;
-    long             lLen   = 0;
-    bool             bHas   = true;
-    QByteArray       data;
-
-    if( !object )
+        labelStream->setText("No object available");
         return;
+    }
+
+    const PdfReference & ref (object->Reference());
+    if (!ref.IsIndirect())
+    {
+        labelStream->setText("Object is not indirect so it can not have a stream");
+        return;
+    }
 
     try {
-        bHas = object->HasStream();
-    } catch( PdfError & e ) {
+        if (!object->HasStream())
+        {
+            labelStream->setText("Object has no stream");
+            return;
+        }
+    }
+    catch ( PdfError & e ) {
+        labelStream->setText("Error while testing for object stream");
         podofoError( e );
+        return;
     }
 
-    if( bHas )
-    {
-        try {
-            object->GetStream()->GetFilteredCopy( &pBuf, &lLen );
-        } catch( PdfError & e ) {
-            m_bEditableStream = false;
-            statusBar()->message( tr("Cannot apply filters to this stream!"), 2000 );
-            podofoError( e );
-            bErr   = true;
-            textStream->setText( "" );
-        }
-
-        if( !bErr )
-        { 
-            m_bEditableStream = (lLen == qstrlen( pBuf ));
-            if( m_bEditableStream )
-                statusBar()->message( tr("Stream contains binary data and is not shown completely!"), 2000 );
-            
-            for( int i=0; i<lLen; i++ )
-                if( pBuf[i] == 0 ) 
-                    pBuf[i] = 127;
-
-            data.duplicate( pBuf, lLen );
-            free( pBuf );
-            textStream->setText( QString( data ) );
-        }
-        labelStream->setText( m_bEditableStream ? tr("This stream can be edited.") : tr("This stream is readonly because of binary data contained in it.") );
-
-        buttonImport->setEnabled( true );
-        buttonExport->setEnabled( true );
+    char * pBuf = NULL;
+    long lLen = -1;
+    try {
+        object->GetStream()->GetFilteredCopy( &pBuf, &lLen );
+    } catch( PdfError & e ) {
+        labelStream->setText("Unable to filter object stream");
+        podofoError( e );
+        return;
     }
-    else
-    {
-        m_bEditableStream = false;
-        textStream->setText( tr("This object does not have a stream!" ) );
-        labelStream->setText( QString::null );
 
-        buttonImport->setEnabled( false );
-        buttonExport->setEnabled( false );
-    }
-    
-    textStream->setReadOnly( !m_bEditableStream );
+    assert(pBuf);
+    assert(lLen >= 0);
+
+    QByteArray data;
+    data.duplicate( pBuf, lLen );
+    free( pBuf );
+    textStream->setEnabled(true);
+    // TODO: sane encoding-safe approach to binary data
+    textStream->setText( QString( data ) );
+    labelStream->setText( QString("Stream associated with %1 %2 obj").arg(ref.ObjectNumber()).arg(ref.GenerationNumber()));
+    buttonImport->setEnabled( true );
+    buttonExport->setEnabled( true );
 }
 
 void PoDoFoBrowser::fileOpen()
@@ -519,6 +436,7 @@ bool PoDoFoBrowser::saveObject()
 
 void PoDoFoBrowser::slotImportStream()
 {
+    /*
     PdfError eCode;
     char*    pBuf     = NULL;
     long     lLen     = 0;
@@ -560,10 +478,12 @@ void PoDoFoBrowser::slotImportStream()
     m_bObjectChanged = true;;
     streamChanged( m_pCurObject );
     statusBar()->message( QString( tr("Stream imported from %1") ).arg( filename ), 2000 );    
+    */
 }
 
 void PoDoFoBrowser::slotExportStream()
 {
+    /*
     PdfError eCode;
     char*    pBuf     = NULL;
     long     lLen     = 0;
@@ -594,6 +514,7 @@ void PoDoFoBrowser::slotExportStream()
     file.close();
 
     statusBar()->message( QString( tr("Stream exported to %1") ).arg( filename ), 2000 );    
+    */
 }
 
 void PoDoFoBrowser::toolsToHex()
@@ -735,6 +656,7 @@ void PoDoFoBrowser::helpAbout()
 
 bool PoDoFoBrowser::trySave() 
 {
+    /*
    if( m_bChanged ) 
    {
        int m = QMessageBox::question( this, tr("File changed"), QString( tr("The file %1 was changed. Do you want to save it?") ).arg( m_filename ), 
@@ -754,11 +676,8 @@ bool PoDoFoBrowser::trySave()
    }
 
    return true;
-}
-
-void PoDoFoBrowser::slotTableChanged()
-{
-    m_bObjectChanged = true;
+   */
+    return true;
 }
 
 void PoDoFoBrowser::loadAllObjects()

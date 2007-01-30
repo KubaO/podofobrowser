@@ -76,9 +76,15 @@
           </widget>
          </item>
          <item>
-          <widget class="Q3TextEdit" name="textStream" >
+          <widget class="QTextEdit" name="textStream" >
+           <property name="undoRedoEnabled" >
+            <bool>false</bool>
+           </property>
            <property name="readOnly" >
-            <bool>true</bool>
+            <bool>false</bool>
+           </property>
+           <property name="acceptRichText" >
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -264,20 +270,6 @@
     <string/>
    </property>
   </action>
-  <action name="filePrintAction" >
-   <property name="icon" >
-    <iconset>image3</iconset>
-   </property>
-   <property name="text" >
-    <string>&amp;Print...</string>
-   </property>
-   <property name="iconText" >
-    <string>Print</string>
-   </property>
-   <property name="shortcut" >
-    <string>Ctrl+P</string>
-   </property>
-  </action>
   <action name="fileExitAction" >
    <property name="text" >
     <string>E&amp;xit</string>
@@ -397,20 +389,15 @@
  <layoutdefault spacing="6" margin="11" />
  <customwidgets>
   <customwidget>
-   <class>Q3ToolBar</class>
-   <extends>Q3Frame</extends>
-   <header>q3listview.h</header>
-  </customwidget>
-  <customwidget>
    <class>Q3MainWindow</class>
    <extends>QWidget</extends>
    <header>q3mainwindow.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>Q3TextEdit</class>
+   <class>Q3ToolBar</class>
    <extends>Q3Frame</extends>
-   <header>q3textedit.h</header>
+   <header>q3listview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
@@ -468,22 +455,6 @@
    <signal>activated()</signal>
    <receiver>PoDoFoBrowserBase</receiver>
    <slot>fileSaveAs()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>20</x>
-     <y>20</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>filePrintAction</sender>
-   <signal>activated()</signal>
-   <receiver>PoDoFoBrowserBase</receiver>
-   <slot>filePrint()</slot>
    <hints>
     <hint type="sourcelabel" >
      <x>-1</x>
