@@ -274,6 +274,8 @@ void PoDoFoBrowser::objectChanged( const QModelIndex & index )
     try {
         // XXX FIXME GetStream() appears to invalidate child nodes by triggering an object rebuild. Since the object
         //           was already delay-loaded by podofo when we built the model tree this SHOULD NOT HAPPEN.
+	// As a workaround, invalidate the object's children before getting the stream.
+	model->InvalidateChildren(index);
         object->GetStream()->GetFilteredCopy( &pBuf, &lLen );
     } catch( PdfError & e ) {
         labelStream->setText("Unable to filter object stream");

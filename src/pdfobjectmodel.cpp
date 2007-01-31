@@ -124,6 +124,10 @@ public:
     // wants to know about them. Call this method before doing something
     // to the children of this node that'll invalidate pointers to the object's
     // children.
+    //
+    // Note that as this invalidates any QModelIndex's for the children of this node,
+    // this method should only be called by the model, which can properly inform
+    // users of those indexes.
     void InvalidateChildren();
 
 private:
@@ -180,6 +184,7 @@ PdfObjectModelTree::PdfObjectModelTree(PdfDocument * doc, PdfObject* root, bool 
 PdfObjectModelTree::~PdfObjectModelTree()
 {
     delete m_pRoot;
+    assert(m_nodeAliases.size() == 0);
 }
 
 void PdfObjectModelTree::NodeCreated(PdfObjectModelNode* node)
@@ -223,6 +228,8 @@ PdfObjectModelNode::PdfObjectModelNode(PdfObjectModelTree * tree,
 
 void PdfObjectModelNode::InvalidateChildren()
 {
+    qDebug("InvalidateChildren() called on %p", this);
+
     // Delete all the children of this object and flag it as needing to
     // rescan for children next time the child list is accessed.
     const std::vector<PdfObjectModelNode*>::iterator itEnd = m_children.end();
@@ -231,6 +238,7 @@ void PdfObjectModelNode::InvalidateChildren()
          ++it)
         delete *it;
 
+    m_children.clear();
     m_bChildrenLoaded = false;
 }
 
@@ -614,6 +622,20 @@ const PdfObject* PdfObjectModel::GetObjectForIndex(const QModelIndex & index) co
     if (!index.isValid())
         return NULL;
 
-    PdfObjectModelNode * node = static_cast<PdfObjectModelNode*>(index.internalPointer());
-    return node->GetObject();
+    return static_cast<PdfObjectModelNode*>(index.internalPointer())->GetObject();
+}
+
+void PdfObjectModel::InvalidateChildren(const QModelIndex & index)
+{
+    if (index.isValid())
+    {
+        PdfObjectModelNode* node = static_cast<PdfObjectModelNode*>(index.internalPointer());
+        qDebug("Invalidating children of node: %i %i %p", index.row(), index.column(), node);
+        //reset();
+        assert(node);
+        emit layoutAboutToBeChanged();
+        node->InvalidateChildren();
+        emit layoutChanged();
+        emit dataChanged(index, index);
+    }
 }

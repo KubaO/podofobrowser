@@ -50,7 +50,12 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
+    // Return the object associed with `index'
     const PoDoFo::PdfObject* GetObjectForIndex(const QModelIndex & index) const;
+
+    // Invalidate the children of `index' so that they're re-loaded next time
+    // they're needed. You MUST call this before modifying the children of an object.
+    void InvalidateChildren(const QModelIndex & index);
 
 private:
     void setupModelData(PoDoFo::PdfDocument* doc);
