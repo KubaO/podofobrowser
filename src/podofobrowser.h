@@ -79,8 +79,6 @@ class PoDoFoBrowser: public Q3MainWindow, private Ui::PoDoFoBrowserBase
     void parseCmdLineArgs();
     void clear();
 
-    void podofoError( const PoDoFo::PdfError & eCode );
-
     bool saveObject();
 
     bool trySave();

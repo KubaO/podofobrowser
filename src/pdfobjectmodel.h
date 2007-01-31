@@ -49,6 +49,7 @@ public:
     virtual QModelIndex parent(const QModelIndex &index) const;
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
     virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
+    virtual bool setData ( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole );
 
     // Return the object associed with `index'
     const PoDoFo::PdfObject* GetObjectForIndex(const QModelIndex & index) const;

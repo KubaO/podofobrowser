@@ -1,4 +1,5 @@
 #include "pdfobjectmodel.h"
+#include "podofoutil.h"
 
 #include <utility>
 using std::pair;
@@ -129,6 +130,9 @@ public:
     // this method should only be called by the model, which can properly inform
     // users of those indexes.
     void InvalidateChildren();
+
+    // Set the item's value to `data'. 
+    bool SetRawDataForScalar(const QByteArray& data);
 
 private:
     // Make sure the child list is populated.
@@ -344,6 +348,27 @@ PdfObjectModelNode * PdfObjectModelNode::GetContainer() const
     return ret;
 }
 
+bool PdfObjectModelNode::SetRawDataForScalar(const QByteArray & data)
+{
+    // Can't replace a container this way because it'd change the
+    // model's layout
+    if (m_pObject->IsDictionary() || m_pObject->IsArray() || m_pObject->IsReference() )
+        return false;
+
+    // Try to parse as a PdfVariant. Failure will throw an exception.
+    PdfVariant variant;
+    PdfTokenizer tokenizer (data.data(), data.size());
+    tokenizer.GetNextVariant(variant);
+
+    // Can't use this method to create a dict or array because that'd change
+    // the model's layout
+    if (variant.IsDictionary() || variant.IsArray() || m_pObject->IsReference() )
+        return false;
+
+    *(m_pObject) = variant;
+    return true;
+}
+
 }; // end anon namespace
 
 
@@ -431,7 +456,6 @@ QVariant PdfObjectModel::data(const QModelIndex& index, int role) const
     QVariant ret;
 
     const PdfObject* item;
-    const PdfParserObject* pobj;
     switch (index.column())
     {
         case 0:
@@ -536,7 +560,19 @@ Qt::ItemFlags PdfObjectModel::flags(const QModelIndex &index) const
     if (!index.isValid())
         return Qt::ItemIsEnabled;
 
-    return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+    Qt::ItemFlags f = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+
+    if (index.column() == 2)
+    {
+        // If the node is not a container and they're editing the data field, mark it editable
+        PdfObjectModelNode * const node = static_cast<PdfObjectModelNode*>(index.internalPointer());
+        assert(node);
+        const PdfObject* obj = node->GetObject();
+        if (! (obj->IsDictionary() || obj->IsArray() || obj->IsReference()) )
+            f = f|Qt::ItemIsEditable;
+    }
+
+    return f;
 }
 
 QVariant PdfObjectModel::headerData(int section, Qt::Orientation orientation,
@@ -627,6 +663,38 @@ const PdfObject* PdfObjectModel::GetObjectForIndex(const QModelIndex & index) co
         return NULL;
 
     return static_cast<PdfObjectModelNode*>(index.internalPointer())->GetObject();
+}
+
+bool PdfObjectModel::setData ( const QModelIndex & index, const QVariant & value, int role )
+{
+    if (!index.isValid() || index.column() != 2)
+        return false;
+    if (value.isNull() || !value.isValid() || !value.canConvert<QByteArray>())
+        return false;
+
+    PdfObjectModelNode* node = static_cast<PdfObjectModelNode*>(index.internalPointer());
+    const PdfObject* obj = node->GetObject();
+    if ( obj->IsDictionary() || obj->IsArray() || obj->IsReference() )
+        return false;
+
+    QByteArray data = value.toByteArray();
+    if (data.size() == 0)
+        return false;
+
+    try
+    {
+        if (node->SetRawDataForScalar(data))
+        {
+            emit dataChanged(index, index);
+            return true;
+        }
+    }
+    catch (PdfError & eCode)
+    {
+        QString msg = QString( "PoDoFoBrowser encounter an error.\nError: %1\n" ).arg( eCode.GetError() );
+        qDebug("%s", msg.toLocal8Bit().data());
+    }
+    return false;
 }
 
 void PdfObjectModel::InvalidateChildren(const QModelIndex & index)

@@ -17,6 +17,7 @@ SET_SOURCE_FILES_PROPERTIES(
 	)
 
 ADD_EXECUTABLE(podofobrowser
+	podofoutil.cpp
 	pdfobjectmodel.cpp
 	podofobrowser.cpp
 	main.cpp
