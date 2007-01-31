@@ -259,7 +259,7 @@ void PoDoFoBrowser::objectChanged( const QModelIndex & index )
     try {
         if (!object->HasStream())
         {
-            labelStream->setText("Object has no stream");
+            labelStream->setText( QString("Object %1 %2 obj has no stream").arg(ref.ObjectNumber()).arg(ref.GenerationNumber()) );
             return;
         }
     }
@@ -272,6 +272,8 @@ void PoDoFoBrowser::objectChanged( const QModelIndex & index )
     char * pBuf = NULL;
     long lLen = -1;
     try {
+        // XXX FIXME GetStream() appears to invalidate child nodes by triggering an object rebuild. Since the object
+        //           was already delay-loaded by podofo when we built the model tree this SHOULD NOT HAPPEN.
         object->GetStream()->GetFilteredCopy( &pBuf, &lLen );
     } catch( PdfError & e ) {
         labelStream->setText("Unable to filter object stream");
@@ -287,6 +289,7 @@ void PoDoFoBrowser::objectChanged( const QModelIndex & index )
     free( pBuf );
     textStream->setEnabled(true);
     // TODO: sane encoding-safe approach to binary data
+    // TODO: hex editor
     textStream->setText( QString( data ) );
     labelStream->setText( QString("Stream associated with %1 %2 obj").arg(ref.ObjectNumber()).arg(ref.GenerationNumber()));
     buttonImport->setEnabled( true );

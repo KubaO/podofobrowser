@@ -11,10 +11,6 @@ namespace PoDoFo {
         class PdfObject;
 };
 
-namespace {
-	class PdfObjectModelTree;
-};
-
 /*
  * A Qt model to represent the PDF's top-level indirect object
  * tree and all child dictionaries of it.
@@ -59,7 +55,9 @@ public:
 private:
     void setupModelData(PoDoFo::PdfDocument* doc);
 
-    PdfObjectModelTree * m_pTree;
+    // PdfObjectModelTree instance for the model - stored as void* to avoid
+    // exposing anonymous namespace types.
+    void * m_pTree;
 };
 
 #endif

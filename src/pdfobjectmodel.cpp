@@ -42,6 +42,8 @@ private:
 
     // Called from each node's ctor
     void NodeCreated(PdfObjectModelNode* node);
+    // Called from each node's dtor
+    void NodeDeleted(PdfObjectModelNode* node);
 
     PdfDocument* m_pDoc;
     const bool m_bFollowReferences;
@@ -89,11 +91,11 @@ public:
     QVariant GetData(int role) const;
 
     // Return the number of children of this node
-    int CountChildren() const { return m_children.size(); }
+    int CountChildren() const { EnsureChildrenLoaded(); return m_children.size(); }
 
     // Get the n'th child node of this object, or 0 if no such child
     // exists.
-    PdfObjectModelNode* GetChild(int n) const { return n < m_children.size() ? m_children[n] : 0; }
+    PdfObjectModelNode* GetChild(int n) const { EnsureChildrenLoaded(); return n < m_children.size() ? m_children[n] : 0; }
 
     // Return the container that contains/reference this object
     PdfObjectModelNode * GetContainer() const;
@@ -118,8 +120,17 @@ public:
     // Return a list of nodes that track the same object as this node
     std::vector<PdfObjectModelNode*> GetAliases() { return m_pTree->GetAliases(m_pObject); }
 
+    // Forget about any children and re-scan for children next time anyone
+    // wants to know about them. Call this method before doing something
+    // to the children of this node that'll invalidate pointers to the object's
+    // children.
+    void InvalidateChildren();
+
 private:
-    // Create nodes to fill the child list
+    // Make sure the child list is populated.
+    inline void EnsureChildrenLoaded() const { if (!m_bChildrenLoaded) { const_cast<PdfObjectModelNode*>(this)->PopulateChildren(); } }
+
+    // Create nodes to fill the child list. Must NEVER be called except via EnsureChildrenLoaded().
     void PopulateChildren();
 
     // Add a child node for the passed object
@@ -127,6 +138,9 @@ private:
     {
         m_children.push_back( new PdfObjectModelNode(m_pTree, object, this, parentKey, pt ) );
     }
+
+    // True iff this object has a populated list of children.
+    bool m_bChildrenLoaded;
 
     // Tree object for this node
     PdfObjectModelTree * m_pTree;
@@ -160,7 +174,7 @@ PdfObjectModelTree::PdfObjectModelTree(PdfDocument * doc, PdfObject* root, bool 
       m_nodeAliases(),
       m_pRoot( new PdfObjectModelNode(this, root, NULL, PdfName::KeyNull, PdfObjectModelNode::PT_Root) )
 {
-    qDebug("Done creating model tree"); //XXX
+    //qDebug("Done creating model tree"); //XXX
 }
 
 PdfObjectModelTree::~PdfObjectModelTree()
@@ -174,12 +188,24 @@ void PdfObjectModelTree::NodeCreated(PdfObjectModelNode* node)
     m_nodeAliases.insert( pair<const PdfObject*,PdfObjectModelNode*>(obj, node) );
 }
 
+void PdfObjectModelTree::NodeDeleted(PdfObjectModelNode* node)
+{
+    const PdfObject * const obj = node->GetObject();
+    std::multimap<const PdfObject*, PdfObjectModelNode*>::iterator it = m_nodeAliases.lower_bound(obj);
+    while ( (*it).first == obj && (*it).second != node )
+        ++it;
+    if ( (*it).first != obj || (*it).second != node )
+        throw std::logic_error("Could not find object,node pair for node being deleted in alias map");
+    m_nodeAliases.erase(it);
+}
+
 PdfObjectModelNode::PdfObjectModelNode(PdfObjectModelTree * tree,
                                        PdfObject* object,
                                        PdfObjectModelNode* parent,
                                        const PdfName & parentKey,
                                        ParentageType parentType)
-    : m_pTree(tree),
+    : m_bChildrenLoaded(false),
+      m_pTree(tree),
       m_pObject(object),
       m_pParent(parent),
       m_parentKey(parentKey),
@@ -192,21 +218,36 @@ PdfObjectModelNode::PdfObjectModelNode(PdfObjectModelTree * tree,
     m_pTree->NodeCreated(this);
 
     // todo: deferred child tree building
-    PopulateChildren();
+    //PopulateChildren(); //XXX
 }
 
-PdfObjectModelNode::~PdfObjectModelNode()
+void PdfObjectModelNode::InvalidateChildren()
 {
-    // Clean up children
+    // Delete all the children of this object and flag it as needing to
+    // rescan for children next time the child list is accessed.
     const std::vector<PdfObjectModelNode*>::iterator itEnd = m_children.end();
     for (std::vector<PdfObjectModelNode*>::iterator it = m_children.begin();
          it != itEnd;
          ++it)
         delete *it;
+
+    m_bChildrenLoaded = false;
+}
+
+PdfObjectModelNode::~PdfObjectModelNode()
+{
+    InvalidateChildren();
+    m_pTree->NodeDeleted(this);
 }
 
 void PdfObjectModelNode::PopulateChildren()
 {
+    // This method must never be called except via EnsureChildrenLoaded()
+    // and only by that if the child list is not populated.
+    assert(!m_bChildrenLoaded);
+
+    qDebug("PopulateChildren() on %p", this);
+
     if (m_pTree->FollowReferences() && m_pObject->IsReference())
     {
        // We must follow the reference and create a child node under it
@@ -222,7 +263,6 @@ void PdfObjectModelNode::PopulateChildren()
            const PdfObject* const obj = parent->GetObject();
            if (obj->IsReference() && obj->GetReference() == ref)
            {
-               //qDebug("Reference cycle detected on %s, breaking recursion", ref.ToString().c_str() );
                return;
            }
            parent = parent->GetParent();
@@ -251,6 +291,8 @@ void PdfObjectModelNode::PopulateChildren()
             AddNode( &(*it), PT_Contained );
         }
     }
+
+    m_bChildrenLoaded = true;
 }
 
 int PdfObjectModelNode::GetIndexInParent() const
@@ -305,7 +347,7 @@ PdfObjectModel::PdfObjectModel(PdfDocument* doc, QObject* parent)
 
 PdfObjectModel::~PdfObjectModel()
 {
-    delete m_pTree;
+    delete static_cast<PdfObjectModelTree*>(m_pTree);
 }
 
 void PdfObjectModel::setupModelData(PdfDocument * doc)
@@ -332,9 +374,9 @@ void PdfObjectModel::setupModelData(PdfDocument * doc)
 
     // Create a new tree rooted on document catalog with reference following
     // turned on
-    qDebug("Creating model tree..."); //XXX
+    //qDebug("Creating model tree..."); //XXX
     m_pTree = new PdfObjectModelTree(doc, catalog, true);
-    qDebug("Done"); //XXX
+    //qDebug("Done creating model tree"); //XXX
 }
 
 QModelIndex PdfObjectModel::index(int row, int column, const QModelIndex& parent) const
@@ -345,12 +387,12 @@ QModelIndex PdfObjectModel::index(int row, int column, const QModelIndex& parent
         // support one-item trees (single rooted) so just return the root node.
         if (row == 0)
         {
-            qDebug("::index asked for root node: (%i %i %p)", row, column, m_pTree->GetRoot() );
-            return createIndex(row, column, m_pTree->GetRoot());
+            //qDebug("::index asked for root node: (%i %i %p)", row, column, static_cast<PdfObjectModelTree*>(m_pTree)->GetRoot() );
+            return createIndex(row, column, static_cast<PdfObjectModelTree*>(m_pTree)->GetRoot());
         }
         else
         {
-            qDebug("::index asked for non-row-0 root node row %i **BAD**", row);
+            //qDebug("::index asked for non-row-0 root node row %i **BAD**", row);
             return QModelIndex();
         }
     }
@@ -360,12 +402,12 @@ QModelIndex PdfObjectModel::index(int row, int column, const QModelIndex& parent
         PdfObjectModelNode * childNode = parentNode->GetChild(row);
         if (!childNode)
         {
-            qDebug("::index getting index for %i %i with parent %p: not found", row, column, parentNode);
+            //qDebug("::index getting index for %i %i with parent %p: not found", row, column, parentNode);
             return QModelIndex();
         }
         else
         {
-            qDebug("::index getting index for %i %i with parent %p: (%i %i %p)", row, column, parentNode, row, column, childNode);
+            //qDebug("::index getting index for %i %i with parent %p: (%i %i %p)", row, column, parentNode, row, column, childNode);
             return createIndex(row, column, childNode);
         }
     }
@@ -510,7 +552,7 @@ QModelIndex PdfObjectModel::parent(const QModelIndex &index) const
 {
     if (!index.isValid())
     {
-        qDebug("::parent **CALLED WITH INVALID INDEX**");
+        //qDebug("::parent **CALLED WITH INVALID INDEX**");
         abort();
         return QModelIndex();
     }
@@ -518,7 +560,7 @@ QModelIndex PdfObjectModel::parent(const QModelIndex &index) const
     PdfObjectModelNode * const child = static_cast<PdfObjectModelNode*>(index.internalPointer());
     if (!child)
     {
-        qDebug("::parent **BAD CHILD**");
+        //qDebug("::parent **BAD CHILD**");
         abort();
     }
 
@@ -526,15 +568,15 @@ QModelIndex PdfObjectModel::parent(const QModelIndex &index) const
     PdfObjectModelNode * const parent = child->GetParent();
     if (!parent)
     {
-        if (child != m_pTree->GetRoot())
+        if (child != static_cast<PdfObjectModelTree*>(m_pTree)->GetRoot())
         {
-            qDebug("::parent(%p): Child %p has null parent but is not root node (%p)", child, m_pTree->GetRoot());
+            //qDebug("::parent(%p): Child %p has null parent but is not root node (%p)", child, static_cast<PdfObjectModelTree*>(m_pTree)->GetRoot());
             //throw std::logic_error("node with no parent not the root node");
             abort();
         }
         else
         {
-            qDebug("::parent(%p): Child is root node %p, returning invalid index", child, m_pTree->GetRoot());
+            //qDebug("::parent(%p): Child is root node %p, returning invalid index", child, static_cast<PdfObjectModelTree*>(m_pTree)->GetRoot());
             return QModelIndex();
         }
     }
@@ -542,7 +584,7 @@ QModelIndex PdfObjectModel::parent(const QModelIndex &index) const
     int parentRow = parent->GetIndexInParent();
     assert(parentRow >= 0);
     
-    qDebug("::parent(%p): returning (%i 0 %p)", child, parentRow, parent);
+    //qDebug("::parent(%p): returning (%i 0 %p)", child, parentRow, parent);
     return createIndex(parentRow, 0, parent);
 }
 
