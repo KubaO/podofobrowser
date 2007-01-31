@@ -92,11 +92,11 @@ public:
     QVariant GetData(int role) const;
 
     // Return the number of children of this node
-    int CountChildren() const { EnsureChildrenLoaded(); return m_children.size(); }
+    int CountChildren() const { if (IsPretendEmpty()) return 0; EnsureChildrenLoaded(); return m_children.size(); }
 
     // Get the n'th child node of this object, or 0 if no such child
     // exists.
-    PdfObjectModelNode* GetChild(int n) const { EnsureChildrenLoaded(); return n < m_children.size() ? m_children[n] : 0; }
+    PdfObjectModelNode* GetChild(int n) const { if (IsPretendEmpty()) return NULL; EnsureChildrenLoaded(); return n < m_children.size() ? m_children[n] : 0; }
 
     // Return the container that contains/reference this object
     PdfObjectModelNode * GetContainer() const;
@@ -131,8 +131,13 @@ public:
     // users of those indexes.
     void InvalidateChildren();
 
+    // Pretend to have no children. This is useful when resetting a subtree.
+    void SetPretendEmpty(bool empty) { m_bPretendEmpty = empty; }
+    // Are we pretending to have no children?
+    bool IsPretendEmpty() const { return m_bPretendEmpty; }
+
     // Set the item's value to `data'. 
-    bool SetRawDataForScalar(const QByteArray& data);
+    bool SetRawData(const QByteArray& data);
 
 private:
     // Make sure the child list is populated.
@@ -146,6 +151,10 @@ private:
     {
         m_children.push_back( new PdfObjectModelNode(m_pTree, object, this, parentKey, pt ) );
     }
+
+    // Are we pretending to be empty?
+    // TODO: merge with children loaded into flags variable for RAM usage
+    bool m_bPretendEmpty;
 
     // True iff this object has a populated list of children.
     bool m_bChildrenLoaded;
@@ -213,7 +222,8 @@ PdfObjectModelNode::PdfObjectModelNode(PdfObjectModelTree * tree,
                                        PdfObjectModelNode* parent,
                                        const PdfName & parentKey,
                                        ParentageType parentType)
-    : m_bChildrenLoaded(false),
+    : m_bPretendEmpty(false),
+      m_bChildrenLoaded(false),
       m_pTree(tree),
       m_pObject(object),
       m_pParent(parent),
@@ -348,26 +358,18 @@ PdfObjectModelNode * PdfObjectModelNode::GetContainer() const
     return ret;
 }
 
-bool PdfObjectModelNode::SetRawDataForScalar(const QByteArray & data)
+bool PdfObjectModelNode::SetRawData(const QByteArray & data)
 {
-    // Can't replace a container this way because it'd change the
-    // model's layout
-    if (m_pObject->IsDictionary() || m_pObject->IsArray() || m_pObject->IsReference() )
-        return false;
-
     // Try to parse as a PdfVariant. Failure will throw an exception.
     PdfVariant variant;
     PdfTokenizer tokenizer (data.data(), data.size());
     tokenizer.GetNextVariant(variant);
 
-    // Can't use this method to create a dict or array because that'd change
-    // the model's layout
-    if (variant.IsDictionary() || variant.IsArray() || m_pObject->IsReference() )
-        return false;
-
+    InvalidateChildren();
     *(m_pObject) = variant;
     return true;
 }
+
 
 }; // end anon namespace
 
@@ -560,17 +562,7 @@ Qt::ItemFlags PdfObjectModel::flags(const QModelIndex &index) const
     if (!index.isValid())
         return Qt::ItemIsEnabled;
 
-    Qt::ItemFlags f = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-
-    if (index.column() == 2)
-    {
-        // If the node is not a container and they're editing the data field, mark it editable
-        PdfObjectModelNode * const node = static_cast<PdfObjectModelNode*>(index.internalPointer());
-        assert(node);
-        const PdfObject* obj = node->GetObject();
-        if (! (obj->IsDictionary() || obj->IsArray() || obj->IsReference()) )
-            f = f|Qt::ItemIsEditable;
-    }
+    Qt::ItemFlags f = Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
 
     return f;
 }
@@ -672,29 +664,43 @@ bool PdfObjectModel::setData ( const QModelIndex & index, const QVariant & value
     if (value.isNull() || !value.isValid() || !value.canConvert<QByteArray>())
         return false;
 
-    PdfObjectModelNode* node = static_cast<PdfObjectModelNode*>(index.internalPointer());
-    const PdfObject* obj = node->GetObject();
-    if ( obj->IsDictionary() || obj->IsArray() || obj->IsReference() )
-        return false;
-
     QByteArray data = value.toByteArray();
     if (data.size() == 0)
         return false;
 
+    PdfObjectModelNode* node = static_cast<PdfObjectModelNode*>(index.internalPointer());
+    const PdfObject* obj = node->GetObject();
+
+    // Container objects need to inform the model implementation that
+    // the tree structure may change after they're edited. To do this we
+    // clear all rows that're children of the modified container, trim that
+    // part of the model tree, then let them be re-read on demand.
+    // Since a simple object might be turned into a container by the user, 
+    // we do this even for simple object edits.
+    if (node->CountChildren())
+    {
+        beginRemoveRows( createIndex(index.row(), 0, node), 0, node->CountChildren() - 1 );
+        node->SetPretendEmpty(true);
+        endRemoveRows();
+    }
+    bool changed = false;
     try
     {
-        if (node->SetRawDataForScalar(data))
-        {
-            emit dataChanged(index, index);
-            return true;
-        }
+        changed = node->SetRawData(data);
     }
     catch (PdfError & eCode)
     {
-        QString msg = QString( "PoDoFoBrowser encounter an error.\nError: %1\n" ).arg( eCode.GetError() );
-        qDebug("%s", msg.toLocal8Bit().data());
+         podofoError(eCode);
     }
-    return false;
+    node->SetPretendEmpty(false);
+    if (node->CountChildren())
+    {
+        beginInsertRows(index, 0, node->CountChildren() - 1);
+        endInsertRows();
+    }
+    if (changed)
+        emit dataChanged(index, index);
+    return changed;
 }
 
 void PdfObjectModel::InvalidateChildren(const QModelIndex & index)
