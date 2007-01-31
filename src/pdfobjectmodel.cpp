@@ -228,7 +228,7 @@ PdfObjectModelNode::PdfObjectModelNode(PdfObjectModelTree * tree,
 
 void PdfObjectModelNode::InvalidateChildren()
 {
-    qDebug("InvalidateChildren() called on %p", this);
+    //qDebug("InvalidateChildren() called on %p", this);
 
     // Delete all the children of this object and flag it as needing to
     // rescan for children next time the child list is accessed.
@@ -254,7 +254,7 @@ void PdfObjectModelNode::PopulateChildren()
     // and only by that if the child list is not populated.
     assert(!m_bChildrenLoaded);
 
-    qDebug("PopulateChildren() on %p", this);
+    //qDebug("PopulateChildren() on %p", this);
 
     if (m_pTree->FollowReferences() && m_pObject->IsReference())
     {
@@ -630,7 +630,7 @@ void PdfObjectModel::InvalidateChildren(const QModelIndex & index)
     if (index.isValid())
     {
         PdfObjectModelNode* node = static_cast<PdfObjectModelNode*>(index.internalPointer());
-        qDebug("Invalidating children of node: %i %i %p", index.row(), index.column(), node);
+        //qDebug("Invalidating children of node: %i %i %p", index.row(), index.column(), node);
         //reset();
         assert(node);
         emit layoutAboutToBeChanged();
