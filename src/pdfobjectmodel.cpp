@@ -446,11 +446,15 @@ QVariant PdfObjectModel::data(const QModelIndex& index, int role) const
                         item = node->GetParent()->GetObject();
 
                         if (item->IsDictionary())
+                        {
                             // Item is a directly contained object in a dictionary, so show dictionary key
                             ret = QVariant( QString( node->GetParentKey().GetName().c_str() ) );
+                        }
                         else if (item->IsArray())
+                        {
                             // directly contained array element
-                            ret = QVariant( QString("<element>") );
+                            ret = QVariant( QString("<element %1>").arg(node->GetIndexInParent()) );
+                        }
                         else if (item->IsReference())
                         {
                             // item is an indirect object from a followed reference
