@@ -140,6 +140,21 @@ public:
     void SetPretendEmpty(bool empty) { m_bPretendEmpty = empty; }
     // Are we pretending to have no children?
     bool IsPretendEmpty() const { return m_bPretendEmpty; }
+
+
+
+    // Insert an element into this array node, creating a new child. The `row'
+    // argument is the row number that the newly inserted row should have
+    // (effectively the number of the existing row that the new row should be
+    // inserted BEFORE). If the row number is not specified, a row is appended.
+    void InsertElement(int row);
+    bool CanInsertElement(int row) const;
+
+    // The newly inserted child will have value `null'. `keyName' will be used
+    // to set the name for the new entry. `keyName' is ignored for arrays.
+    void InsertKey(const PdfName & keyName);
+    bool CanInsertKey(const PdfName & keyName) const;
+
 private:
 
     // Make sure the child list is populated.
@@ -237,6 +252,35 @@ PdfObjectModelNode::PdfObjectModelNode(PdfObjectModelTree * tree,
         throw std::invalid_argument("Non-root node with null parent");
 
     m_pTree->NodeCreated(this);
+}
+
+bool PdfObjectModelNode::CanInsertElement(int row) const
+{
+    return  row > 0
+            && row <= CountChildren()
+            && m_pObject->IsArray();
+}
+
+void PdfObjectModelNode::InsertElement(int row)
+{
+    assert(CanInsertElement(row));
+    PdfArray & a = m_pObject->GetArray();
+    std::vector<PdfObject>::iterator it = a.begin();
+    std::advance(it, row);
+    a.insert(it, PdfVariant::NullValue);
+}
+
+bool PdfObjectModelNode::CanInsertKey(const PdfName& keyName) const
+{
+    return keyName != PdfName::KeyNull
+           && m_pObject->IsDictionary()
+           && !m_pObject->GetDictionary().HasKey(keyName);
+}
+
+void PdfObjectModelNode::InsertKey(const PdfName& keyName)
+{
+    assert(CanInsertKey(keyName));
+    m_pObject->GetDictionary().AddKey(keyName, PdfVariant::NullValue);
 }
 
 void PdfObjectModelNode::InvalidateChildren()
@@ -689,11 +733,45 @@ bool PdfObjectModel::setData ( const QModelIndex & index, const QVariant & value
     return changed;
 }
 
+bool PdfObjectModel::insertElement( int row, const QModelIndex & parent )
+{
+    PdfObjectModelNode * node;
+    if (parent.isValid())
+        node = static_cast<PdfObjectModelTree*>(m_pTree)->GetRoot();
+    else
+        node = static_cast<PdfObjectModelNode*>(parent.internalPointer());
+    if (node->CanInsertElement(row))
+    {
+       beginInsertRows(parent, row, row);
+       node->InsertElement(row);
+       endInsertRows();
+       return true;
+    }
+    return false;
+}
+
+bool PdfObjectModel::insertKey(const PdfName& keyName, const QModelIndex & parent )
+{
+    PdfObjectModelNode * node;
+    if (parent.isValid())
+        node = static_cast<PdfObjectModelTree*>(m_pTree)->GetRoot();
+    else
+        node = static_cast<PdfObjectModelNode*>(parent.internalPointer());
+    if (node->CanInsertKey(keyName))
+    {
+        PrepareForSubtreeChange(parent);
+        node->InsertKey(keyName);
+        SubtreeChanged(parent);
+        return true;
+    }
+    return false;
+}
+
 void PdfObjectModel::InvalidateChildren(const QModelIndex & index)
 {
     if (index.isValid())
     {
-        PdfObjectModelNode* node = static_cast<PdfObjectModelNode*>(index.internalPointer());
+        PdfObjectModelNode * const node = static_cast<PdfObjectModelNode*>(index.internalPointer());
         assert(node);
         emit layoutAboutToBeChanged(); // Do we really need this?
         node->InvalidateChildren();
@@ -724,4 +802,9 @@ int PdfObjectModel::IndexChildCount(const QModelIndex & index) const
 {
     if (!index.isValid()) return -1;
     return static_cast<PdfObjectModelNode*>(index.internalPointer())->CountChildren();
+}
+
+bool PdfObjectModel::insertRow(int,const QModelIndex&)
+{
+    throw std::logic_error("Use insertElement(...) or insertKey(...) instead!");
 }

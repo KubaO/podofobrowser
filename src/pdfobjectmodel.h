@@ -9,6 +9,7 @@
 namespace PoDoFo {
     class PdfDocument;
     class PdfObject;
+    class PdfName;
 };
 
 /*
@@ -68,9 +69,23 @@ public:
     // where the tree is modified, and only the model should be doing that.
     void PrepareForSubtreeChange(const QModelIndex& index);
     void SubtreeChanged(const QModelIndex& index);
+    
+    // Insert a dictionary key into the PDF document.
+    // The key will be named `keyName' and be inserted into the dictionary
+    // at `parent'. If false is returned the change was not completed
+    // successfully.
+    bool insertKey(const PoDoFo::PdfName& keyName, const QModelIndex & parent );
+
+    // Insert an array element into the array at `parent'.
+    // The element is inserted before `row' such that the new
+    // element ends up with row number `row'. If the change
+    // could not be completed false is returned.
+    bool insertElement( int row, const QModelIndex & parent );
+
 
     /** \return true iff the document has changed */
     bool DocChanged() const throw() { return m_bDocChanged; }
+
 private:
     // have any changes been made to the document tree through the model?
     bool m_bDocChanged;
@@ -79,6 +94,9 @@ private:
 
     // PdfObjectModelTree instance for the model
     void * m_pTree;
+
+    // This inherited method explicitly fails
+    virtual bool insertRow(int,const QModelIndex&);
 };
 
 #endif

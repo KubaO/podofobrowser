@@ -206,6 +206,7 @@
     <addaction name="separator" />
     <addaction name="actionInsert_Before" />
     <addaction name="actionInsert_After" />
+    <addaction name="actionInsert_Key" />
     <addaction name="actionInsert_Child" />
     <addaction name="separator" />
     <addaction name="actionCreate_Missing_Object" />
@@ -361,6 +362,11 @@
   <action name="actionCreate_Missing_Object" >
    <property name="text" >
     <string>Create Missing Object</string>
+   </property>
+  </action>
+  <action name="actionInsert_Key" >
+   <property name="text" >
+    <string>Insert &amp;Key</string>
    </property>
   </action>
  </widget>

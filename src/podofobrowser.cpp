@@ -73,7 +73,8 @@ PoDoFoBrowser::PoDoFoBrowser()
     connect( buttonExport, SIGNAL( clicked() ), this, SLOT( slotExportStream() ) );
     connect( actionInsert_Before, SIGNAL( activated() ), this, SLOT( editInsertBefore() ) );
     connect( actionInsert_After,  SIGNAL( activated() ), this, SLOT( editInsertAfter() ) );
-    connect( actionInsert_Child,  SIGNAL( activated() ), this, SLOT( editInsertChild() ) );
+    connect( actionInsert_Key,    SIGNAL( activated() ), this, SLOT( editInsertKey() ) );
+    connect( actionInsert_Child,  SIGNAL( activated() ), this, SLOT( editInsertChildBelow() ) );
     connect( actionRemove_Item,   SIGNAL( activated() ), this, SLOT( editRemoveItem()) );
     connect( actionCreate_Missing_Object, SIGNAL( activated() ), this, SLOT( editCreateMissingObject()) );
 
@@ -228,9 +229,33 @@ bool PoDoFoBrowser::fileSave( const QString & filename )
     return true;
 }
 
+void PoDoFoBrowser::UpdateMenus()
+{
+    PdfObjectModel * const model = static_cast<PdfObjectModel*>(listObjects->model());
+    QModelIndex sel = GetSelectedItem();
+
+    if (!sel.isValid())
+    {
+    }
+
+    // Can add a child to any array or dictionary
+    actionInsert_Child->setEnabled( sel.isValid() && (model->IndexIsDictionary(sel) || model->IndexIsArray(sel)) );
+    // Can create missing child only of a dangling reference
+    actionCreate_Missing_Object->setEnabled( sel.isValid() && model->IndexIsReference(sel) && !model->IndexChildCount(sel) );
+    
+    QModelIndex parent = sel.parent();
+    bool enableInsertBeforeAfter = parent.isValid() && model->IndexIsArray(parent);
+    actionInsert_Before->setEnabled(enableInsertBeforeAfter);
+    actionInsert_After->setEnabled(enableInsertBeforeAfter);
+    actionInsert_Key->setEnabled(parent.isValid() && model->IndexIsDictionary(parent));
+    actionRemove_Item->setEnabled(false); //XXX
+}
+
 // Triggered when the selected object in the list view changes
 void PoDoFoBrowser::treeSelectionChanged( const QModelIndex & current, const QModelIndex & previous )
 {
+    UpdateMenus();
+
     textStream->clear();
     buttonImport->setEnabled( false );
     buttonExport->setEnabled( false );
@@ -333,17 +358,54 @@ void PoDoFoBrowser::fileExit()
     this->close();
 }
 
+void PoDoFoBrowser::insertElement(int row, const QModelIndex& parent)
+{
+    PdfObjectModel * const model = static_cast<PdfObjectModel*>(listObjects->model());
+    if (!model->insertElement(row, parent))
+        qDebug("insertElement() failed!");
+}
 
+// Insert an array element before the selected item
 void PoDoFoBrowser::editInsertBefore()
 {
+    QModelIndex idx = GetSelectedItem();
+    if (!idx.isValid()) return; // shouldn't happen
+    QModelIndex parent = idx.parent();
+    insertElement(idx.row(), parent);
 }
 
+// Insert an array element after the selected item
 void PoDoFoBrowser::editInsertAfter()
 {
+    QModelIndex idx = GetSelectedItem();
+    if (!idx.isValid()) return; // shouldn't happen
+    QModelIndex parent = idx.parent();
+    insertElement(idx.row() + 1, parent);
 }
 
-void PoDoFoBrowser::editInsertChild()
+// Insert a new dictionary key at the same level as the selected item
+void PoDoFoBrowser::editInsertKey()
 {
+    QModelIndex idx = GetSelectedItem();
+    if (!idx.isValid()) return; // shouldn't happen
+    QModelIndex parent = idx.parent();
+    PdfObjectModel * const model = static_cast<PdfObjectModel*>(listObjects->model());
+    if (!model->insertKey( PdfName("Fred") /*XXX*/, parent))
+        qDebug("editInsertKey() failed!");
+}
+
+// Insert a new array element OR dictionary key as a child of the selected item.
+void PoDoFoBrowser::editInsertChildBelow()
+{
+    QModelIndex parent = GetSelectedItem();
+    if (!parent.isValid()) return; // shouldn't happen
+    PdfObjectModel * const model = static_cast<PdfObjectModel*>(listObjects->model());
+    if (model->IndexIsDictionary(parent))
+	model->insertKey( PdfName("Fred") /*XXX*/, parent);
+    else if (model->IndexIsArray(parent))
+	model->insertElement( model->IndexChildCount(parent), parent );
+    else
+	qDebug("editInsertChildBelow() on item that's not a multivalued container");
 }
 
 void PoDoFoBrowser::editRemoveItem()

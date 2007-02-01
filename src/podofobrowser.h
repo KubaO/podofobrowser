@@ -66,12 +66,14 @@ class PoDoFoBrowser: public Q3MainWindow, private Ui::PoDoFoBrowserBase
 
     void editInsertBefore();
     void editInsertAfter();
-    void editInsertChild();
+    void editInsertKey();
+    void editInsertChildBelow();
     void editRemoveItem();
     void editCreateMissingObject();
 
  private:
     void ModelChange(PdfObjectModel* newModel);
+    void UpdateMenus();
 
     inline QModelIndex GetSelectedItem();
 
@@ -84,6 +86,10 @@ class PoDoFoBrowser: public Q3MainWindow, private Ui::PoDoFoBrowserBase
     bool saveObject();
 
     bool trySave();
+
+    // Insert an element at row `row' under `parent'.
+    // Just a helper for editInsertBlah()
+    void insertElement(int row, const QModelIndex& parent);
 
  private:
 
