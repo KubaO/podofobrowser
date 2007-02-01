@@ -74,7 +74,7 @@ PoDoFoBrowser::PoDoFoBrowser()
     connect( actionInsert_Before, SIGNAL( activated() ), this, SLOT( editInsertBefore() ) );
     connect( actionInsert_After,  SIGNAL( activated() ), this, SLOT( editInsertAfter() ) );
     connect( actionInsert_Child,  SIGNAL( activated() ), this, SLOT( editInsertChild() ) );
-    connect( actionRemove_Item,   SIGNAL( activated() ), this, SLOT( editDeleteItem()) );
+    connect( actionRemove_Item,   SIGNAL( activated() ), this, SLOT( editRemoveItem()) );
     connect( actionCreate_Missing_Object, SIGNAL( activated() ), this, SLOT( editCreateMissingObject()) );
 
     show();
@@ -333,6 +333,28 @@ void PoDoFoBrowser::fileExit()
     this->close();
 }
 
+
+void PoDoFoBrowser::editInsertBefore()
+{
+}
+
+void PoDoFoBrowser::editInsertAfter()
+{
+}
+
+void PoDoFoBrowser::editInsertChild()
+{
+}
+
+void PoDoFoBrowser::editRemoveItem()
+{
+}
+
+void PoDoFoBrowser::editCreateMissingObject()
+{
+}
+
+
 void PoDoFoBrowser::slotImportStream()
 {
     /*
@@ -470,8 +492,8 @@ void PoDoFoBrowser::helpAbout()
 
 bool PoDoFoBrowser::trySave() 
 {
-    /*
-   if( m_bChanged ) 
+   PdfObjectModel* model = static_cast<PdfObjectModel*>(listObjects->model());
+   if( model && model->DocChanged() ) 
    {
        int m = QMessageBox::question( this, tr("File changed"), QString( tr("The file %1 was changed. Do you want to save it?") ).arg( m_filename ), 
                                   QMessageBox::Yes, QMessageBox::No, QMessageBox::Cancel );
@@ -490,6 +512,4 @@ bool PoDoFoBrowser::trySave()
    }
 
    return true;
-   */
-    return true;
 }

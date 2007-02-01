@@ -26,7 +26,7 @@ class PdfObjectModelNode;
 class PdfObjectModelTree
 {
 public:
-    PdfObjectModelTree(PdfObjectModel* model, PdfDocument * doc, PdfObject* root, bool followReferences);
+    PdfObjectModelTree(PdfDocument * doc, PdfObject* root, bool followReferences);
 
     ~PdfObjectModelTree();
 
@@ -46,7 +46,6 @@ private:
     // Called from each node's dtor
     void NodeDeleted(PdfObjectModelNode* node);
 
-    PdfObjectModel * m_pModel;
     PdfDocument* m_pDoc;
     const bool m_bFollowReferences;
     std::multimap<const PdfObject*,PdfObjectModelNode*> m_nodeAliases;
@@ -188,9 +187,8 @@ private:
 
 };
 
-PdfObjectModelTree::PdfObjectModelTree(PdfObjectModel* model, PdfDocument * doc, PdfObject* root, bool followReferences)
-    : m_pModel(model),
-      m_pDoc(doc),
+PdfObjectModelTree::PdfObjectModelTree(PdfDocument * doc, PdfObject* root, bool followReferences)
+    : m_pDoc(doc),
       m_bFollowReferences(followReferences),
       m_nodeAliases(),
       m_pRoot( new PdfObjectModelNode(this, root, NULL, PdfName::KeyNull, PdfObjectModelNode::PT_Root) )
@@ -360,7 +358,7 @@ bool PdfObjectModelNode::SetRawData(const QByteArray & data)
 
 
 PdfObjectModel::PdfObjectModel(PdfDocument* doc, QObject* parent)
-    : QAbstractTableModel(parent), m_pTree(0)
+    : QAbstractTableModel(parent), m_bDocChanged(false), m_pTree(0)
 {
     setupModelData(doc);
 }
@@ -394,7 +392,7 @@ void PdfObjectModel::setupModelData(PdfDocument * doc)
 
     // Create a new tree rooted on document catalog with reference following
     // turned on
-    m_pTree = new PdfObjectModelTree(this, doc, catalog, true);
+    m_pTree = new PdfObjectModelTree(doc, catalog, true);
 }
 
 void PdfObjectModel::PrepareForSubtreeChange(const QModelIndex& index)
@@ -687,6 +685,7 @@ bool PdfObjectModel::setData ( const QModelIndex & index, const QVariant & value
          podofoError(eCode);
     }
     SubtreeChanged(index);
+    m_bDocChanged = m_bDocChanged|changed;
     return changed;
 }
 

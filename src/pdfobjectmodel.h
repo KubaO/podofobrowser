@@ -68,7 +68,12 @@ public:
     // where the tree is modified, and only the model should be doing that.
     void PrepareForSubtreeChange(const QModelIndex& index);
     void SubtreeChanged(const QModelIndex& index);
+
+    /** \return true iff the document has changed */
+    bool DocChanged() const throw() { return m_bDocChanged; }
 private:
+    // have any changes been made to the document tree through the model?
+    bool m_bDocChanged;
 
     void setupModelData(PoDoFo::PdfDocument* doc);
 

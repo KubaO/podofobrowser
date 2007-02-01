@@ -64,8 +64,16 @@ class PoDoFoBrowser: public Q3MainWindow, private Ui::PoDoFoBrowserBase
 
     void helpAbout();
 
+    void editInsertBefore();
+    void editInsertAfter();
+    void editInsertChild();
+    void editRemoveItem();
+    void editCreateMissingObject();
+
  private:
     void ModelChange(PdfObjectModel* newModel);
+
+    inline QModelIndex GetSelectedItem();
 
     void loadConfig();
     void saveConfig();
@@ -86,5 +94,9 @@ class PoDoFoBrowser: public Q3MainWindow, private Ui::PoDoFoBrowserBase
     PoDoFo::PdfDocument*  m_pDocument;
 };
 
+QModelIndex PoDoFoBrowser::GetSelectedItem()
+{
+    return listObjects->selectionModel()->currentIndex();
+}
 
 #endif
