@@ -54,6 +54,12 @@ public:
     // Return the object associed with `index'
     const PoDoFo::PdfObject* GetObjectForIndex(const QModelIndex & index) const;
 
+    // Convenience wrappers around some really common node/PdfObject functions
+    bool IndexIsDictionary(const QModelIndex & index) const;
+    bool IndexIsArray(const QModelIndex & index) const;
+    bool IndexIsReference(const QModelIndex & index) const;
+    int IndexChildCount(const QModelIndex & index) const;
+
     // Invalidate the children of `index' so that they're re-loaded next time
     // they're needed. You MUST call this before modifying the children of an object.
     void InvalidateChildren(const QModelIndex & index);

@@ -69,15 +69,31 @@ PoDoFoBrowser::PoDoFoBrowser()
 
     clear();
 
-    connect( listObjects, SIGNAL( clicked(QModelIndex) ), this, SLOT( objectChanged( const QModelIndex & ) ) );
     connect( buttonImport, SIGNAL( clicked() ), this, SLOT( slotImportStream() ) );
     connect( buttonExport, SIGNAL( clicked() ), this, SLOT( slotExportStream() ) );
+    connect( actionInsert_Before, SIGNAL( activated() ), this, SLOT( editInsertBefore() ) );
+    connect( actionInsert_After,  SIGNAL( activated() ), this, SLOT( editInsertAfter() ) );
+    connect( actionInsert_Child,  SIGNAL( activated() ), this, SLOT( editInsertChild() ) );
+    connect( actionRemove_Item,   SIGNAL( activated() ), this, SLOT( editDeleteItem()) );
+    connect( actionCreate_Missing_Object, SIGNAL( activated() ), this, SLOT( editCreateMissingObject()) );
 
     show();
     statusBar()->message( tr("Ready"), 2000 );
 
     loadConfig();
     parseCmdLineArgs();
+}
+
+void PoDoFoBrowser::ModelChange(PdfObjectModel* newModel)
+{
+    PdfObjectModel* oldModel = static_cast<PdfObjectModel*>(listObjects->model());
+    listObjects->setModel(newModel);
+    if (newModel)
+    {
+        connect( listObjects->selectionModel(), SIGNAL( currentChanged (QModelIndex, QModelIndex) ),
+                 this, SLOT( treeSelectionChanged(QModelIndex, QModelIndex) ) );
+    }
+    delete oldModel; oldModel = 0;
 }
 
 PoDoFoBrowser::~PoDoFoBrowser()
@@ -137,9 +153,7 @@ void PoDoFoBrowser::clear()
     buttonExport->setEnabled( false );
     textStream->setEnabled(false);
     
-    PdfObjectModel* oldModel = static_cast<PdfObjectModel*>(listObjects->model());
-    listObjects->setModel(0);
-    delete oldModel; oldModel = 0;
+    ModelChange(NULL);
 
     delete m_pDocument; m_pDocument=0;
 
@@ -159,17 +173,7 @@ void PoDoFoBrowser::fileNew()
 
     m_pDocument = new PdfDocument();
 
-    PdfObjectModel* oldModel = static_cast<PdfObjectModel*>(listObjects->model());
-    try
-    {
-        listObjects->setModel(new PdfObjectModel(m_pDocument, listObjects));
-    }
-    catch (std::exception& e)
-    {
-        qDebug("Caught fatal exception when building model");
-	throw;
-    }
-    delete oldModel; oldModel=0;
+    ModelChange( new PdfObjectModel(m_pDocument, listObjects) );
 }
 
 void PoDoFoBrowser::fileOpen( const QString & filename )
@@ -189,17 +193,7 @@ void PoDoFoBrowser::fileOpen( const QString & filename )
         return;
     }
 
-    PdfObjectModel* oldModel = static_cast<PdfObjectModel*>(listObjects->model());
-    try
-    {
-        listObjects->setModel(new PdfObjectModel(m_pDocument, listObjects));
-    }
-    catch (std::exception& e)
-    {
-        qDebug("Caught fatal exception when building model");
-	throw;
-    }
-    delete oldModel; oldModel=0;
+    ModelChange( new PdfObjectModel(m_pDocument, listObjects) );
     
     m_filename = filename;
     setCaption( m_filename );
@@ -211,7 +205,6 @@ void PoDoFoBrowser::fileOpen( const QString & filename )
 bool PoDoFoBrowser::fileSave( const QString & filename )
 {
     QApplication::setOverrideCursor( Qt::WaitCursor );
-    loadAllObjects();
 
     try {
         m_pDocument->Write( filename.toLocal8Bit().data() );
@@ -231,7 +224,7 @@ bool PoDoFoBrowser::fileSave( const QString & filename )
 }
 
 // Triggered when the selected object in the list view changes
-void PoDoFoBrowser::objectChanged( const QModelIndex & index )
+void PoDoFoBrowser::treeSelectionChanged( const QModelIndex & current, const QModelIndex & previous )
 {
     textStream->clear();
     buttonImport->setEnabled( false );
@@ -245,7 +238,7 @@ void PoDoFoBrowser::objectChanged( const QModelIndex & index )
         return;
     }
 
-    const PdfObject* object = model->GetObjectForIndex(index);
+    const PdfObject* object = model->GetObjectForIndex(current);
     if (!object)
     {
         labelStream->setText("No object available");
@@ -274,16 +267,16 @@ void PoDoFoBrowser::objectChanged( const QModelIndex & index )
 
     char * pBuf = NULL;
     long lLen = -1;
-    model->PrepareForSubtreeChange(index);
+    model->PrepareForSubtreeChange(current);
     try {
         object->GetStream()->GetFilteredCopy( &pBuf, &lLen );
     } catch( PdfError & e ) {
-        model->SubtreeChanged(index);
+        model->SubtreeChanged(current);
         labelStream->setText("Unable to filter object stream");
         podofoError( e );
         return;
     }
-    model->SubtreeChanged(index);
+    model->SubtreeChanged(current);
 
     assert(pBuf);
     assert(lLen >= 0);
@@ -333,84 +326,6 @@ void PoDoFoBrowser::fileExit()
        return;
 
     this->close();
-}
-
-bool PoDoFoBrowser::saveObject()
-{
-        /*
-    PdfError    eCode;
-    PdfVariant  var;
-    PdfName     name;
-    int         i;
-    const char* pszText;
-
-    // Check if there is a current object to save
-    if( !m_pCurObject || !m_bObjectChanged )
-        return true;
-
-    if( m_pCurObject->IsDictionary() )
-    {
-        // first check wether all keys are valid
-        for( i=0;i<tableKeys->numRows();i++ )
-        {
-            pszText = tableKeys->text( i, 0 ).latin1();
-            name    = PdfName( pszText );
-            if( name.GetLength() == 0 )
-            {
-                QMessageBox::warning( this, tr("Error"), QString("Error: %1 is no valid name.").arg( pszText ) );
-                return false;
-            }
-
-
-            QByteArray bytes( tableKeys->text( i, 1 ).toLatin1() );
-
-            try {
-		PdfTokenizer(bytes, bytes.size()).GetNextVariant(var);
-            } catch( PdfError & e ) {
-                QString msg = QString("\"%1\" is no valid PDF datatype.\n").arg( pszText );
-                e.SetErrorInformation( msg.latin1() );
-                podofoError( e );
-                return false;
-            }
-        }
-
-        // clear the key map
-        m_pCurObject->GetDictionary().Clear();
-
-        // first check wether all keys are valid
-        for( i=0;i<tableKeys->numRows();i++ )
-        {
-	    QByteArray bytes( tableKeys->text( i, 1 ).toLatin1() );
-	    PdfTokenizer(bytes, bytes.size()).GetNextVariant(var);
-            m_pCurObject->GetDictionary().AddKey( PdfName( tableKeys->text( i, 0 ).latin1() ), var );
-        }
-    }
-    else
-    {
-        QByteArray bytes( tableKeys->text( 0, 0 ).toLatin1() );
-        try {
-	    PdfTokenizer(bytes, bytes.size()).GetNextVariant(var);
-        } catch ( PdfError & e ) {
-            podofoError( eCode );
-            return false;
-        }
-        
-        *m_pCurObject = var;
-    }
-
-    if( m_bEditableStream && textStream->isModified() ) 
-    {
-        m_pCurObject->GetDictionary().RemoveKey( PdfName( "Filter" ) );
-        m_pCurObject->GetStream()->Set( textStream->text().latin1() );
-        m_pCurObject->FlateCompressStream();
-        statusBar()->message( tr("Stream data saved"), 2000 );
-    }
-
-    m_bChanged       = true;
-    m_bObjectChanged = false;
-
-    return true;
-    */
 }
 
 void PoDoFoBrowser::slotImportStream()
@@ -540,91 +455,6 @@ void PoDoFoBrowser::toolsFromHex()
     }
 }
 
-void PoDoFoBrowser::editInsertKey()
-{
-    /*
-    if( m_pCurObject )
-    {
-        tableKeys->setNumRows( tableKeys->numRows() + 1 );
-        tableKeys->setCurrentCell( tableKeys->numRows(), 0 );
-        tableKeys->setFocus();
-
-        m_bObjectChanged = true;
-        m_bChanged       = true;
-    }
-    */
-}
-
-void PoDoFoBrowser::editInsertObject()
-{
-        /*
-    PdfObject* pObject;
-
-    if( saveObject() )
-    {
-        pObject = m_pDocument->GetObjects().CreateObject();
-        // listObjects->setCurrentItem( new PdfListViewItem( listObjects, pObject ) ); //XXX
-
-        m_bObjectChanged = true;
-        m_bChanged       = true;
-    }
-    */
-}
-
-void PoDoFoBrowser::editDeleteKey()
-{
-        /*
-    int cur = tableKeys->currentRow();
-
-    if( !m_pCurObject )
-        return;
-
-    if( QMessageBox::question( this, tr("Delete"), QString( tr("Do you really want to delete the key '%1'?") ).arg( 
-                               tableKeys->text( cur, 0 ) ), QMessageBox::Yes, QMessageBox::No ) == QMessageBox::Yes ) 
-    {
-        tableKeys->removeRow( cur );
-        m_bObjectChanged = true;
-        m_bChanged       = true;
-    }
-    */
-}
-
-void PoDoFoBrowser::editDeleteObject()
-{
-        /*
-    QTreeWidgetItem* item  = listObjects->currentItem();
-
-    if( !m_pCurObject && item )
-        return;
-
-    if( listObjects->currentItem()->parent() )
-    {
-        QMessageBox::information( this, tr("Delete"), tr("Deleting child objects is not yet supported." ) );
-        return;
-    }
-
-    if( QMessageBox::question( this, tr("Delete"), QString( tr("Do you really want to delete the object '%1'?") ).arg( 
-                               m_pCurObject->Reference().ToString().c_str() ), QMessageBox::Yes, QMessageBox::No ) == QMessageBox::Yes ) 
-    {
-        PdfObject* pObj = m_pDocument->GetObjects().RemoveObject( m_pCurObject->Reference() );
-        if( pObj ) 
-        {
-            delete pObj;
-
-	    //XXX update view
-            //listObjects->takeItem( item );
-            //delete item;
-        
-            m_pCurObject     = NULL;
-
-            objectChanged( listObjects->currentItem() );
-        }
-
-        m_bChanged       = true;
-    }
-    */
-}
-
 void PoDoFoBrowser::helpAbout()
 {
     QDialog* dlg = new QDialog( this );
@@ -657,30 +487,4 @@ bool PoDoFoBrowser::trySave()
    return true;
    */
     return true;
-}
-
-void PoDoFoBrowser::loadAllObjects()
-{
-        /* XXX
-    QTreeWidgetItemIterator it( listObjects );
-    Q3ProgressDialog       dlg( this );
-    int                   i = 0;
-
-    dlg.setLabelText( QString( tr( "Reading %1 objects ...") ).arg( listObjects->childCount() ) );
-    dlg.setTotalSteps( listObjects->childCount() );
-    dlg.show();
-
-    while( it.current() ) 
-    {
-        if( dlg.wasCanceled() )
-            return;
-
-        dlg.setProgress( i );
-
-        // XXX static_cast<PdfListViewItem*>(it.current())->init();    
-
-        ++i;
-        ++it;
-    }
-    */ //XXX
 }

@@ -694,12 +694,34 @@ void PdfObjectModel::InvalidateChildren(const QModelIndex & index)
     if (index.isValid())
     {
         PdfObjectModelNode* node = static_cast<PdfObjectModelNode*>(index.internalPointer());
-        //qDebug("Invalidating children of node: %i %i %p", index.row(), index.column(), node);
-        //reset();
         assert(node);
-        emit layoutAboutToBeChanged();
+        emit layoutAboutToBeChanged(); // Do we really need this?
         node->InvalidateChildren();
-        emit layoutChanged();
+        emit layoutChanged(); // or this?
         emit dataChanged(index, index);
     }
+}
+
+bool PdfObjectModel::IndexIsDictionary(const QModelIndex & index) const
+{
+    if (!index.isValid()) return false;
+    return static_cast<PdfObjectModelNode*>(index.internalPointer())->GetObject()->IsDictionary();
+}
+
+bool PdfObjectModel::IndexIsArray(const QModelIndex & index) const
+{
+    if (!index.isValid()) return false;
+    return static_cast<PdfObjectModelNode*>(index.internalPointer())->GetObject()->IsArray();
+}
+
+bool PdfObjectModel::IndexIsReference(const QModelIndex & index) const
+{
+    if (!index.isValid()) return false;
+    return static_cast<PdfObjectModelNode*>(index.internalPointer())->GetObject()->IsReference();
+}
+
+int PdfObjectModel::IndexChildCount(const QModelIndex & index) const
+{
+    if (!index.isValid()) return -1;
+    return static_cast<PdfObjectModelNode*>(index.internalPointer())->CountChildren();
 }

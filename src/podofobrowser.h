@@ -54,24 +54,18 @@ class PoDoFoBrowser: public Q3MainWindow, private Ui::PoDoFoBrowserBase
 
     void fileExit();
 
-    void editInsertKey();
-    void editInsertObject();
-
-    void editDeleteKey();
-    void editDeleteObject();
-
     void toolsToHex();
     void toolsFromHex();
 
-    void loadAllObjects();
+    void treeSelectionChanged( const QModelIndex & current, const QModelIndex & previous );
 
-    void objectChanged( const QModelIndex & );
     void slotImportStream();
     void slotExportStream();
 
     void helpAbout();
 
  private:
+    void ModelChange(PdfObjectModel* newModel);
 
     void loadConfig();
     void saveConfig();

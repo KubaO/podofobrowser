@@ -172,22 +172,6 @@
      <height>25</height>
     </rect>
    </property>
-   <widget class="QMenu" name="Edit" >
-    <property name="title" >
-     <string>&amp;Edit</string>
-    </property>
-    <addaction name="editCutAction" />
-    <addaction name="editnew_itemAction" />
-    <addaction name="editPasteAction" />
-    <addaction name="separator" />
-    <addaction name="editInsertObjectAction" />
-    <addaction name="editInsertKeyAction" />
-    <addaction name="separator" />
-    <addaction name="editDeleteObjectAction" />
-    <addaction name="editDeleteKeyAction" />
-    <addaction name="separator" />
-    <addaction name="editLoadAllObjectsAction" />
-   </widget>
    <widget class="QMenu" name="Tools" >
     <property name="title" >
      <string>&amp;Tools</string>
@@ -211,6 +195,23 @@
      <string>&amp;Help</string>
     </property>
     <addaction name="helpAboutAction" />
+   </widget>
+   <widget class="QMenu" name="Edit" >
+    <property name="title" >
+     <string>&amp;Edit</string>
+    </property>
+    <addaction name="editCutAction" />
+    <addaction name="editnew_itemAction" />
+    <addaction name="editPasteAction" />
+    <addaction name="separator" />
+    <addaction name="actionInsert_Before" />
+    <addaction name="actionInsert_After" />
+    <addaction name="actionInsert_Child" />
+    <addaction name="separator" />
+    <addaction name="actionCreate_Missing_Object" />
+    <addaction name="separator" />
+    <addaction name="actionRemove_Item" />
+    <addaction name="separator" />
    </widget>
    <addaction name="fileMenu" />
    <addaction name="Edit" />
@@ -337,52 +338,29 @@
     <string>&amp;Paste</string>
    </property>
   </action>
-  <action name="editInsertObjectAction" >
+  <action name="actionInsert_Before" >
    <property name="text" >
-    <string>Insert &amp;Object</string>
-   </property>
-   <property name="iconText" >
-    <string>Insert &amp;Object</string>
+    <string>Insert &amp;Before</string>
    </property>
   </action>
-  <action name="editInsertKeyAction" >
+  <action name="actionInsert_After" >
    <property name="text" >
-    <string>Insert &amp;Key</string>
-   </property>
-   <property name="iconText" >
-    <string>Insert &amp;Key</string>
+    <string>Insert &amp;After</string>
    </property>
   </action>
-  <action name="editDeleteObjectAction" >
+  <action name="actionInsert_Child" >
    <property name="text" >
-    <string>&amp;Delete Object</string>
-   </property>
-   <property name="iconText" >
-    <string>&amp;Delete Object</string>
+    <string>Insert New &amp;Child</string>
    </property>
   </action>
-  <action name="editDeleteKeyAction" >
+  <action name="actionRemove_Item" >
    <property name="text" >
-    <string>D&amp;elete Key</string>
-   </property>
-   <property name="iconText" >
-    <string>D&amp;elete Key</string>
+    <string>&amp;Delete Item</string>
    </property>
   </action>
-  <action name="editLoadAllObjectsAction" >
+  <action name="actionCreate_Missing_Object" >
    <property name="text" >
-    <string>&amp;Load all objects</string>
-   </property>
-   <property name="iconText" >
-    <string>&amp;Load all objects</string>
-   </property>
-   <property name="toolTip" >
-    <string>Objects are loaded on demand from the PDF file. This action will load all objects immediately which can take some time.</string>
-   </property>
-  </action>
-  <action name="actionScan_Tree" >
-   <property name="text" >
-    <string>Scan Tree</string>
+    <string>Create Missing Object</string>
    </property>
   </action>
  </widget>
@@ -519,86 +497,6 @@
    <signal>activated()</signal>
    <receiver>PoDoFoBrowserBase</receiver>
    <slot>toolsFromHex()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>20</x>
-     <y>20</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>editDeleteKeyAction</sender>
-   <signal>activated()</signal>
-   <receiver>PoDoFoBrowserBase</receiver>
-   <slot>editDeleteKey()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>20</x>
-     <y>20</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>editDeleteObjectAction</sender>
-   <signal>activated()</signal>
-   <receiver>PoDoFoBrowserBase</receiver>
-   <slot>editDeleteObject()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>20</x>
-     <y>20</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>editInsertKeyAction</sender>
-   <signal>activated()</signal>
-   <receiver>PoDoFoBrowserBase</receiver>
-   <slot>editInsertKey()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>20</x>
-     <y>20</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>editInsertObjectAction</sender>
-   <signal>activated()</signal>
-   <receiver>PoDoFoBrowserBase</receiver>
-   <slot>editInsertObject()</slot>
-   <hints>
-    <hint type="sourcelabel" >
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel" >
-     <x>20</x>
-     <y>20</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>editLoadAllObjectsAction</sender>
-   <signal>activated()</signal>
-   <receiver>PoDoFoBrowserBase</receiver>
-   <slot>loadAllObjects()</slot>
    <hints>
     <hint type="sourcelabel" >
      <x>-1</x>
