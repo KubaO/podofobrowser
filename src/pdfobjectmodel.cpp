@@ -26,7 +26,7 @@ class PdfObjectModelNode;
 class PdfObjectModelTree
 {
 public:
-    PdfObjectModelTree(PdfDocument * doc, PdfObject* root, bool followReferences);
+    PdfObjectModelTree(PdfObjectModel* model, PdfDocument * doc, PdfObject* root, bool followReferences);
 
     ~PdfObjectModelTree();
 
@@ -46,6 +46,7 @@ private:
     // Called from each node's dtor
     void NodeDeleted(PdfObjectModelNode* node);
 
+    PdfObjectModel * m_pModel;
     PdfDocument* m_pDoc;
     const bool m_bFollowReferences;
     std::multimap<const PdfObject*,PdfObjectModelNode*> m_nodeAliases;
@@ -98,11 +99,9 @@ public:
     // exists.
     PdfObjectModelNode* GetChild(int n) const { if (IsPretendEmpty()) return NULL; EnsureChildrenLoaded(); return n < m_children.size() ? m_children[n] : 0; }
 
-    // Return the container that contains/reference this object
-    PdfObjectModelNode * GetContainer() const;
-
-    // Return the direct parent of this object - a node for a reference
-    // if object was referenced, otherwise a same as GetContainer();
+    // Return the immediate parent of this object - a node for a reference
+    // if object was referenced, otherwise the container in which the object
+    // is contained.
     PdfObjectModelNode * GetParent() const { return m_pParent; }
 
     // Return the index of this object inside its parent's
@@ -131,15 +130,19 @@ public:
     // users of those indexes.
     void InvalidateChildren();
 
-    // Pretend to have no children. This is useful when resetting a subtree.
-    void SetPretendEmpty(bool empty) { m_bPretendEmpty = empty; }
-    // Are we pretending to have no children?
-    bool IsPretendEmpty() const { return m_bPretendEmpty; }
+    // Reset the model's view of the tree under this node and update its view of this
+    // node's data.
+    void ResetSubtree();
 
     // Set the item's value to `data'. 
     bool SetRawData(const QByteArray& data);
 
+    // Pretend to have no children. This is useful when resetting a subtree.
+    void SetPretendEmpty(bool empty) { m_bPretendEmpty = empty; }
+    // Are we pretending to have no children?
+    bool IsPretendEmpty() const { return m_bPretendEmpty; }
 private:
+
     // Make sure the child list is populated.
     inline void EnsureChildrenLoaded() const { if (!m_bChildrenLoaded) { const_cast<PdfObjectModelNode*>(this)->PopulateChildren(); } }
 
@@ -185,8 +188,9 @@ private:
 
 };
 
-PdfObjectModelTree::PdfObjectModelTree(PdfDocument * doc, PdfObject* root, bool followReferences)
-    : m_pDoc(doc),
+PdfObjectModelTree::PdfObjectModelTree(PdfObjectModel* model, PdfDocument * doc, PdfObject* root, bool followReferences)
+    : m_pModel(model),
+      m_pDoc(doc),
       m_bFollowReferences(followReferences),
       m_nodeAliases(),
       m_pRoot( new PdfObjectModelNode(this, root, NULL, PdfName::KeyNull, PdfObjectModelNode::PT_Root) )
@@ -235,9 +239,6 @@ PdfObjectModelNode::PdfObjectModelNode(PdfObjectModelTree * tree,
         throw std::invalid_argument("Non-root node with null parent");
 
     m_pTree->NodeCreated(this);
-
-    // todo: deferred child tree building
-    //PopulateChildren(); //XXX
 }
 
 void PdfObjectModelNode::InvalidateChildren()
@@ -268,31 +269,32 @@ void PdfObjectModelNode::PopulateChildren()
     // and only by that if the child list is not populated.
     assert(!m_bChildrenLoaded);
 
-    //qDebug("PopulateChildren() on %p", this);
-
     if (m_pTree->FollowReferences() && m_pObject->IsReference())
     {
-       // We must follow the reference and create a child node under it
-       PdfObject * const referee =  m_pTree->GetDocument()->GetObjects().GetObject(m_pObject->GetReference());
-
-       // Recurse up our direct heritage to see if this object number has been referenced before.
-       // If it has we're in a reference cycle and should just stop here. TODO: handle cycles
-       // gracefully (hyperlink?)
-       const PdfReference ref = m_pObject->GetReference();
-       PdfObjectModelNode * parent = m_pParent;
-       while (parent)
-       {
-           const PdfObject* const obj = parent->GetObject();
-           if (obj->IsReference() && obj->GetReference() == ref)
-           {
-               return;
-           }
-           parent = parent->GetParent();
-       }
-
-       // TODO: handle dangling references
-       assert(m_pObject);
-       AddNode( referee, PT_Referenced );
+        // We must follow the reference and create a child node under it
+        PdfObject * const referee =  m_pTree->GetDocument()->GetObjects().GetObject(m_pObject->GetReference());
+        if (referee)
+        {
+            /* CR: We dynamically construct the tree now so we don't need to do this
+             *
+            // Recurse up our direct heritage to see if this object number has been referenced before.
+            // If it has we're in a reference cycle and should just stop here. TODO: handle cycles
+            // gracefully (hyperlink?)
+            const PdfReference ref = m_pObject->GetReference();
+            PdfObjectModelNode * parent = m_pParent;
+            while (parent)
+            {
+                const PdfObject* const obj = parent->GetObject();
+                if (obj->IsReference() && obj->GetReference() == ref)
+                {
+                    return;
+                }
+                parent = parent->GetParent();
+            }
+            assert(m_pObject);
+            */
+            AddNode( referee, PT_Referenced );
+        }
     }
     else if (m_pObject->IsDictionary())
     {
@@ -341,23 +343,6 @@ int PdfObjectModelNode::GetIndexInParent() const
     throw std::logic_error("Node not present in parent's list of children!");
 }
 
-PdfObjectModelNode * PdfObjectModelNode::GetContainer() const
-{
-    PdfObjectModelNode * ret = 0;
-    switch (m_parentType)
-    {
-        case PT_Root:
-            break;
-        case PT_Contained:
-            ret = m_pParent;
-            break;
-        case PT_Referenced:
-            ret = m_pParent->m_pParent;
-            break;
-    }
-    return ret;
-}
-
 bool PdfObjectModelNode::SetRawData(const QByteArray & data)
 {
     // Try to parse as a PdfVariant. Failure will throw an exception.
@@ -371,7 +356,7 @@ bool PdfObjectModelNode::SetRawData(const QByteArray & data)
 }
 
 
-}; // end anon namespace
+}; // end anonymous namespace
 
 
 PdfObjectModel::PdfObjectModel(PdfDocument* doc, QObject* parent)
@@ -409,9 +394,31 @@ void PdfObjectModel::setupModelData(PdfDocument * doc)
 
     // Create a new tree rooted on document catalog with reference following
     // turned on
-    //qDebug("Creating model tree..."); //XXX
-    m_pTree = new PdfObjectModelTree(doc, catalog, true);
-    //qDebug("Done creating model tree"); //XXX
+    m_pTree = new PdfObjectModelTree(this, doc, catalog, true);
+}
+
+void PdfObjectModel::PrepareForSubtreeChange(const QModelIndex& index)
+{
+    PdfObjectModelNode* node = static_cast<PdfObjectModelNode*>(index.internalPointer());
+    if (node->CountChildren())
+    {
+        beginRemoveRows( createIndex( index.row(), 0, index.internalPointer() ), 0, node->CountChildren() - 1 );
+        node->InvalidateChildren();
+        node->SetPretendEmpty(true);
+        endRemoveRows();
+    }
+}
+
+void PdfObjectModel::SubtreeChanged(const QModelIndex& index)
+{
+    PdfObjectModelNode* node = static_cast<PdfObjectModelNode*>(index.internalPointer());
+    node->SetPretendEmpty(false);
+    if (node->CountChildren())
+    {
+        beginInsertRows( createIndex( index.row(), 0, index.internalPointer() ), 0, node->CountChildren() - 1 );
+        endInsertRows();
+    }
+    emit dataChanged( index, index );
 }
 
 QModelIndex PdfObjectModel::index(int row, int column, const QModelIndex& parent) const
@@ -422,7 +429,6 @@ QModelIndex PdfObjectModel::index(int row, int column, const QModelIndex& parent
         // support one-item trees (single rooted) so just return the root node.
         if (row == 0)
         {
-            //qDebug("::index asked for root node: (%i %i %p)", row, column, static_cast<PdfObjectModelTree*>(m_pTree)->GetRoot() );
             return createIndex(row, column, static_cast<PdfObjectModelTree*>(m_pTree)->GetRoot());
         }
         else
@@ -609,22 +615,14 @@ QModelIndex PdfObjectModel::parent(const QModelIndex &index) const
     if (!parent)
     {
         if (child != static_cast<PdfObjectModelTree*>(m_pTree)->GetRoot())
-        {
-            //qDebug("::parent(%p): Child %p has null parent but is not root node (%p)", child, static_cast<PdfObjectModelTree*>(m_pTree)->GetRoot());
-            //throw std::logic_error("node with no parent not the root node");
-            abort();
-        }
+            throw std::logic_error("node with no parent not the root node");
         else
-        {
-            //qDebug("::parent(%p): Child is root node %p, returning invalid index", child, static_cast<PdfObjectModelTree*>(m_pTree)->GetRoot());
             return QModelIndex();
-        }
     }
 
     int parentRow = parent->GetIndexInParent();
     assert(parentRow >= 0);
     
-    //qDebug("::parent(%p): returning (%i 0 %p)", child, parentRow, parent);
     return createIndex(parentRow, 0, parent);
 }
 
@@ -677,12 +675,7 @@ bool PdfObjectModel::setData ( const QModelIndex & index, const QVariant & value
     // part of the model tree, then let them be re-read on demand.
     // Since a simple object might be turned into a container by the user, 
     // we do this even for simple object edits.
-    if (node->CountChildren())
-    {
-        beginRemoveRows( createIndex(index.row(), 0, node), 0, node->CountChildren() - 1 );
-        node->SetPretendEmpty(true);
-        endRemoveRows();
-    }
+    PrepareForSubtreeChange(index);
     bool changed = false;
     try
     {
@@ -692,14 +685,7 @@ bool PdfObjectModel::setData ( const QModelIndex & index, const QVariant & value
     {
          podofoError(eCode);
     }
-    node->SetPretendEmpty(false);
-    if (node->CountChildren())
-    {
-        beginInsertRows(index, 0, node->CountChildren() - 1);
-        endInsertRows();
-    }
-    if (changed)
-        emit dataChanged(index, index);
+    SubtreeChanged(index);
     return changed;
 }
 

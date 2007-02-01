@@ -1,2 +1,5 @@
 Dominik Seichter <domseichter@web.de>
  -- started PoDoFo and is the current maintainer
+Craig Ringer <craig@postnewspapers.com.au>
+ -- Ported PoDoFoBrowser to qt4 and re-wrote it to use
+    Qt4's model/view framework.

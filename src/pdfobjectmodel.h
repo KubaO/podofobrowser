@@ -7,8 +7,8 @@
 #include <QMap>
 
 namespace PoDoFo {
-        class PdfDocument;
-        class PdfObject;
+    class PdfDocument;
+    class PdfObject;
 };
 
 /*
@@ -58,11 +58,15 @@ public:
     // they're needed. You MUST call this before modifying the children of an object.
     void InvalidateChildren(const QModelIndex & index);
 
+    // These perhaps shouldn't really be public as they're only necessary
+    // where the tree is modified, and only the model should be doing that.
+    void PrepareForSubtreeChange(const QModelIndex& index);
+    void SubtreeChanged(const QModelIndex& index);
 private:
+
     void setupModelData(PoDoFo::PdfDocument* doc);
 
-    // PdfObjectModelTree instance for the model - stored as void* to avoid
-    // exposing anonymous namespace types.
+    // PdfObjectModelTree instance for the model
     void * m_pTree;
 };
 

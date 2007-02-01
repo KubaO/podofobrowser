@@ -35,7 +35,11 @@
    <item>
     <widget class="QLabel" name="textLabel3" >
      <property name="text" >
-      <string>&lt;p align="center">(c) 2006 Dominik Seichter - domseichter@web.de&lt;/p></string>
+      <string>(c) 2006-2007 Dominik Seichter - domseichter@web.de
+(c) 2007 Craig Ringer - craig@postnewspapers.com.au</string>
+     </property>
+     <property name="alignment" >
+      <set>Qt::AlignCenter</set>
      </property>
      <property name="wordWrap" >
       <bool>false</bool>
