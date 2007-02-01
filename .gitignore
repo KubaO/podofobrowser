@@ -15,6 +15,7 @@ bin/qt-mt3.dll
 /podofobrowserbase.h
 /release
 src/*.cmake
+src/*.swp
 src/CMakeFiles
 src/Makefile
 src/Makefile.Debug
