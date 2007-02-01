@@ -87,6 +87,11 @@ PoDoFoBrowser::PoDoFoBrowser()
 void PoDoFoBrowser::ModelChange(PdfObjectModel* newModel)
 {
     PdfObjectModel* oldModel = static_cast<PdfObjectModel*>(listObjects->model());
+    if (oldModel)
+    {
+        disconnect( listObjects->selectionModel(), SIGNAL( currentChanged (QModelIndex, QModelIndex) ),
+                    this, SLOT( treeSelectionChanged(QModelIndex, QModelIndex) ) );
+    }
     listObjects->setModel(newModel);
     if (newModel)
     {

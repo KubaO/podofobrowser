@@ -564,11 +564,12 @@ QVariant PdfObjectModel::data(const QModelIndex& index, int role) const
 
 Qt::ItemFlags PdfObjectModel::flags(const QModelIndex &index) const
 {
-    // XXX TODO currently all claimed read only
     if (!index.isValid())
         return Qt::ItemIsEnabled;
 
-    Qt::ItemFlags f = Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
+    Qt::ItemFlags f = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+    if (index.column() == 2)
+        f = f | Qt::ItemIsEditable;
 
     return f;
 }
