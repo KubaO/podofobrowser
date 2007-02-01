@@ -509,7 +509,6 @@ QVariant PdfObjectModel::data(const QModelIndex& index, int role) const
 
     const PdfObject* item;
     QString fileName;
-    QPixmap pm; //XXX
     switch (index.column())
     {
         case 0:
@@ -545,20 +544,23 @@ QVariant PdfObjectModel::data(const QModelIndex& index, int role) const
                     break;
                 case Qt::DecorationRole:
                     item = node->GetObject();
-                    if (item->IsDictionary())
-                        fileName = ":/icons/dictionary.png";
-                    else if (item->IsArray())
-                        fileName = ":/icons/dictionary.png";
-                    else if (item->IsReference())
-                        fileName = node->CountChildren() ? ":/icons/reference.png" : ":/icons/dangling_reference.png";
-                    else
-                        fileName = ":/icons/empty.png";
-                    qDebug("Using icon %s", fileName.toLocal8Bit().data());
-                    pm.load ( fileName );
-                    qDebug("Valid pixmap: %i", !pm.isNull());
-                    if (!pm.isNull())
-                        qDebug("Pixmap size: %ix%i", pm.height(), pm.width());
-                    ret = QVariant( pm );
+		    switch (item->GetDataType())
+		    {
+			    case ePdfDataType_Bool: fileName = ":/icons/bool.png"; break;
+			    case ePdfDataType_Number: fileName = ":/icons/number.png"; break;
+			    case ePdfDataType_Real: fileName = ":/icons/real.png"; break;
+			    case ePdfDataType_String: fileName = ":/icons/litstring.png"; break;
+			    case ePdfDataType_HexString: fileName = ":/icons/hexstring.png"; break;
+			    case ePdfDataType_Name: fileName = ":/icons/name.png"; break;
+			    case ePdfDataType_Array: fileName = ":/icons/dictionary.png"; break;
+			    case ePdfDataType_Dictionary: fileName = ":/icons/dictionary.png"; break;
+			    case ePdfDataType_Null: fileName = ":/icons/empty.png"; break;
+			    case ePdfDataType_Reference:
+                                 fileName = node->CountChildren() ? ":/icons/reference.png" : ":/icons/dangling_reference.png";
+                                 break;
+			    case ePdfDataType_RawData: fileName = ""; break;
+		    }
+                    ret = QVariant( QPixmap(fileName) );
                     break;
                 default:
                     break;

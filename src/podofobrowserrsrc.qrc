@@ -1,9 +1,15 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
     <file>icons/array.png</file>
-    <file>icons/dangling_reference.png</file>
+    <file>icons/bool.png</file>
     <file>icons/dictionary.png</file>
-    <file>icons/reference.png</file>
     <file>icons/empty.png</file>
+    <file>icons/hexstring.png</file>
+    <file>icons/litstring.png</file>
+    <file>icons/name.png</file>
+    <file>icons/number.png</file>
+    <file>icons/real.png</file>
+    <file>icons/reference.png</file>
+    <file>icons/dangling_reference.png</file>
 </qresource>
 </RCC>
