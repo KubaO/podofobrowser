@@ -12,6 +12,11 @@ cmake/modules/FindLIBPODOFO.cmake -text
 cmake/modules/FindZLIB.cmake -text
 /podofobrowser.pro -text
 src/CMakeLists.txt -text
+src/icons/array.png -text
+src/icons/dangling_reference.png -text
+src/icons/dictionary.png -text
+src/icons/empty.png -text
+src/icons/reference.png -text
 src/main.cpp -text
 src/pdfobjectmodel.cpp -text
 src/pdfobjectmodel.h -text
@@ -19,6 +24,7 @@ src/podofoaboutdlg.ui -text
 src/podofobrowser.cpp -text
 src/podofobrowser.h -text
 src/podofobrowserbase.ui -text
+src/podofobrowserrsrc.qrc -text
 src/podofoutil.cpp -text
 src/podofoutil.h -text
 templates/cpp -text

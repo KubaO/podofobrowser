@@ -21,4 +21,5 @@ SOURCES += \
 	src/pdflistviewitem.cpp \
 	src/podofobrowser.cpp \
 	src/pdfobjectmodel.cpp
-
+RESOURCES += \
+	src/podofobrowserrsrc.qrc

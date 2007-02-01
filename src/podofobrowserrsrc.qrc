@@ -1,0 +1,9 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>icons/array.png</file>
+    <file>icons/dangling_reference.png</file>
+    <file>icons/dictionary.png</file>
+    <file>icons/reference.png</file>
+    <file>icons/empty.png</file>
+</qresource>
+</RCC>

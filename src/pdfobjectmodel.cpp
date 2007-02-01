@@ -1,6 +1,8 @@
 #include "pdfobjectmodel.h"
 #include "podofoutil.h"
 
+#include <QPixmap>
+
 #include <utility>
 using std::pair;
 #include <vector>
@@ -506,6 +508,8 @@ QVariant PdfObjectModel::data(const QModelIndex& index, int role) const
     QVariant ret;
 
     const PdfObject* item;
+    QString fileName;
+    QPixmap pm; //XXX
     switch (index.column())
     {
         case 0:
@@ -538,6 +542,23 @@ QVariant PdfObjectModel::data(const QModelIndex& index, int role) const
                         else
                             ret = QVariant( QString("<UNKNOWN>") );
                     }
+                    break;
+                case Qt::DecorationRole:
+                    item = node->GetObject();
+                    if (item->IsDictionary())
+                        fileName = ":/icons/dictionary.png";
+                    else if (item->IsArray())
+                        fileName = ":/icons/dictionary.png";
+                    else if (item->IsReference())
+                        fileName = node->CountChildren() ? ":/icons/reference.png" : ":/icons/dangling_reference.png";
+                    else
+                        fileName = ":/icons/empty.png";
+                    qDebug("Using icon %s", fileName.toLocal8Bit().data());
+                    pm.load ( fileName );
+                    qDebug("Valid pixmap: %i", !pm.isNull());
+                    if (!pm.isNull())
+                        qDebug("Pixmap size: %ix%i", pm.height(), pm.width());
+                    ret = QVariant( pm );
                     break;
                 default:
                     break;

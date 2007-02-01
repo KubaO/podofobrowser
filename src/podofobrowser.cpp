@@ -388,10 +388,17 @@ void PoDoFoBrowser::editInsertKey()
 {
     QModelIndex idx = GetSelectedItem();
     if (!idx.isValid()) return; // shouldn't happen
-    QModelIndex parent = idx.parent();
-    PdfObjectModel * const model = static_cast<PdfObjectModel*>(listObjects->model());
-    if (!model->insertKey( PdfName("Fred") /*XXX*/, parent))
-        qDebug("editInsertKey() failed!");
+
+    bool ok = false;
+    QString keyName = QInputDialog::getText(this, "Key Name", "Key Name (unescaped, without leading /)",
+                                            QLineEdit::Normal, "", &ok);
+    if (ok)
+    {
+        QModelIndex parent = idx.parent();
+        PdfObjectModel * const model = static_cast<PdfObjectModel*>(listObjects->model());
+        if (!model->insertKey( PdfName( keyName.toUtf8().data() ), parent))
+            qDebug("editInsertKey() failed!");
+    }
 }
 
 // Insert a new array element OR dictionary key as a child of the selected item.
@@ -401,7 +408,13 @@ void PoDoFoBrowser::editInsertChildBelow()
     if (!parent.isValid()) return; // shouldn't happen
     PdfObjectModel * const model = static_cast<PdfObjectModel*>(listObjects->model());
     if (model->IndexIsDictionary(parent))
-	model->insertKey( PdfName("Fred") /*XXX*/, parent);
+    {
+        bool ok = false;
+        QString keyName = QInputDialog::getText(this, "Key Name", "Key Name (unescaped, without leading /)",
+                                            QLineEdit::Normal, "", &ok);
+	if (ok)
+            model->insertKey( PdfName( keyName.toUtf8().data() ), parent);
+    }
     else if (model->IndexIsArray(parent))
 	model->insertElement( model->IndexChildCount(parent), parent );
     else

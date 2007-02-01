@@ -9,6 +9,12 @@ SET(podofobrowser_MOC_HEADERS
 	)
 QT4_WRAP_CPP(podofobrowser_MOC_SRCS ${podofobrowser_MOC_HEADERS})
 
+# Qt resources such as icons to be embedded in the executable
+SET(podofobrowser_RSRC_FILES
+	podofobrowserrsrc.qrc
+        )
+QT4_ADD_RESOURCES(podofobrowser_QRC_SRCS ${podofobrowser_RSRC_FILES})
+
 # WTF does this not get done for us?
 SET_SOURCE_FILES_PROPERTIES(
 	podofobrowser.cpp
@@ -21,6 +27,7 @@ ADD_EXECUTABLE(podofobrowser
 	pdfobjectmodel.cpp
 	podofobrowser.cpp
 	main.cpp
+	${podofobrowser_QRC_SRCS}
 	${podofobrowser_MOC_SRCS}
 	)
 
