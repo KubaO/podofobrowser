@@ -100,8 +100,7 @@ void PoDoFoBrowser::ModelChange(PdfObjectModel* newModel)
         connect( listObjects->selectionModel(), SIGNAL( currentChanged (QModelIndex, QModelIndex) ),
                  this, SLOT( treeSelectionChanged(QModelIndex, QModelIndex) ) );
     }
-    fileSaveAction->setEnabled(newModel != 0);
-    fileSaveAsAction->setEnabled(newModel != 0);
+    UpdateMenus();
     delete oldModel; oldModel = 0;
 }
 
@@ -237,9 +236,8 @@ void PoDoFoBrowser::UpdateMenus()
     PdfObjectModel * const model = static_cast<PdfObjectModel*>(listObjects->model());
     QModelIndex sel = GetSelectedItem();
 
-    if (!sel.isValid())
-    {
-    }
+    fileSaveAction->setEnabled(model != 0);
+    fileSaveAsAction->setEnabled(model != 0);
 
     // Can add a child to any array or dictionary
     actionInsert_Child->setEnabled( sel.isValid() && (model->IndexIsDictionary(sel) || model->IndexIsArray(sel)) );

@@ -13,14 +13,6 @@
    <string>PoDoFo Browser</string>
   </property>
   <widget class="QWidget" name="widget" >
-   <property name="geometry" >
-    <rect>
-     <x>0</x>
-     <y>49</y>
-     <width>758</width>
-     <height>567</height>
-    </rect>
-   </property>
    <layout class="QVBoxLayout" >
     <property name="margin" >
      <number>9</number>
@@ -148,20 +140,22 @@
    </layout>
   </widget>
   <widget class="QToolBar" name="toolBar" >
-   <property name="geometry" >
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>90</width>
-     <height>26</height>
-    </rect>
+   <property name="orientation" >
+    <enum>Qt::Horizontal</enum>
    </property>
-   <property name="label" >
-    <string>Tools</string>
-   </property>
+   <attribute name="toolBarArea" >
+    <number>4</number>
+   </attribute>
    <addaction name="fileNewAction" />
    <addaction name="fileOpenAction" />
    <addaction name="fileSaveAction" />
+   <addaction name="separator" />
+   <addaction name="actionInsert_Before" />
+   <addaction name="actionInsert_After" />
+   <addaction name="actionInsert_Key" />
+   <addaction name="actionInsert_Child" />
+   <addaction name="actionCreate_Missing_Object" />
+   <addaction name="actionRemove_Item" />
   </widget>
   <widget class="QMenuBar" name="MenuBar" >
    <property name="geometry" >
@@ -169,7 +163,7 @@
      <x>0</x>
      <y>0</y>
      <width>758</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="Tools" >
