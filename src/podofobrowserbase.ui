@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>758</width>
-    <height>603</height>
+    <height>616</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -18,7 +18,7 @@
      <x>0</x>
      <y>49</y>
      <width>758</width>
-     <height>554</height>
+     <height>567</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" >
@@ -338,31 +338,49 @@
    </property>
   </action>
   <action name="actionInsert_Before" >
+   <property name="icon" >
+    <iconset resource="podofobrowserrsrc.qrc" >:/icons/insert_elem_above.png</iconset>
+   </property>
    <property name="text" >
     <string>Insert &amp;Before</string>
    </property>
   </action>
   <action name="actionInsert_After" >
+   <property name="icon" >
+    <iconset resource="podofobrowserrsrc.qrc" >:/icons/insert_elem_below.png</iconset>
+   </property>
    <property name="text" >
     <string>Insert &amp;After</string>
    </property>
   </action>
   <action name="actionInsert_Child" >
+   <property name="icon" >
+    <iconset resource="podofobrowserrsrc.qrc" >:/icons/insert_child.png</iconset>
+   </property>
    <property name="text" >
     <string>Insert New &amp;Child</string>
    </property>
   </action>
   <action name="actionRemove_Item" >
+   <property name="icon" >
+    <iconset resource="podofobrowserrsrc.qrc" >:/icons/deleteitem.png</iconset>
+   </property>
    <property name="text" >
     <string>&amp;Delete Item</string>
    </property>
   </action>
   <action name="actionCreate_Missing_Object" >
+   <property name="icon" >
+    <iconset resource="podofobrowserrsrc.qrc" >:/icons/fix_dangling_reference.png</iconset>
+   </property>
    <property name="text" >
     <string>Create Missing Object</string>
    </property>
   </action>
   <action name="actionInsert_Key" >
+   <property name="icon" >
+    <iconset resource="podofobrowserrsrc.qrc" >:/icons/insert_key.png</iconset>
+   </property>
    <property name="text" >
     <string>Insert &amp;Key</string>
    </property>
