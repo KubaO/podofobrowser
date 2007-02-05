@@ -99,6 +99,8 @@ void PoDoFoBrowser::ModelChange(PdfObjectModel* newModel)
         connect( listObjects->selectionModel(), SIGNAL( currentChanged (QModelIndex, QModelIndex) ),
                  this, SLOT( treeSelectionChanged(QModelIndex, QModelIndex) ) );
     }
+    fileSaveAction->setEnabled(newModel != 0);
+    fileSaveAsAction->setEnabled(newModel != 0);
     delete oldModel; oldModel = 0;
 }
 
