@@ -212,7 +212,6 @@ PdfObjectModelTree::PdfObjectModelTree(PdfDocument * doc, PdfObject* root, bool 
       m_nodeAliases(),
       m_pRoot( new PdfObjectModelNode(this, root, NULL, PdfName::KeyNull, PdfObjectModelNode::PT_Root) )
 {
-    //qDebug("Done creating model tree"); //XXX
 }
 
 PdfObjectModelTree::~PdfObjectModelTree()
@@ -300,8 +299,6 @@ void PdfObjectModelNode::InsertKey(const PdfName& keyName)
 
 void PdfObjectModelNode::InvalidateChildren()
 {
-    //qDebug("InvalidateChildren() called on %p", this);
-
     // Delete all the children of this object and flag it as needing to
     // rescan for children next time the child list is accessed.
     const std::vector<PdfObjectModelNode*>::iterator itEnd = m_children.end();
@@ -463,7 +460,6 @@ void PdfObjectModel::PrepareForSubtreeChange(const QModelIndex& index)
     PdfObjectModelNode* node = static_cast<PdfObjectModelNode*>(index.internalPointer());
     const int childCount = node->CountChildren();
     const PdfObject * const obj = node->GetObject();
-    qDebug("PrepareForSubtreeChanged() with node %p obj %p children %i", node, obj, childCount);
     if (!childCount)
         // nothing to change
         return;
@@ -473,11 +469,9 @@ void PdfObjectModel::PrepareForSubtreeChange(const QModelIndex& index)
          it != itEnd;
          ++it)
     {
-        qDebug("PrepareForSubtreeChange(...) on alias %p of %p", (*it), node);
         // Inform the model about the change to this particular subtree
         // alias nodes MUST have the same number of children and same associated object.
         assert(obj == (*it)->GetObject());
-        qDebug("Testing children: original has %i, I have %i (pretending: %s)", childCount, (*it)->CountChildren(), ( (*it)->IsPretendEmpty() ? "yes":"no") );
         assert(childCount == (*it)->CountChildren());
         // Find out what this particular node's position within its parent node
         // is.
@@ -490,7 +484,6 @@ void PdfObjectModel::PrepareForSubtreeChange(const QModelIndex& index)
         (*it)->SetPretendEmpty(true);
         endRemoveRows();
     }
-    qDebug("PrepareForSubtreeChange() done");
 }
 
 void PdfObjectModel::SubtreeChanged(const QModelIndex& index)
@@ -498,7 +491,6 @@ void PdfObjectModel::SubtreeChanged(const QModelIndex& index)
     assert(index.isValid());
     PdfObjectModelNode* node = static_cast<PdfObjectModelNode*>(index.internalPointer());
     const PdfObject * const obj = node->GetObject();
-    qDebug("SubtreeChanged() with node %p obj %p", node, obj);
     // Loop over all aliases of this node and inform the model the tree
     // below that node has changed.
     std::vector<PdfObjectModelNode*> aliases = node->GetAliases();
@@ -507,7 +499,6 @@ void PdfObjectModel::SubtreeChanged(const QModelIndex& index)
          it != itEnd;
          ++it)
     {
-        qDebug("SubtreeChanged(...) on alias %p of %p", (*it), node);
         // alias nodes MUST have the same associated object.
         assert(obj == (*it)->GetObject());
         // Inform the model about changes to this particular alias node
@@ -520,7 +511,6 @@ void PdfObjectModel::SubtreeChanged(const QModelIndex& index)
         }
         emit dataChanged( nodeIndex, nodeIndex );
     }
-    qDebug("SubtreeChanged(...) done");
 }
 
 QModelIndex PdfObjectModel::index(int row, int column, const QModelIndex& parent) const
@@ -530,29 +520,18 @@ QModelIndex PdfObjectModel::index(int row, int column, const QModelIndex& parent
         // We've been asked for an item in the top-level table. We currently only
         // support one-item trees (single rooted) so just return the root node.
         if (row == 0)
-        {
             return createIndex(row, column, static_cast<PdfObjectModelTree*>(m_pTree)->GetRoot());
-        }
         else
-        {
-            //qDebug("::index asked for non-row-0 root node row %i **BAD**", row);
             return QModelIndex();
-        }
     }
     else
     {
         PdfObjectModelNode * parentNode = static_cast<PdfObjectModelNode*>(parent.internalPointer());
         PdfObjectModelNode * childNode = parentNode->GetChild(row);
         if (!childNode)
-        {
-            //qDebug("::index getting index for %i %i with parent %p: not found", row, column, parentNode);
             return QModelIndex();
-        }
         else
-        {
-            //qDebug("::index getting index for %i %i with parent %p: (%i %i %p)", row, column, parentNode, row, column, childNode);
             return createIndex(row, column, childNode);
-        }
     }
 }
 
@@ -722,17 +701,13 @@ QModelIndex PdfObjectModel::parent(const QModelIndex &index) const
 {
     if (!index.isValid())
     {
-        //qDebug("::parent **CALLED WITH INVALID INDEX**");
         abort();
         return QModelIndex();
     }
 
     PdfObjectModelNode * const child = static_cast<PdfObjectModelNode*>(index.internalPointer());
     if (!child)
-    {
-        //qDebug("::parent **BAD CHILD**");
         abort();
-    }
 
     assert(child);
     PdfObjectModelNode * const parent = child->GetParent();
