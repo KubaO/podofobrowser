@@ -1,0 +1,27 @@
+{
+   X11_WriteEv
+   Memcheck:Param
+   writev(vector[...])
+   fun:writev
+   obj:/usr/lib/libX11.so.6.2.0
+   fun:_X11TransWritev
+   fun:_XSend
+   fun:XQueryExtension
+   fun:XInitExtension
+   fun:XextAddDisplay
+   obj:/usr/lib/libXinerama.so.1.0.0
+   fun:XPanoramiXQueryExtension
+   fun:XineramaQueryExtension
+   fun:_ZN21QDesktopWidgetPrivate4initEv
+   fun:_ZN14QDesktopWidgetC1Ev
+}
+{
+   QPainterPrivate_updateMatrix_Cond
+   Memcheck:Cond
+   fun:_ZN15QPainterPrivate12updateMatrixEv
+}
+{
+   QRasterPainterEngine_updateMatrix_Cond
+   Memcheck:Cond
+   fun:_ZN18QRasterPaintEngine12updateMatrixERK7QMatrix
+}
