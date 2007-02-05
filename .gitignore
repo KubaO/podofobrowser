@@ -57,6 +57,7 @@ src/podofoaboutdlg.h
 src/podofobrowser.exe
 src/podofobrowserbase.cpp
 src/podofobrowserbase.h
+src/progress.make
 src/qrc_podofobrowserrsrc.cxx
 src/release
 src/ui_podofoaboutdlg.cpp
