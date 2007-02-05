@@ -149,6 +149,7 @@
    <addaction name="fileNewAction" />
    <addaction name="fileOpenAction" />
    <addaction name="fileSaveAction" />
+   <addaction name="fileReloadAction" />
    <addaction name="separator" />
    <addaction name="actionInsert_Before" />
    <addaction name="actionInsert_After" />
@@ -163,9 +164,15 @@
      <x>0</x>
      <y>0</y>
      <width>758</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
+   <widget class="QMenu" name="helpMenu" >
+    <property name="title" >
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="helpAboutAction" />
+   </widget>
    <widget class="QMenu" name="Tools" >
     <property name="title" >
      <string>&amp;Tools</string>
@@ -181,14 +188,9 @@
     <addaction name="fileOpenAction" />
     <addaction name="fileSaveAction" />
     <addaction name="fileSaveAsAction" />
+    <addaction name="fileReloadAction" />
     <addaction name="separator" />
     <addaction name="fileExitAction" />
-   </widget>
-   <widget class="QMenu" name="helpMenu" >
-    <property name="title" >
-     <string>&amp;Help</string>
-    </property>
-    <addaction name="helpAboutAction" />
    </widget>
    <widget class="QMenu" name="Edit" >
     <property name="title" >
@@ -207,6 +209,7 @@
     <addaction name="separator" />
     <addaction name="actionRemove_Item" />
     <addaction name="separator" />
+    <addaction name="actionRefreshView" />
    </widget>
    <addaction name="fileMenu" />
    <addaction name="Edit" />
@@ -242,6 +245,9 @@
    </property>
   </action>
   <action name="fileSaveAction" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
    <property name="icon" >
     <iconset resource="podofobrowserrsrc.qrc" >:/icons/filesave.png</iconset>
    </property>
@@ -256,6 +262,9 @@
    </property>
   </action>
   <action name="fileSaveAsAction" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
    <property name="icon" >
     <iconset resource="podofobrowserrsrc.qrc" >:/icons/filesaveas.png</iconset>
    </property>
@@ -308,6 +317,9 @@
    </property>
   </action>
   <action name="editCutAction" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
    <property name="text" >
     <string>Cu&amp;t</string>
    </property>
@@ -316,6 +328,9 @@
    </property>
   </action>
   <action name="editnew_itemAction" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
    <property name="text" >
     <string>&amp;Copy</string>
    </property>
@@ -324,6 +339,9 @@
    </property>
   </action>
   <action name="editPasteAction" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
    <property name="text" >
     <string>&amp;Paste</string>
    </property>
@@ -332,6 +350,9 @@
    </property>
   </action>
   <action name="actionInsert_Before" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
    <property name="icon" >
     <iconset resource="podofobrowserrsrc.qrc" >:/icons/insert_elem_above.png</iconset>
    </property>
@@ -340,6 +361,9 @@
    </property>
   </action>
   <action name="actionInsert_After" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
    <property name="icon" >
     <iconset resource="podofobrowserrsrc.qrc" >:/icons/insert_elem_below.png</iconset>
    </property>
@@ -348,6 +372,9 @@
    </property>
   </action>
   <action name="actionInsert_Child" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
    <property name="icon" >
     <iconset resource="podofobrowserrsrc.qrc" >:/icons/insert_child.png</iconset>
    </property>
@@ -356,6 +383,9 @@
    </property>
   </action>
   <action name="actionRemove_Item" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
    <property name="icon" >
     <iconset resource="podofobrowserrsrc.qrc" >:/icons/deleteitem.png</iconset>
    </property>
@@ -364,6 +394,9 @@
    </property>
   </action>
   <action name="actionCreate_Missing_Object" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
    <property name="icon" >
     <iconset resource="podofobrowserrsrc.qrc" >:/icons/fix_dangling_reference.png</iconset>
    </property>
@@ -372,11 +405,27 @@
    </property>
   </action>
   <action name="actionInsert_Key" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
    <property name="icon" >
     <iconset resource="podofobrowserrsrc.qrc" >:/icons/insert_key.png</iconset>
    </property>
    <property name="text" >
     <string>Insert &amp;Key</string>
+   </property>
+  </action>
+  <action name="fileReloadAction" >
+   <property name="icon" >
+    <iconset resource="podofobrowserrsrc.qrc" >:/icons/reload.png</iconset>
+   </property>
+   <property name="text" >
+    <string>Reload</string>
+   </property>
+  </action>
+  <action name="actionRefreshView" >
+   <property name="text" >
+    <string>Refresh View (DEBUG)</string>
    </property>
   </action>
  </widget>

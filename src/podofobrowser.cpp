@@ -72,11 +72,13 @@ PoDoFoBrowser::PoDoFoBrowser()
 
     connect( buttonImport, SIGNAL( clicked() ), this, SLOT( slotImportStream() ) );
     connect( buttonExport, SIGNAL( clicked() ), this, SLOT( slotExportStream() ) );
+    connect( fileReloadAction, SIGNAL( activated() ), this, SLOT( fileReload() ) );
     connect( actionInsert_Before, SIGNAL( activated() ), this, SLOT( editInsertBefore() ) );
     connect( actionInsert_After,  SIGNAL( activated() ), this, SLOT( editInsertAfter() ) );
     connect( actionInsert_Key,    SIGNAL( activated() ), this, SLOT( editInsertKey() ) );
     connect( actionInsert_Child,  SIGNAL( activated() ), this, SLOT( editInsertChildBelow() ) );
     connect( actionRemove_Item,   SIGNAL( activated() ), this, SLOT( editRemoveItem()) );
+    connect( actionRefreshView,   SIGNAL( activated() ), this, SLOT( editRefreshView()) );
     connect( actionCreate_Missing_Object, SIGNAL( activated() ), this, SLOT( editCreateMissingObject()) );
 
     show();
@@ -194,7 +196,7 @@ void PoDoFoBrowser::fileOpen( const QString & filename )
 
     // TODO: leaking old document?
     try {
-        m_pDocument = new PdfDocument( filename.latin1() );
+        m_pDocument = new PdfDocument( filename.toLocal8Bit().data() );
     } catch( PdfError & e ) {
         QApplication::restoreOverrideCursor();
         podofoError( e );
@@ -238,12 +240,14 @@ void PoDoFoBrowser::UpdateMenus()
 
     fileSaveAction->setEnabled(model != 0);
     fileSaveAsAction->setEnabled(model != 0);
+    fileReloadAction->setEnabled(model != 0 && !m_filename.isEmpty() && model->DocChanged() );
+    actionRefreshView->setEnabled(model != 0);
 
     // Can add a child to any array or dictionary
     actionInsert_Child->setEnabled( sel.isValid() && (model->IndexIsDictionary(sel) || model->IndexIsArray(sel)) );
     // Can create missing child only of a dangling reference
     actionCreate_Missing_Object->setEnabled( sel.isValid() && model->IndexIsReference(sel) && !model->IndexChildCount(sel) );
-    
+
     QModelIndex parent = sel.parent();
     bool enableInsertBeforeAfter = parent.isValid() && model->IndexIsArray(parent);
     actionInsert_Before->setEnabled(enableInsertBeforeAfter);
@@ -305,6 +309,7 @@ void PoDoFoBrowser::treeSelectionChanged( const QModelIndex & current, const QMo
         return;
     }
 
+    // XXX this should be in the model
     char * pBuf = NULL;
     long lLen = -1;
     model->PrepareForSubtreeChange(current);
@@ -358,6 +363,19 @@ bool PoDoFoBrowser::fileSaveAs()
         return fileSave( filename );
     else
         return false;
+}
+
+void PoDoFoBrowser::fileReload()
+{
+    if (m_filename.isEmpty()) return;
+    QMessageBox::StandardButton result = QMessageBox::question(this, tr("Discard changes and re-load file?"),
+            tr("Are you sure you want to discard all your changes and re-load the last saved version of this file?"),
+            QMessageBox::Discard|QMessageBox::Cancel, QMessageBox::Cancel);
+    if (result == QMessageBox::Discard)
+    {
+        const QString filename = m_filename;
+        fileOpen(filename);
+    }
 }
 
 void PoDoFoBrowser::fileExit()
@@ -437,6 +455,15 @@ void PoDoFoBrowser::editRemoveItem()
 
 void PoDoFoBrowser::editCreateMissingObject()
 {
+}
+
+// For debugging: refresh the view
+void PoDoFoBrowser::editRefreshView()
+{
+    PdfObjectModel * const model = static_cast<PdfObjectModel*>(listObjects->model());
+    if (!model)
+        qDebug("can't refresh with no model");
+    model->reset();
 }
 
 

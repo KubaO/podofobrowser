@@ -34,6 +34,7 @@ src/icons/name.png -text
 src/icons/number.png -text
 src/icons/real.png -text
 src/icons/reference.png -text
+src/icons/reload.png -text
 src/main.cpp -text
 src/pdfobjectmodel.cpp -text
 src/pdfobjectmodel.h -text

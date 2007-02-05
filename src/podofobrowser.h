@@ -50,6 +50,7 @@ class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
     bool fileSave();
     bool fileSave( const QString & filename );
     bool fileSaveAs();
+    void fileReload();
 
     void fileExit();
 
@@ -69,6 +70,7 @@ class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
     void editInsertChildBelow();
     void editRemoveItem();
     void editCreateMissingObject();
+    void editRefreshView();
 
  private:
     void ModelChange(PdfObjectModel* newModel);

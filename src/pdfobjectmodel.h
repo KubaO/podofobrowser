@@ -86,6 +86,9 @@ public:
     /** \return true iff the document has changed */
     bool DocChanged() const throw() { return m_bDocChanged; }
 
+    /** For debugging: reset the model */
+    void reset() { QAbstractItemModel::reset(); }
+
 private:
     // have any changes been made to the document tree through the model?
     bool m_bDocChanged;
