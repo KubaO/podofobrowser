@@ -16,9 +16,9 @@
    <property name="geometry" >
     <rect>
      <x>0</x>
-     <y>42</y>
+     <y>49</y>
      <width>758</width>
-     <height>561</height>
+     <height>554</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" >
@@ -152,8 +152,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>36</width>
-     <height>16</height>
+     <width>90</width>
+     <height>26</height>
     </rect>
    </property>
    <property name="label" >
@@ -169,7 +169,7 @@
      <x>0</x>
      <y>0</y>
      <width>758</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="Tools" >
@@ -221,7 +221,7 @@
   </widget>
   <action name="fileNewAction" >
    <property name="icon" >
-    <iconset>image0</iconset>
+    <iconset resource="podofobrowserrsrc.qrc" >:/icons/filenew.png</iconset>
    </property>
    <property name="text" >
     <string>&amp;New</string>
@@ -235,7 +235,7 @@
   </action>
   <action name="fileOpenAction" >
    <property name="icon" >
-    <iconset>image1</iconset>
+    <iconset resource="podofobrowserrsrc.qrc" >:/icons/fileopen.png</iconset>
    </property>
    <property name="text" >
     <string>&amp;Open...</string>
@@ -249,7 +249,7 @@
   </action>
   <action name="fileSaveAction" >
    <property name="icon" >
-    <iconset>image2</iconset>
+    <iconset resource="podofobrowserrsrc.qrc" >:/icons/filesave.png</iconset>
    </property>
    <property name="text" >
     <string>&amp;Save</string>
@@ -262,6 +262,9 @@
    </property>
   </action>
   <action name="fileSaveAsAction" >
+   <property name="icon" >
+    <iconset resource="podofobrowserrsrc.qrc" >:/icons/filesaveas.png</iconset>
+   </property>
    <property name="text" >
     <string>Save &amp;As...</string>
    </property>
@@ -308,11 +311,6 @@
    </property>
    <property name="iconText" >
     <string>Convert &amp;from Hexstring</string>
-   </property>
-  </action>
-  <action name="Action" >
-   <property name="iconText" >
-    <string>Action</string>
    </property>
   </action>
   <action name="editCutAction" >
@@ -384,7 +382,9 @@
    <header>q3listview.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="podofobrowserrsrc.qrc" />
+ </resources>
  <connections>
   <connection>
    <sender>fileNewAction</sender>

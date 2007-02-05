@@ -12,11 +12,16 @@ cmake/modules/FindLIBPODOFO.cmake -text
 cmake/modules/FindZLIB.cmake -text
 /podofobrowser.pro -text
 src/CMakeLists.txt -text
+src/icons/CREDITS -text
 src/icons/array.png -text
 src/icons/bool.png -text
 src/icons/dangling_reference.png -text
 src/icons/dictionary.png -text
 src/icons/empty.png -text
+src/icons/filenew.png -text
+src/icons/fileopen.png -text
+src/icons/filesave.png -text
+src/icons/filesaveas.png -text
 src/icons/hexstring.png -text
 src/icons/litstring.png -text
 src/icons/name.png -text

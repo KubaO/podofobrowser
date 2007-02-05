@@ -11,5 +11,9 @@
     <file>icons/real.png</file>
     <file>icons/reference.png</file>
     <file>icons/dangling_reference.png</file>
+    <file>icons/fileopen.png</file>
+    <file>icons/filesave.png</file>
+    <file>icons/filesaveas.png</file>
+    <file>icons/filenew.png</file>
 </qresource>
 </RCC>
