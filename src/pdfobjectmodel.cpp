@@ -476,8 +476,9 @@ void PdfObjectModel::PrepareForSubtreeChange(const QModelIndex& index)
         qDebug("PrepareForSubtreeChange(...) on alias %p of %p", (*it), node);
         // Inform the model about the change to this particular subtree
         // alias nodes MUST have the same number of children and same associated object.
-        assert(childCount == (*it)->CountChildren());
         assert(obj == (*it)->GetObject());
+        qDebug("Testing children: original has %i, I have %i (pretending: %s)", childCount, (*it)->CountChildren(), ( (*it)->IsPretendEmpty() ? "yes":"no") );
+        assert(childCount == (*it)->CountChildren());
         // Find out what this particular node's position within its parent node
         // is.
         beginRemoveRows(
@@ -485,8 +486,8 @@ void PdfObjectModel::PrepareForSubtreeChange(const QModelIndex& index)
                         0,
                         (*it)->CountChildren() - 1
                         );
-        node->InvalidateChildren();
-        node->SetPretendEmpty(true);
+        (*it)->InvalidateChildren();
+        (*it)->SetPretendEmpty(true);
         endRemoveRows();
     }
     qDebug("PrepareForSubtreeChange() done");
