@@ -25,7 +25,6 @@
 // for Qt4
 #include <QtCore>
 #include <QtGui>
-#include <Qt3Support>
 
 #include "ui_podofobrowserbase.h"
 #include <podofo/podofo.h>
@@ -34,7 +33,7 @@
 class PdfObjectModel;
 class QModelIndex;
 
-class PoDoFoBrowser: public Q3MainWindow, private Ui::PoDoFoBrowserBase
+class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
 {
     Q_OBJECT
 

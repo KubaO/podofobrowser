@@ -1,6 +1,6 @@
 <ui version="4.0" >
  <class>PoDoFoBrowserBase</class>
- <widget class="Q3MainWindow" name="PoDoFoBrowserBase" >
+ <widget class="QMainWindow" name="PoDoFoBrowserBase" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -147,7 +147,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="Q3ToolBar" name="toolBar" >
+  <widget class="QToolBar" name="toolBar" >
    <property name="geometry" >
     <rect>
      <x>0</x>
@@ -387,19 +387,6 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11" />
- <customwidgets>
-  <customwidget>
-   <class>Q3MainWindow</class>
-   <extends>QWidget</extends>
-   <header>q3mainwindow.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>Q3ToolBar</class>
-   <extends>Q3Frame</extends>
-   <header>q3listview.h</header>
-  </customwidget>
- </customwidgets>
  <resources>
   <include location="podofobrowserrsrc.qrc" />
  </resources>

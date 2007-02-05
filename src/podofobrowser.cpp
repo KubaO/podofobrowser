@@ -24,6 +24,7 @@
 #include "ui_podofoaboutdlg.h"
 #include "pdfobjectmodel.h"
 
+#include <Qt3Support>
 #include <qapplication.h>
 #include <qcursor.h>
 #include <q3filedialog.h>
@@ -61,7 +62,7 @@ private:
 };
 
 PoDoFoBrowser::PoDoFoBrowser()
-    : Q3MainWindow(0, "PoDoFoBrowser", Qt::WDestructiveClose ),
+    : QMainWindow(0, "PoDoFoBrowser", Qt::WDestructiveClose ),
       PoDoFoBrowserBase(),
       m_pDocument( NULL )
 {
