@@ -295,11 +295,20 @@ void PoDoFoBrowser::treeSelectionChanged( const QModelIndex & current, const QMo
         return;
     }
 
+    // XXX dirty hack: extract stream implementation until the earthquakes re
+    // immediate writing in PoDoFo are done.
+    const PdfMemStream * stream = dynamic_cast<const PdfMemStream*>(object->GetStream());
+    if (!stream)
+    {
+        labelStream->setText("Can't display stream as it's not in memory.");
+        return;
+    }
+
     char * pBuf = NULL;
     long lLen = -1;
     model->PrepareForSubtreeChange(current);
     try {
-        object->GetStream()->GetFilteredCopy( &pBuf, &lLen );
+        stream->GetFilteredCopy( &pBuf, &lLen );
     } catch( PdfError & e ) {
         model->SubtreeChanged(current);
         labelStream->setText("Unable to filter object stream");

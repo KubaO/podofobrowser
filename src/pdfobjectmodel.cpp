@@ -41,7 +41,7 @@ private:
     friend class PdfObjectModelNode;
     // XXX TODO Force full model creation for these calls to produce correct results
     int CountAliases(const PdfObject * object) const { return m_nodeAliases.count(object); }
-    std::vector<PdfObjectModelNode*> GetAliases(const PdfObject * object) const; //XXX
+    std::vector<PdfObjectModelNode*> GetAliases(const PdfObject * object) const;
 
     // Called from each node's ctor
     void NodeCreated(PdfObjectModelNode* node);
@@ -50,7 +50,8 @@ private:
 
     PdfDocument* m_pDoc;
     const bool m_bFollowReferences;
-    std::multimap<const PdfObject*,PdfObjectModelNode*> m_nodeAliases;
+    typedef std::multimap<const PdfObject*,PdfObjectModelNode*> NodeAliasMap;
+    NodeAliasMap m_nodeAliases;
     PdfObjectModelNode * m_pRoot;
 
 };
@@ -118,8 +119,9 @@ public:
     // nodes that track the same PdfObject
     int CountAliases() { return m_pTree->CountAliases(m_pObject); }
 
-    // Return a list of nodes that track the same object as this node
-    std::vector<PdfObjectModelNode*> GetAliases() { return m_pTree->GetAliases(m_pObject); }
+    // Return a list of nodes that track the same object as this node. The alias
+    // list includes this node.
+    std::vector<PdfObjectModelNode*> GetAliases() const { return m_pTree->GetAliases(m_pObject); }
 
     // Forget about any children and re-scan for children next time anyone
     // wants to know about them. Call this method before doing something
@@ -217,6 +219,17 @@ PdfObjectModelTree::~PdfObjectModelTree()
 {
     delete m_pRoot;
     assert(m_nodeAliases.size() == 0);
+}
+
+std::vector<PdfObjectModelNode*> PdfObjectModelTree::GetAliases(const PdfObject* item) const
+{
+    std::pair<NodeAliasMap::const_iterator,NodeAliasMap::const_iterator> r = m_nodeAliases.equal_range(item);
+    std::vector<PdfObjectModelNode*> aliases;
+    for ( NodeAliasMap::const_iterator it = r.first;
+          it != r.second;
+	  ++it)
+        aliases.push_back( (*it).second );
+    return aliases;
 }
 
 void PdfObjectModelTree::NodeCreated(PdfObjectModelNode* node)
@@ -443,26 +456,70 @@ void PdfObjectModel::setupModelData(PdfDocument * doc)
 
 void PdfObjectModel::PrepareForSubtreeChange(const QModelIndex& index)
 {
+    assert(index.isValid());
+    // Loop over all aliases of this node and prepare their subtrees
+    // for the change to the underlying data model. Note that the alias list
+    // includes the original node, so we don't  have to handle it specially.
     PdfObjectModelNode* node = static_cast<PdfObjectModelNode*>(index.internalPointer());
-    if (node->CountChildren())
+    const int childCount = node->CountChildren();
+    const PdfObject * const obj = node->GetObject();
+    qDebug("PrepareForSubtreeChanged() with node %p obj %p children %i", node, obj, childCount);
+    if (!childCount)
+        // nothing to change
+        return;
+    std::vector<PdfObjectModelNode*> aliases = node->GetAliases();
+    std::vector<PdfObjectModelNode*>::iterator itEnd = aliases.end();
+    for (std::vector<PdfObjectModelNode*>::iterator it = aliases.begin();
+         it != itEnd;
+         ++it)
     {
-        beginRemoveRows( createIndex( index.row(), 0, index.internalPointer() ), 0, node->CountChildren() - 1 );
+        qDebug("PrepareForSubtreeChange(...) on alias %p of %p", (*it), node);
+        // Inform the model about the change to this particular subtree
+        // alias nodes MUST have the same number of children and same associated object.
+        assert(childCount == (*it)->CountChildren());
+        assert(obj == (*it)->GetObject());
+        // Find out what this particular node's position within its parent node
+        // is.
+        beginRemoveRows(
+                        createIndex( (*it)->GetIndexInParent(), 0, (*it) ),
+                        0,
+                        (*it)->CountChildren() - 1
+                        );
         node->InvalidateChildren();
         node->SetPretendEmpty(true);
         endRemoveRows();
     }
+    qDebug("PrepareForSubtreeChange() done");
 }
 
 void PdfObjectModel::SubtreeChanged(const QModelIndex& index)
 {
+    assert(index.isValid());
     PdfObjectModelNode* node = static_cast<PdfObjectModelNode*>(index.internalPointer());
-    node->SetPretendEmpty(false);
-    if (node->CountChildren())
+    const PdfObject * const obj = node->GetObject();
+    qDebug("SubtreeChanged() with node %p obj %p", node, obj);
+    // Loop over all aliases of this node and inform the model the tree
+    // below that node has changed.
+    std::vector<PdfObjectModelNode*> aliases = node->GetAliases();
+    std::vector<PdfObjectModelNode*>::iterator itEnd = aliases.end();
+    for (std::vector<PdfObjectModelNode*>::iterator it = aliases.begin();
+         it != itEnd;
+         ++it)
     {
-        beginInsertRows( createIndex( index.row(), 0, index.internalPointer() ), 0, node->CountChildren() - 1 );
-        endInsertRows();
+        qDebug("SubtreeChanged(...) on alias %p of %p", (*it), node);
+        // alias nodes MUST have the same associated object.
+        assert(obj == (*it)->GetObject());
+        // Inform the model about changes to this particular alias node
+        (*it)->SetPretendEmpty(false);
+        QModelIndex nodeIndex = createIndex((*it)->GetIndexInParent(), 0, (*it) );
+        if ((*it)->CountChildren())
+        {
+            beginInsertRows(nodeIndex, 0, (*it)->CountChildren() - 1 );
+            endInsertRows();
+        }
+        emit dataChanged( nodeIndex, nodeIndex );
     }
-    emit dataChanged( index, index );
+    qDebug("SubtreeChanged(...) done");
 }
 
 QModelIndex PdfObjectModel::index(int row, int column, const QModelIndex& parent) const
