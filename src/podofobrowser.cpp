@@ -552,7 +552,7 @@ void PoDoFoBrowser::slotExportStream()
 
 void PoDoFoBrowser::toolsToHex()
 {
-    const PdfFilter * const hexfilter = PdfFilterFactory::Create(ePdfFilter_ASCIIHexDecode);
+    std::auto_ptr<const PdfFilter> hexfilter = PdfFilterFactory::Create(ePdfFilter_ASCIIHexDecode);
 
     char* pBuffer = NULL;
     long  lLen    = 0;
@@ -574,7 +574,7 @@ void PoDoFoBrowser::toolsToHex()
 
 void PoDoFoBrowser::toolsFromHex()
 {
-    const PdfFilter * const hexfilter = PdfFilterFactory::Create(ePdfFilter_ASCIIHexDecode);
+    std::auto_ptr<const PdfFilter> hexfilter = PdfFilterFactory::Create(ePdfFilter_ASCIIHexDecode);
 
     char* pBuffer = NULL;
     long  lLen    = 0;
