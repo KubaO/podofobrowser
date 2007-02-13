@@ -277,7 +277,10 @@ bool PdfObjectModelNode::CanInsertElement(int row) const
 
 void PdfObjectModelNode::InsertElement(int row)
 {
-    assert(CanInsertElement(row));
+    // We do NOT check if the row is sane to insert here. We can't, since
+    // our child list will have been invalidated by the caller and we don't want
+    // to rescan it until after the row is inserted. Trust the caller to check
+    // CanInsertElement() .
     PdfArray & a = m_pObject->GetArray();
     std::vector<PdfObject>::iterator it = a.begin();
     std::advance(it, row);
@@ -459,9 +462,6 @@ void PdfObjectModel::PrepareForSubtreeChange(const QModelIndex& index)
     PdfObjectModelNode* node = static_cast<PdfObjectModelNode*>(index.internalPointer());
     const int childCount = node->CountChildren();
     const PdfObject * const obj = node->GetObject();
-    if (!childCount)
-        // nothing to change
-        return;
     std::vector<PdfObjectModelNode*> aliases = node->GetAliases();
     std::vector<PdfObjectModelNode*>::iterator itEnd = aliases.end();
     for (std::vector<PdfObjectModelNode*>::iterator it = aliases.begin();
@@ -682,20 +682,25 @@ Qt::ItemFlags PdfObjectModel::flags(const QModelIndex &index) const
 QVariant PdfObjectModel::headerData(int section, Qt::Orientation orientation,
                     int role) const
 {
-     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-     switch (section)
-     {
-         case Column_ParentIdentifier:
-             return QVariant("Object");
-         case Column_RawValue:
-             return QVariant("Value");
-         case Column_Type:
-             return QVariant("Type");
-         default:
-             return QVariant();
-     }
+    if (orientation != Qt::Horizontal)
+        return QVariant();
 
-     return QVariant();
+    if (role == Qt::DisplayRole)
+    {
+        switch (section)
+        {
+            case Column_ParentIdentifier:
+                return QVariant("Object");
+            case Column_RawValue:
+                return QVariant("Value");
+            case Column_Type:
+                return QVariant("Type");
+            default:
+                return QVariant();
+        }
+    }
+    else
+       return QVariant();
 }
 
 // Find the parent of the object pointed to by index's internal pointer
@@ -801,10 +806,10 @@ bool PdfObjectModel::insertElement( int row, const QModelIndex & parent )
         node = static_cast<PdfObjectModelTree*>(m_pTree)->GetRoot();
     if (node->CanInsertElement(row))
     {
-       beginInsertRows(parent, row, row);
-       node->InsertElement(row);
-       endInsertRows();
-       return true;
+        PrepareForSubtreeChange(parent);
+        node->InsertElement(row);
+        SubtreeChanged(parent);
+        return true;
     }
     return false;
 }
