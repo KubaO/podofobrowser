@@ -4,6 +4,7 @@ PROJECT(PoDoFoBrowser)
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
 MESSAGE("Remember to set QTDIR in your environment if qmake is not found")
+SET(QT_MIN_VERSION "4.2.0")
 SET(QT_USE_QT3SUPPORT TRUE)
 SET(QT_USE_QTUITOOLS TRUE)
 SET(QT_REQUIRED TRUE)

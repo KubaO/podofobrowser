@@ -1,7 +1,8 @@
 	**WARNING**
 This version of PoDoFoBrowser is under heavy development and is not suitable
 for production use. You should get the latest from podofobrowser/branches/qt4,
-or the latest public PoDoFoBrowser release, for a more stable build.
+or the latest public PoDoFoBrowser release, for a more stable build. You will
+need the very latest PoDoFo svn to compile this version of PoDoFoBrowser.
 
 
 
@@ -9,5 +10,6 @@ PoDoFoBrowser is a Qt 4 application for browsing the objects in a PDF file and
 modifying their keys easily. It is very useful if you want to look on the
 internal structure of PDF files.
 
-You will need Qt4 and PoDoFo to build PoDoFoBrowser. CMake is used as the build
-system (see the INSTALL file for details), though you can use qmake if you prefer.
+You will need Qt version 4.2.0 or newer and PoDoFo to build PoDoFoBrowser.
+CMake is used as the build system (see the INSTALL file for details), though
+you can use qmake if you prefer.
