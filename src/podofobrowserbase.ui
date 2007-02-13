@@ -167,31 +167,6 @@
      <height>22</height>
     </rect>
    </property>
-   <widget class="QMenu" name="helpMenu" >
-    <property name="title" >
-     <string>&amp;Help</string>
-    </property>
-    <addaction name="helpAboutAction" />
-   </widget>
-   <widget class="QMenu" name="Tools" >
-    <property name="title" >
-     <string>&amp;Tools</string>
-    </property>
-    <addaction name="toolsToHexAction" />
-    <addaction name="toolsFromHexAction" />
-   </widget>
-   <widget class="QMenu" name="fileMenu" >
-    <property name="title" >
-     <string>&amp;File</string>
-    </property>
-    <addaction name="fileNewAction" />
-    <addaction name="fileOpenAction" />
-    <addaction name="fileSaveAction" />
-    <addaction name="fileSaveAsAction" />
-    <addaction name="fileReloadAction" />
-    <addaction name="separator" />
-    <addaction name="fileExitAction" />
-   </widget>
    <widget class="QMenu" name="Edit" >
     <property name="title" >
      <string>&amp;Edit</string>
@@ -210,6 +185,32 @@
     <addaction name="actionRemove_Item" />
     <addaction name="separator" />
     <addaction name="actionRefreshView" />
+   </widget>
+   <widget class="QMenu" name="fileMenu" >
+    <property name="title" >
+     <string>&amp;File</string>
+    </property>
+    <addaction name="fileNewAction" />
+    <addaction name="fileOpenAction" />
+    <addaction name="fileSaveAction" />
+    <addaction name="fileSaveAsAction" />
+    <addaction name="fileReloadAction" />
+    <addaction name="separator" />
+    <addaction name="fileExitAction" />
+   </widget>
+   <widget class="QMenu" name="helpMenu" >
+    <property name="title" >
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="helpAboutAction" />
+   </widget>
+   <widget class="QMenu" name="Tools" >
+    <property name="title" >
+     <string>&amp;Tools</string>
+    </property>
+    <addaction name="toolsToHexAction" />
+    <addaction name="toolsFromHexAction" />
+    <addaction name="actionToolsDisplayCodeForSelection" />
    </widget>
    <addaction name="fileMenu" />
    <addaction name="Edit" />
@@ -426,6 +427,16 @@
   <action name="actionRefreshView" >
    <property name="text" >
     <string>Refresh View (DEBUG)</string>
+   </property>
+  </action>
+  <action name="actionDisplay_Selected_Object" >
+   <property name="text" >
+    <string>Display Selected Object</string>
+   </property>
+  </action>
+  <action name="actionToolsDisplayCodeForSelection" >
+   <property name="text" >
+    <string>&amp;Display Code For Selection</string>
    </property>
   </action>
  </widget>

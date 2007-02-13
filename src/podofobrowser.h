@@ -56,6 +56,7 @@ class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
 
     void toolsToHex();
     void toolsFromHex();
+    void toolsDisplayCodeForSelection();
 
     void treeSelectionChanged( const QModelIndex & current, const QModelIndex & previous );
 

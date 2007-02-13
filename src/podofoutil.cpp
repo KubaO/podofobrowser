@@ -1,4 +1,6 @@
 #include "podofoutil.h"
+#include <string>
+#include <iostream>
 #include <podofo/podofo.h>
 #include <QtCore>
 #include <QtGui>
@@ -30,4 +32,12 @@ void podofoError( const PdfError & eCode )
     }
     
     QMessageBox::warning( 0, "Error", msg );
+}
+
+void printObject( const PdfObject* obj )
+{
+    std::cerr << "Printing object: 0x" << obj << std::endl;
+    std::string s;
+    obj->ToString(s);
+    std::cerr << s << std::endl;
 }

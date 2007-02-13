@@ -42,6 +42,7 @@
 #include <Q3ValueList>
 
 #include <cassert>
+#include <iostream>
 
 using namespace PoDoFo;
 
@@ -80,6 +81,7 @@ PoDoFoBrowser::PoDoFoBrowser()
     connect( actionRemove_Item,   SIGNAL( activated() ), this, SLOT( editRemoveItem()) );
     connect( actionRefreshView,   SIGNAL( activated() ), this, SLOT( editRefreshView()) );
     connect( actionCreate_Missing_Object, SIGNAL( activated() ), this, SLOT( editCreateMissingObject()) );
+    connect( actionToolsDisplayCodeForSelection, SIGNAL( activated() ), this, SLOT( toolsDisplayCodeForSelection()) );
 
     show();
     statusBar()->message( tr("Ready"), 2000 );
@@ -254,6 +256,8 @@ void PoDoFoBrowser::UpdateMenus()
     actionInsert_After->setEnabled(enableInsertBeforeAfter);
     actionInsert_Key->setEnabled(parent.isValid() && model->IndexIsDictionary(parent));
     actionRemove_Item->setEnabled(false); //XXX
+
+    actionToolsDisplayCodeForSelection->setEnabled( sel.isValid() );
 }
 
 // Triggered when the selected object in the list view changes
@@ -433,20 +437,37 @@ void PoDoFoBrowser::editInsertKey()
 void PoDoFoBrowser::editInsertChildBelow()
 {
     QModelIndex parent = GetSelectedItem();
-    if (!parent.isValid()) return; // shouldn't happen
+    if (!parent.isValid())
+    {
+        qDebug("%s: invalid selection", __FUNCTION__);
+        return;
+    }
     PdfObjectModel * const model = static_cast<PdfObjectModel*>(listObjects->model());
+
+    /// XXX
+    std::string s;
+    model->GetObjectForIndex(parent)->ToString(s);
+    std::cerr << "Parent (before):" << std::endl << s << std::endl;
+
     if (model->IndexIsDictionary(parent))
     {
         bool ok = false;
         QString keyName = QInputDialog::getText(this, "Key Name", "Key Name (unescaped, without leading /)",
                                             QLineEdit::Normal, "", &ok);
-	if (ok)
+        if (ok)
+        {
             model->insertKey( PdfName( keyName.toUtf8().data() ), parent);
+        }
     }
     else if (model->IndexIsArray(parent))
-	model->insertElement( model->IndexChildCount(parent), parent );
+        model->insertElement( model->IndexChildCount(parent), parent );
     else
-	qDebug("editInsertChildBelow() on item that's not a multivalued container");
+        qDebug("editInsertChildBelow() on item that's not a multivalued container");
+
+    //XXX
+    std::string s2;
+    model->GetObjectForIndex(parent)->ToString(s2);
+    std::cerr << "Parent (after):" << std::endl << s2 << std::endl;
 }
 
 void PoDoFoBrowser::editRemoveItem()
@@ -463,7 +484,8 @@ void PoDoFoBrowser::editRefreshView()
     PdfObjectModel * const model = static_cast<PdfObjectModel*>(listObjects->model());
     if (!model)
         qDebug("can't refresh with no model");
-    model->reset();
+
+    ModelChange(new PdfObjectModel(m_pDocument, listObjects));
 }
 
 
@@ -592,6 +614,18 @@ void PoDoFoBrowser::toolsFromHex()
         text.setLatin1( pBuffer, lLen );
         QMessageBox::information( this, tr("PoDoFoBrowser"), tr("The string converted to ascii:<br>") + text );
     }
+}
+
+void PoDoFoBrowser::toolsDisplayCodeForSelection()
+{
+    QModelIndex idx = GetSelectedItem();
+    if (!idx.isValid())
+        return;
+    PdfObjectModel* model = static_cast<PdfObjectModel*>(listObjects->model());
+    const PdfObject* obj = model->GetObjectForIndex(idx);
+    std::string s;
+    obj->ToString(s);
+    QMessageBox::information(this, tr("PDF code for selection"), QString( s.c_str() ) );
 }
 
 void PoDoFoBrowser::helpAbout()

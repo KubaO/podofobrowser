@@ -3,8 +3,10 @@
 
 namespace PoDoFo {
     class PdfError;
+    class PdfObject;
 };
 
 void podofoError( const PoDoFo::PdfError & eCode );
+void printObject( const PoDoFo::PdfObject* obj );
 
 #endif

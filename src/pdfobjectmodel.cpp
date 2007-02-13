@@ -270,7 +270,7 @@ PdfObjectModelNode::PdfObjectModelNode(PdfObjectModelTree * tree,
 
 bool PdfObjectModelNode::CanInsertElement(int row) const
 {
-    return  row > 0
+    return  row >= 0
             && row <= CountChildren()
             && m_pObject->IsArray();
 }
@@ -581,22 +581,22 @@ QVariant PdfObjectModel::data(const QModelIndex& index, int role) const
                     break;
                 case Qt::DecorationRole:
                     item = node->GetObject();
-		    switch (item->GetDataType())
-		    {
-			    case ePdfDataType_Bool: fileName = ":/icons/bool.png"; break;
-			    case ePdfDataType_Number: fileName = ":/icons/number.png"; break;
-			    case ePdfDataType_Real: fileName = ":/icons/real.png"; break;
-			    case ePdfDataType_String: fileName = ":/icons/litstring.png"; break;
-			    case ePdfDataType_HexString: fileName = ":/icons/hexstring.png"; break;
-			    case ePdfDataType_Name: fileName = ":/icons/name.png"; break;
-			    case ePdfDataType_Array: fileName = ":/icons/dictionary.png"; break;
-			    case ePdfDataType_Dictionary: fileName = ":/icons/dictionary.png"; break;
-			    case ePdfDataType_Null: fileName = ":/icons/empty.png"; break;
-			    case ePdfDataType_Reference:
+            switch (item->GetDataType())
+            {
+                case ePdfDataType_Bool: fileName = ":/icons/bool.png"; break;
+                case ePdfDataType_Number: fileName = ":/icons/number.png"; break;
+                case ePdfDataType_Real: fileName = ":/icons/real.png"; break;
+                case ePdfDataType_String: fileName = ":/icons/litstring.png"; break;
+                case ePdfDataType_HexString: fileName = ":/icons/hexstring.png"; break;
+                case ePdfDataType_Name: fileName = ":/icons/name.png"; break;
+                case ePdfDataType_Array: fileName = ":/icons/array.png"; break;
+                case ePdfDataType_Dictionary: fileName = ":/icons/dictionary.png"; break;
+                case ePdfDataType_Null: fileName = ":/icons/empty.png"; break;
+                case ePdfDataType_Reference:
                                  fileName = node->CountChildren() ? ":/icons/reference.png" : ":/icons/dangling_reference.png";
                                  break;
-			    case ePdfDataType_RawData: fileName = ""; break;
-		    }
+                case ePdfDataType_RawData: fileName = ""; break;
+            }
                     ret = QVariant( QPixmap(fileName) );
                     break;
                 default:
@@ -793,9 +793,9 @@ bool PdfObjectModel::insertElement( int row, const QModelIndex & parent )
 {
     PdfObjectModelNode * node;
     if (parent.isValid())
-        node = static_cast<PdfObjectModelTree*>(m_pTree)->GetRoot();
-    else
         node = static_cast<PdfObjectModelNode*>(parent.internalPointer());
+    else
+        node = static_cast<PdfObjectModelTree*>(m_pTree)->GetRoot();
     if (node->CanInsertElement(row))
     {
        beginInsertRows(parent, row, row);
@@ -810,9 +810,9 @@ bool PdfObjectModel::insertKey(const PdfName& keyName, const QModelIndex & paren
 {
     PdfObjectModelNode * node;
     if (parent.isValid())
-        node = static_cast<PdfObjectModelTree*>(m_pTree)->GetRoot();
-    else
         node = static_cast<PdfObjectModelNode*>(parent.internalPointer());
+    else
+        node = static_cast<PdfObjectModelTree*>(m_pTree)->GetRoot();
     if (node->CanInsertKey(keyName))
     {
         PrepareForSubtreeChange(parent);
