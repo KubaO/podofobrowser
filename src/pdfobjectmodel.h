@@ -93,6 +93,10 @@ public:
     // could not be completed false is returned.
     bool insertElement( int row, const QModelIndex & parent );
 
+    // Delete the direct object at `index'. Trying to delete an indirect object
+    // will fail and return false - you must instead remove the reference(s) to
+    // it.
+    bool deleteIndex(const QModelIndex & index);
 
     /** \return true iff the document has changed */
     bool DocChanged() const throw() { return m_bDocChanged; }

@@ -159,6 +159,10 @@ public:
     void InsertKey(const PdfName & keyName);
     bool CanInsertKey(const PdfName & keyName) const;
 
+    // Delete a child node
+    void DeleteChild(int row);
+    bool CanDeleteChild(int row) const;
+
 private:
 
     // Make sure the child list is populated.
@@ -298,6 +302,34 @@ void PdfObjectModelNode::InsertKey(const PdfName& keyName)
 {
     assert(CanInsertKey(keyName));
     m_pObject->GetDictionary().AddKey(keyName, PdfVariant::NullValue);
+}
+
+bool PdfObjectModelNode::CanDeleteChild(int row) const
+{
+    return (m_pObject->IsDictionary() || m_pObject->IsArray())
+           && row >= 0
+           && row < CountChildren();
+}
+
+void PdfObjectModelNode::DeleteChild(int row)
+{
+    // Child list MUST have been invalidated before calling
+    assert(m_children.size() == 0);
+
+    if (m_pObject->IsArray())
+    {
+        PdfArray & a = m_pObject->GetArray();
+        std::vector<PdfObject>::iterator it = a.begin();
+        std::advance(it, row);
+        a.erase(it);
+    }
+    else if (m_pObject->IsDictionary())
+    {
+        TKeyMap& keys ( m_pObject->GetDictionary().GetKeys() );
+        TKeyMap::iterator it = keys.begin();
+        std::advance(it, row);
+        m_pObject->GetDictionary().RemoveKey( (*it).first );
+    }
 }
 
 void PdfObjectModelNode::InvalidateChildren()
@@ -825,6 +857,28 @@ bool PdfObjectModel::insertKey(const PdfName& keyName, const QModelIndex & paren
     {
         PrepareForSubtreeChange(parent);
         node->InsertKey(keyName);
+        SubtreeChanged(parent);
+        return true;
+    }
+    return false;
+}
+
+bool PdfObjectModel::deleteIndex(const QModelIndex & index)
+{
+    if (!index.isValid())
+        return false;
+    const QModelIndex parent = index.parent();
+    if (!parent.isValid())
+        return false;
+
+    PdfObjectModelNode* parentNode = static_cast<PdfObjectModelNode*>(parent.internalPointer());
+
+    // For now we'll do this the ugly way - find the parent node, invalidate
+    // its children, delete the underlying object and reset the subtree tree.
+    if (parentNode->CanDeleteChild(index.row()))
+    {
+        PrepareForSubtreeChange(parent);
+        parentNode->DeleteChild(index.row());
         SubtreeChanged(parent);
         return true;
     }

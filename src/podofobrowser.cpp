@@ -255,7 +255,7 @@ void PoDoFoBrowser::UpdateMenus()
     actionInsert_Before->setEnabled(enableInsertBeforeAfter);
     actionInsert_After->setEnabled(enableInsertBeforeAfter);
     actionInsert_Key->setEnabled(parent.isValid() && model->IndexIsDictionary(parent));
-    actionRemove_Item->setEnabled(false); //XXX
+    actionRemove_Item->setEnabled(sel.isValid() && !model->GetObjectForIndex(sel)->Reference().IsIndirect());
 
     actionToolsDisplayCodeForSelection->setEnabled( sel.isValid() );
 }
@@ -444,11 +444,6 @@ void PoDoFoBrowser::editInsertChildBelow()
     }
     PdfObjectModel * const model = static_cast<PdfObjectModel*>(listObjects->model());
 
-    /// XXX
-    std::string s;
-    model->GetObjectForIndex(parent)->ToString(s);
-    std::cerr << "Parent (before):" << std::endl << s << std::endl;
-
     if (model->IndexIsDictionary(parent))
     {
         bool ok = false;
@@ -463,15 +458,19 @@ void PoDoFoBrowser::editInsertChildBelow()
         model->insertElement( model->IndexChildCount(parent), parent );
     else
         qDebug("editInsertChildBelow() on item that's not a multivalued container");
-
-    //XXX
-    std::string s2;
-    model->GetObjectForIndex(parent)->ToString(s2);
-    std::cerr << "Parent (after):" << std::endl << s2 << std::endl;
 }
 
 void PoDoFoBrowser::editRemoveItem()
 {
+    QModelIndex sel = GetSelectedItem();
+    if (!sel.isValid())
+    {
+        qDebug("%s: invalid selection", __FUNCTION__);
+        return;
+    }
+    PdfObjectModel * const model = static_cast<PdfObjectModel*>(listObjects->model());
+
+    model->deleteIndex(sel);
 }
 
 void PoDoFoBrowser::editCreateMissingObject()
