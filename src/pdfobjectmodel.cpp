@@ -409,7 +409,6 @@ bool PdfObjectModelNode::SetRawData(const QByteArray & data)
     return true;
 }
 
-
 }; // end anonymous namespace
 
 
@@ -548,7 +547,7 @@ QVariant PdfObjectModel::data(const QModelIndex& index, int role) const
     QString fileName;
     switch (index.column())
     {
-        case 0:
+        case Column_ParentIdentifier:
             switch (role)
             {
                 case Qt::DisplayRole:
@@ -604,19 +603,7 @@ QVariant PdfObjectModel::data(const QModelIndex& index, int role) const
             }
             break;
         
-        case 1:
-            switch (role)
-            {
-                case Qt::DisplayRole:
-                    ret = QVariant( QString( node->GetObject()->GetDataTypeString() ) );
-                    break;
-                default:
-                    ret = QVariant();
-                    break;
-            }
-            break;
-
-        case 2:
+        case Column_RawValue:
             switch (role)
             {
                 case Qt::DisplayRole:
@@ -660,6 +647,19 @@ QVariant PdfObjectModel::data(const QModelIndex& index, int role) const
                     break;
             }
             break;
+
+        case Column_Type:
+            switch (role)
+            {
+                case Qt::DisplayRole:
+                    ret = QVariant( QString( node->GetObject()->GetDataTypeString() ) );
+                    break;
+                default:
+                    ret = QVariant();
+                    break;
+            }
+            break;
+
     }
     return ret;
 }
@@ -669,8 +669,11 @@ Qt::ItemFlags PdfObjectModel::flags(const QModelIndex &index) const
     if (!index.isValid())
         return Qt::ItemIsEnabled;
 
+    PdfObjectModelNode* node = static_cast<PdfObjectModelNode*>(index.internalPointer());
+    const PdfObject* obj = node->GetObject();
+
     Qt::ItemFlags f = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-    if (index.column() == 2)
+    if ( index.column() == Column_RawValue && !(obj->IsArray() || obj->IsDictionary()) )
         f = f | Qt::ItemIsEditable;
 
     return f;
@@ -682,12 +685,12 @@ QVariant PdfObjectModel::headerData(int section, Qt::Orientation orientation,
      if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
      switch (section)
      {
-         case 0:
+         case Column_ParentIdentifier:
              return QVariant("Object");
-         case 1:
-             return QVariant("Type");
-         case 2:
+         case Column_RawValue:
              return QVariant("Value");
+         case Column_Type:
+             return QVariant("Type");
          default:
              return QVariant();
      }
@@ -756,7 +759,7 @@ const PdfObject* PdfObjectModel::GetObjectForIndex(const QModelIndex & index) co
 
 bool PdfObjectModel::setData ( const QModelIndex & index, const QVariant & value, int role )
 {
-    if (!index.isValid() || index.column() != 2)
+    if (!index.isValid() || index.column() != Column_RawValue)
         return false;
     if (value.isNull() || !value.isValid() || !value.canConvert<QByteArray>())
         return false;

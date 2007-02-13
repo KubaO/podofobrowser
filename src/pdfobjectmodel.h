@@ -38,6 +38,17 @@ class PdfObjectModel : public QAbstractTableModel
     Q_OBJECT
 
 public:
+
+    /**
+     * Enumerator that identifies the columns in the model.
+     */
+    enum Column
+    {
+        Column_ParentIdentifier = 0,
+        Column_RawValue = 1,
+        Column_Type = 2
+    };
+
     PdfObjectModel(PoDoFo::PdfDocument* doc, QObject* parent = 0);
     virtual ~PdfObjectModel();
 
