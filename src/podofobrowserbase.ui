@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>758</width>
-    <height>616</height>
+    <height>629</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -187,14 +187,6 @@
     </property>
     <addaction name="helpAboutAction" />
    </widget>
-   <widget class="QMenu" name="Tools" >
-    <property name="title" >
-     <string>&amp;Tools</string>
-    </property>
-    <addaction name="toolsToHexAction" />
-    <addaction name="toolsFromHexAction" />
-    <addaction name="actionToolsDisplayCodeForSelection" />
-   </widget>
    <widget class="QMenu" name="Edit" >
     <property name="title" >
      <string>&amp;Edit</string>
@@ -219,6 +211,14 @@
     </property>
     <addaction name="actionRefreshView" />
     <addaction name="actionCatalogView" />
+   </widget>
+   <widget class="QMenu" name="Tools" >
+    <property name="title" >
+     <string>&amp;Tools</string>
+    </property>
+    <addaction name="toolsToHexAction" />
+    <addaction name="toolsFromHexAction" />
+    <addaction name="actionToolsDisplayCodeForSelection" />
    </widget>
    <addaction name="fileMenu" />
    <addaction name="Edit" />

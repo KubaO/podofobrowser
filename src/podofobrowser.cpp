@@ -21,6 +21,7 @@
 
 #include "podofobrowser.h"
 #include "podofoutil.h"
+#include "backgroundloader.h"
 #include "ui_podofoaboutdlg.h"
 #include "pdfobjectmodel.h"
 
@@ -65,9 +66,15 @@ private:
 PoDoFoBrowser::PoDoFoBrowser()
     : QMainWindow(0, "PoDoFoBrowser", Qt::WDestructiveClose ),
       PoDoFoBrowserBase(),
-      m_pDocument( NULL )
+      m_pDocument( NULL ),
+      m_pBackgroundLoader( NULL ),
+      m_pDelayedLoadProgress( NULL )
 {
     setupUi(this);
+
+    m_pDelayedLoadProgress = new QProgressBar( statusBar() );
+    m_pDelayedLoadProgress->setFormat( tr("%p% of objects loaded") );
+    statusBar()->addPermanentWidget(m_pDelayedLoadProgress);
 
     clear();
 
@@ -106,11 +113,32 @@ void PoDoFoBrowser::ModelChange(PdfObjectModel* newModel)
                  this, SLOT( treeSelectionChanged(QModelIndex, QModelIndex) ) );
     }
     UpdateMenus();
-    delete oldModel; oldModel = 0;
+    delete oldModel;
+}
+
+void PoDoFoBrowser::DocChange(PdfDocument* newDoc)
+{
+    delete m_pBackgroundLoader;
+    m_pBackgroundLoader = NULL;
+    m_pDelayedLoadProgress->reset();
+    if (newDoc)
+    {
+        // create a background loader and hook it up to the progress bar
+        m_pBackgroundLoader = new BackgroundLoader(newDoc);
+        m_pDelayedLoadProgress->setMaximum( m_pDocument->GetObjects().size() );
+        connect( m_pBackgroundLoader, SIGNAL(progress(int)), m_pDelayedLoadProgress, SLOT(setValue(int)) );
+        connect( m_pBackgroundLoader, SIGNAL(done()), m_pDelayedLoadProgress, SLOT(reset()) );
+
+        // then start loading
+        m_pBackgroundLoader->start();
+    }
 }
 
 PoDoFoBrowser::~PoDoFoBrowser()
 {
+    ModelChange(NULL);
+    DocChange(NULL);
+
     saveConfig();
 
     delete m_pDocument;
@@ -167,6 +195,7 @@ void PoDoFoBrowser::clear()
     textStream->setEnabled(false);
     
     ModelChange(NULL);
+    DocChange(NULL);
 
     delete m_pDocument; m_pDocument=0;
 
@@ -184,9 +213,13 @@ void PoDoFoBrowser::fileNew()
 
     this->clear();
 
+    PdfDocument* oldDoc = m_pDocument;
     m_pDocument = new PdfDocument();
 
     ModelChange( new PdfObjectModel(m_pDocument, listObjects, actionCatalogView->isChecked()) );
+    DocChange(m_pDocument);
+
+    delete oldDoc;
 }
 
 void PoDoFoBrowser::fileOpen( const QString & filename )
@@ -197,9 +230,10 @@ void PoDoFoBrowser::fileOpen( const QString & filename )
 
     QApplication::setOverrideCursor( Qt::WaitCursor );
 
-    // TODO: leaking old document?
+    PdfDocument* oldDoc = m_pDocument;
     try {
         m_pDocument = new PdfDocument( filename.toLocal8Bit().data() );
+        delete oldDoc;
     } catch( PdfError & e ) {
         QApplication::restoreOverrideCursor();
         podofoError( e );
@@ -207,12 +241,13 @@ void PoDoFoBrowser::fileOpen( const QString & filename )
     }
 
     ModelChange( new PdfObjectModel(m_pDocument, listObjects, actionCatalogView->isChecked()) );
-    
+    DocChange(m_pDocument);
+
     m_filename = filename;
     setCaption( m_filename );
 
     QApplication::restoreOverrideCursor();
-    statusBar()->message(  QString( tr("Loaded file %1 successfully") ).arg( filename ), 2000 );
+    statusBar()->message(  QString( tr("Opened file %1 successfully") ).arg( filename ), 2000 );
 }
 
 bool PoDoFoBrowser::fileSave( const QString & filename )
@@ -359,7 +394,37 @@ bool PoDoFoBrowser::fileSave()
     if( m_filename.isEmpty() )
         return fileSaveAs();
     else
-        return fileSave( m_filename );
+    {
+        // can't just overwrite existing file, since we might have file streams
+        // reading from it as we write. Instead we write to a temp file and then
+        // swap it with the original.
+        const QString origFileName = m_filename;
+        bool success = false;
+        QString message;
+        if (!QFile::rename(origFileName, origFileName+".bak"))
+        {
+            message= tr("Unable to back up original file (rename failed)");
+        }
+        else
+        {
+            if (!fileSave(origFileName))
+            {
+                message = tr("Unable to write new file");
+                QFile::remove(origFileName);
+                QFile::rename(origFileName+".bak", origFileName);
+            }
+            else
+            {
+                success = true;
+            }
+        }
+        m_filename = origFileName;
+
+        if (!success)
+            QMessageBox::critical(this, tr("Saving failed"),
+                    tr("Unable to save %1: %2").arg(origFileName).arg(message));
+        return success;
+    }
 }
 
 bool PoDoFoBrowser::fileSaveAs()

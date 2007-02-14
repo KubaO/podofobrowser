@@ -4,6 +4,7 @@ QT4_WRAP_UI(podofobrowser_UIC_HEADERS
 	)
 
 SET(podofobrowser_MOC_HEADERS
+	backgroundloader.h
 	podofobrowser.h
 	pdfobjectmodel.h
 	)
@@ -12,7 +13,7 @@ QT4_WRAP_CPP(podofobrowser_MOC_SRCS ${podofobrowser_MOC_HEADERS})
 # Qt resources such as icons to be embedded in the executable
 SET(podofobrowser_RSRC_FILES
 	podofobrowserrsrc.qrc
-        )
+	)
 QT4_ADD_RESOURCES(podofobrowser_QRC_SRCS ${podofobrowser_RSRC_FILES})
 
 # WTF does this not get done for us?
@@ -23,6 +24,7 @@ SET_SOURCE_FILES_PROPERTIES(
 	)
 
 ADD_EXECUTABLE(podofobrowser
+	backgroundloader.cpp
 	podofoutil.cpp
 	pdfobjectmodel.cpp
 	podofobrowser.cpp

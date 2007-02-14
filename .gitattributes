@@ -13,6 +13,8 @@ cmake/modules/FindLIBPODOFO.cmake -text
 cmake/modules/FindZLIB.cmake -text
 /podofobrowser.pro -text
 src/CMakeLists.txt -text
+src/backgroundloader.cpp -text
+src/backgroundloader.h -text
 src/icons/CREDITS -text
 src/icons/array.png -text
 src/icons/bool.png -text

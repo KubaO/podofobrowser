@@ -14,12 +14,15 @@ FORMS = \
 	src/podofoaboutdlg.ui \
 	src/podofobrowserbase.ui
 HEADERS += \
+	src/backgroundloader.h \
 	src/pdflistviewitem.h \
-	src/podofobrowser.h
+	src/podofobrowser.h \
+	src/podofoutil.h
 SOURCES += \
 	src/main.cpp \
-	src/pdflistviewitem.cpp \
 	src/podofobrowser.cpp \
-	src/pdfobjectmodel.cpp
+	src/pdfobjectmodel.cpp \
+	src/backgroundloader.cpp \
+	src/podofoutil.cpp
 RESOURCES += \
 	src/podofobrowserrsrc.qrc

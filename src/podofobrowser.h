@@ -31,6 +31,7 @@
 #include <qstring.h>
 
 class PdfObjectModel;
+class BackgroundLoader;
 class QModelIndex;
 
 class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
@@ -76,6 +77,7 @@ class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
 
  private:
     void ModelChange(PdfObjectModel* newModel);
+    void DocChange(PoDoFo::PdfDocument* doc);
     void UpdateMenus();
 
     inline QModelIndex GetSelectedItem();
@@ -101,6 +103,8 @@ class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
 
     PoDoFo::PdfObject*    m_pCurObject;
     PoDoFo::PdfDocument*  m_pDocument;
+    BackgroundLoader*     m_pBackgroundLoader;
+    QProgressBar*         m_pDelayedLoadProgress;
 };
 
 QModelIndex PoDoFoBrowser::GetSelectedItem()
