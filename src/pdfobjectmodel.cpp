@@ -149,7 +149,8 @@ public:
     // Are we pretending to have no children?
     bool IsPretendEmpty() const { return m_bPretendEmpty; }
 
-
+    // Return true iff the object is a reference to an existing indirect object
+    bool IsValidReference() const { return m_pObject->IsReference() && m_pTree->GetDocument()->GetObjects().GetObject(m_pObject->GetReference()); }
 
     // Insert an element into this array node, creating a new child. The `row'
     // argument is the row number that the newly inserted row should have
@@ -616,8 +617,10 @@ QVariant PdfObjectModel::data(const QModelIndex& index, int role) const
             {
                 case Qt::DisplayRole:
                     if (!node->GetParent())
-                        // root object
-                        ret = QVariant( QString("/Root") );
+                    {
+                        const PdfReference & ref ( node->GetObject()->Reference() );
+                        ret = QVariant( QString("%1 %2 obj").arg(ref.ObjectNumber()).arg(ref.GenerationNumber()) );
+                    }
                     else
                     {
                         item = node->GetParent()->GetObject();
@@ -656,7 +659,7 @@ QVariant PdfObjectModel::data(const QModelIndex& index, int role) const
                 case ePdfDataType_Dictionary: fileName = ":/icons/dictionary.png"; break;
                 case ePdfDataType_Null: fileName = ":/icons/empty.png"; break;
                 case ePdfDataType_Reference:
-                                 fileName = node->CountChildren() ? ":/icons/reference.png" : ":/icons/dangling_reference.png";
+                                 fileName = node->IsValidReference() ? ":/icons/reference.png" : ":/icons/dangling_reference.png";
                                  break;
                 case ePdfDataType_RawData: fileName = ""; break;
             }

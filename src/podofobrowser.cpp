@@ -185,7 +185,7 @@ void PoDoFoBrowser::fileNew()
 
     m_pDocument = new PdfDocument();
 
-    ModelChange( new PdfObjectModel(m_pDocument, listObjects) );
+    ModelChange( new PdfObjectModel(m_pDocument, listObjects, false) );
 }
 
 void PoDoFoBrowser::fileOpen( const QString & filename )
@@ -205,7 +205,7 @@ void PoDoFoBrowser::fileOpen( const QString & filename )
         return;
     }
 
-    ModelChange( new PdfObjectModel(m_pDocument, listObjects) );
+    ModelChange( new PdfObjectModel(m_pDocument, listObjects, false) );
     
     m_filename = filename;
     setCaption( m_filename );
@@ -484,7 +484,7 @@ void PoDoFoBrowser::editRefreshView()
     if (!model)
         qDebug("can't refresh with no model");
 
-    ModelChange(new PdfObjectModel(m_pDocument, listObjects));
+    ModelChange(new PdfObjectModel(m_pDocument, listObjects, false));
 }
 
 
