@@ -98,10 +98,8 @@ class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
 
  private:
 
-    QTreeWidgetItem*      m_lastItem; //XXX
     QString               m_filename;
 
-    PoDoFo::PdfObject*    m_pCurObject;
     PoDoFo::PdfDocument*  m_pDocument;
     BackgroundLoader*     m_pBackgroundLoader;
     QProgressBar*         m_pDelayedLoadProgress;

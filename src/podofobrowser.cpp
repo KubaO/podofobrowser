@@ -193,14 +193,12 @@ void PoDoFoBrowser::clear()
     buttonImport->setEnabled( false );
     buttonExport->setEnabled( false );
     textStream->setEnabled(false);
-    
+
     ModelChange(NULL);
     DocChange(NULL);
 
     delete m_pDocument; m_pDocument=0;
 
-    m_pCurObject      = NULL;
-    m_lastItem        = NULL;
     m_pDocument       = NULL;
 }
 
@@ -560,85 +558,109 @@ void PoDoFoBrowser::viewRefreshView()
 
 void PoDoFoBrowser::slotImportStream()
 {
-    /*
-    PdfError eCode;
-    char*    pBuf     = NULL;
-    long     lLen     = 0;
-    QString  filename;
-    QFile    file;
+    QModelIndex idx = GetSelectedItem();
+    if (!idx.isValid()) return; // shouldn't happen
 
-    if( !m_pCurObject )
-        return; 
+    PdfObjectModel * const model = static_cast<PdfObjectModel*>(listObjects->model());
 
-    filename = Q3FileDialog::getOpenFileName( QString::null, tr("File (*)"), this );
-    if( filename.isNull() )
+    // TODO: if the stream is a file stream, convert it to a mem
+    // stream while retaining all dictionary attributes.
+    const PdfObject * obj = model->GetObjectForIndex(idx);
+    if (!obj->HasStream())
         return;
-    
-    file.setName( filename );
-    if( !file.open( QIODevice::ReadOnly ) )
+    // dodgy!
+    PdfStream * stream = const_cast<PdfObject*>(obj)->GetStream();
+
+    QString fn = QFileDialog::getOpenFileName(this,
+            tr("Import stream")
+            );
+    if (fn.isEmpty())
+        return;
+
+    QFile f(fn);
+    if (!f.open(QIODevice::ReadOnly))
     {
-        QMessageBox::critical( this, tr("Error"), QString( tr("Cannot open file %1 for reading.") ).arg( filename ) );
+        QMessageBox::critical( this, tr("Saving failed"), QString( tr("Cannot open file %1 for reading.") ).arg( fn ) );
         return;
     }
 
-    pBuf = (char*)malloc( file.size() * sizeof(char) );
-    if( !pBuf )
-    {
-        QMessageBox::critical( this, tr("Error"), tr("Not enough memory to import this stream.") );
-        file.close();
-        return;
-    }
+    // Load the stream in streamChunkSize byte chunks.
+    static const qint64 streamChunkSize=1024*64;
+    char* pBuf = static_cast<char*>(malloc( streamChunkSize*sizeof(char) ));
 
-    lLen = file.readBlock( pBuf, file.size() );
-    file.close();
-
+    // Clear the stream.
+    // XXX Set(...) should take const char
+    // XXX Need proper way to clear/reset stream w/o resetting stream dict
+    // XXX BUG FIXME If stream is filtered, filters aren't cleared and stream is fucked
+    stream->Set( const_cast<char*>(""), 0, false);
+    qint64 bytesRead = 0;
     try {
-        m_pCurObject->GetStream()->Set( pBuf, lLen );
-    } catch( PdfError & e ) {
+        do
+        {
+            bytesRead = f.read(pBuf, streamChunkSize);
+            assert(bytesRead != -1); // error not handled properly
+            if (bytesRead > 0)
+                stream->Append(pBuf, bytesRead);
+        }
+        while (bytesRead > 0);
+    } catch (PdfError& e) {
+        free(pBuf);
         podofoError( e );
         return;
     }
+    free(pBuf);
 
-    m_bObjectChanged = true;;
-    streamChanged( m_pCurObject );
-    statusBar()->message( QString( tr("Stream imported from %1") ).arg( filename ), 2000 );    
-    */
+    statusBar()->message( QString( tr("Stream imported from %1") ).arg( fn ), 2000 );
+
+    // TODO: refresh stream
 }
 
 void PoDoFoBrowser::slotExportStream()
 {
-    /*
-    PdfError eCode;
-    char*    pBuf     = NULL;
-    long     lLen     = 0;
-    QString  filename;
-    QFile    file;
+    QModelIndex idx = GetSelectedItem();
+    if (!idx.isValid()) return; // shouldn't happen
 
-    if( !m_pCurObject )
-        return; 
+    PdfObjectModel * const model = static_cast<PdfObjectModel*>(listObjects->model());
 
-    filename = Q3FileDialog::getSaveFileName( QString::null, tr("File (*)"), this );
-    if( filename.isNull() )
+    // TODO: if the stream is a file stream, convert it to a mem
+    // stream while retaining all dictionary attributes.
+    const PdfObject * obj = model->GetObjectForIndex(idx);
+    if (!obj->HasStream())
         return;
 
+    QString fn = QFileDialog::getSaveFileName(this,
+            tr("Import stream")
+            );
+    if (fn.isEmpty())
+        return;
+
+    // TODO: progressive reading of stream
+    char* pBuf = 0;
+    long lLen = 0;
     try {
-        m_pCurObject->GetStream()->GetFilteredCopy( &pBuf, &lLen );    
+        obj->GetStream()->GetFilteredCopy( &pBuf, &lLen );
     } catch( PdfError & e ) {
         podofoError( e );
         return;
     }
 
-    file.setName( filename );
-    if( !file.open( QIODevice::WriteOnly ) )
+    QFile f(fn);
+    if (!f.open(QIODevice::WriteOnly))
     {
-        QMessageBox::critical( this, tr("Error"), QString( tr("Cannot open file %1 for writing.") ).arg( filename ) );
+        QMessageBox::critical( this, tr("Saving failed"), QString( tr("Cannot open file %1 for writing.") ).arg( fn ) );
         return;
     }
-    file.writeBlock( pBuf, lLen );
-    file.close();
 
-    statusBar()->message( QString( tr("Stream exported to %1") ).arg( filename ), 2000 );    
-    */
+    qint64 bytesWritten = f.write(pBuf, lLen);
+    free(pBuf);
+    f.close();
+    if (bytesWritten != lLen)
+    {
+        QMessageBox::critical( this, tr("Saving failed"), QString( tr("Wrote only partial stream contents") ).arg( fn ) );
+        return;
+    }
+
+    statusBar()->message( QString( tr("Stream exported to %1") ).arg( fn ), 2000 );
 }
 
 void PoDoFoBrowser::toolsToHex()
