@@ -310,66 +310,75 @@ void PoDoFoBrowser::treeSelectionChanged( const QModelIndex & current, const QMo
     PdfObjectModel * const model = static_cast<PdfObjectModel*>(listObjects->model());
     if (!model)
     {
-        labelStream->setText("No document available");
+        labelStream->setText( tr("No document available") );
         return;
     }
 
     const PdfObject* object = model->GetObjectForIndex(current);
     if (!object)
     {
-        labelStream->setText("No object available");
+        labelStream->setText( tr("No object available") );
         return;
     }
 
     const PdfReference & ref (object->Reference());
     if (!ref.IsIndirect())
     {
-        labelStream->setText("Object is not indirect so it can not have a stream");
+        labelStream->setText( tr("Object is not indirect so it can not have a stream") );
         return;
     }
 
     try {
         if (!object->HasStream())
         {
-            labelStream->setText( QString("Object %1 %2 obj has no stream").arg(ref.ObjectNumber()).arg(ref.GenerationNumber()) );
+            labelStream->setText( tr("Object %1 %2 obj has no stream").arg(ref.ObjectNumber()).arg(ref.GenerationNumber()) );
             return;
         }
     }
     catch ( PdfError & e ) {
-        labelStream->setText("Error while testing for object stream");
+        labelStream->setText( tr("Error while testing for object stream") );
         podofoError( e );
         return;
     }
 
-    // XXX dirty hack: extract stream implementation until the earthquakes re
-    // immediate writing in PoDoFo are done.
-    const PdfStream * const stream = object->GetStream();
-
     // XXX this should be in the model
+    const PdfStream * const stream = object->GetStream();
     char * pBuf = NULL;
     long lLen = -1;
-    //model->PrepareForSubtreeChange(current);
     try {
         stream->GetFilteredCopy( &pBuf, &lLen );
     } catch( PdfError & e ) {
-        //model->SubtreeChanged(current);
-        labelStream->setText("Unable to filter object stream");
+        labelStream->setText( tr("Unable to filter object stream") );
         podofoError( e );
         return;
     }
-    //model->SubtreeChanged(current);
 
     assert(pBuf);
     assert(lLen >= 0);
 
-    QByteArray data;
-    data.duplicate( pBuf, lLen );
-    free( pBuf );
-    textStream->setEnabled(true);
+    // Quick and dirty binary-ness test
     // TODO: sane encoding-safe approach to binary data
     // TODO: hex editor
-    textStream->setText( QString( data ) );
-    labelStream->setText( QString("Stream associated with %1 %2 obj").arg(ref.ObjectNumber()).arg(ref.GenerationNumber()));
+    QString displayInfo;
+    const bool isBinary = std::find(pBuf, pBuf+lLen, 0) != pBuf+lLen;
+    if (!isBinary)
+    {
+        QByteArray data;
+        data.duplicate( pBuf, lLen );
+        free( pBuf );
+        textStream->setEnabled(true);
+        textStream->setText( QString( data ) );
+        displayInfo = tr("displayed in full");
+    }
+    else
+        displayInfo = tr("not shown because it contains binary data");
+
+    labelStream->setText( tr("Stream from object %1 %2 obj of unfiltered length %3 bytes %4")
+            .arg(ref.ObjectNumber())
+            .arg(ref.GenerationNumber())
+            .arg(lLen)
+            .arg(displayInfo)
+            );
     buttonImport->setEnabled( true );
     buttonExport->setEnabled( true );
 }
