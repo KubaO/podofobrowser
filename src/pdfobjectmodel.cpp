@@ -383,24 +383,6 @@ void PdfObjectModelNode::PopulateChildren()
         PdfObject * const referee =  m_pTree->GetDocument()->GetObjects().GetObject(m_pObject->GetReference());
         if (referee)
         {
-            /* CR: We dynamically construct the tree now so we don't need to do this
-             *
-            // Recurse up our direct heritage to see if this object number has been referenced before.
-            // If it has we're in a reference cycle and should just stop here. TODO: handle cycles
-            // gracefully (hyperlink?)
-            const PdfReference ref = m_pObject->GetReference();
-            PdfObjectModelNode * parent = m_pParent;
-            while (parent)
-            {
-                const PdfObject* const obj = parent->GetObject();
-                if (obj->IsReference() && obj->GetReference() == ref)
-                {
-                    return;
-                }
-                parent = parent->GetParent();
-            }
-            assert(m_pObject);
-            */
             AddNode( referee, PT_Referenced );
         }
     }

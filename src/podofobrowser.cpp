@@ -79,7 +79,8 @@ PoDoFoBrowser::PoDoFoBrowser()
     connect( actionInsert_Key,    SIGNAL( activated() ), this, SLOT( editInsertKey() ) );
     connect( actionInsert_Child,  SIGNAL( activated() ), this, SLOT( editInsertChildBelow() ) );
     connect( actionRemove_Item,   SIGNAL( activated() ), this, SLOT( editRemoveItem()) );
-    connect( actionRefreshView,   SIGNAL( activated() ), this, SLOT( editRefreshView()) );
+    connect( actionRefreshView,   SIGNAL( activated() ), this, SLOT( viewRefreshView()) );
+    connect( actionCatalogView,   SIGNAL( activated() ), this, SLOT( viewRefreshView()) );
     connect( actionCreate_Missing_Object, SIGNAL( activated() ), this, SLOT( editCreateMissingObject()) );
     connect( actionToolsDisplayCodeForSelection, SIGNAL( activated() ), this, SLOT( toolsDisplayCodeForSelection()) );
 
@@ -185,7 +186,7 @@ void PoDoFoBrowser::fileNew()
 
     m_pDocument = new PdfDocument();
 
-    ModelChange( new PdfObjectModel(m_pDocument, listObjects, false) );
+    ModelChange( new PdfObjectModel(m_pDocument, listObjects, actionCatalogView->isChecked()) );
 }
 
 void PoDoFoBrowser::fileOpen( const QString & filename )
@@ -205,7 +206,7 @@ void PoDoFoBrowser::fileOpen( const QString & filename )
         return;
     }
 
-    ModelChange( new PdfObjectModel(m_pDocument, listObjects, false) );
+    ModelChange( new PdfObjectModel(m_pDocument, listObjects, actionCatalogView->isChecked()) );
     
     m_filename = filename;
     setCaption( m_filename );
@@ -244,6 +245,7 @@ void PoDoFoBrowser::UpdateMenus()
     fileSaveAsAction->setEnabled(model != 0);
     fileReloadAction->setEnabled(model != 0 && !m_filename.isEmpty() && model->DocChanged() );
     actionRefreshView->setEnabled(model != 0);
+    actionCatalogView->setEnabled(model != 0);
 
     // Can add a child to any array or dictionary
     actionInsert_Child->setEnabled( sel.isValid() && (model->IndexIsDictionary(sel) || model->IndexIsArray(sel)) );
@@ -478,15 +480,14 @@ void PoDoFoBrowser::editCreateMissingObject()
 }
 
 // For debugging: refresh the view
-void PoDoFoBrowser::editRefreshView()
+void PoDoFoBrowser::viewRefreshView()
 {
     PdfObjectModel * const model = static_cast<PdfObjectModel*>(listObjects->model());
     if (!model)
         qDebug("can't refresh with no model");
 
-    ModelChange(new PdfObjectModel(m_pDocument, listObjects, false));
+    ModelChange(new PdfObjectModel(m_pDocument, listObjects, actionCatalogView->isChecked()));
 }
-
 
 void PoDoFoBrowser::slotImportStream()
 {

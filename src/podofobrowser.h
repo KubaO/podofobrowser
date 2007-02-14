@@ -71,7 +71,8 @@ class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
     void editInsertChildBelow();
     void editRemoveItem();
     void editCreateMissingObject();
-    void editRefreshView();
+
+    void viewRefreshView();
 
  private:
     void ModelChange(PdfObjectModel* newModel);
