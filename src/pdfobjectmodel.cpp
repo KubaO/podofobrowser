@@ -28,11 +28,15 @@ class PdfObjectModelNode;
 class PdfObjectModelTree
 {
 public:
-    PdfObjectModelTree(PdfDocument * doc, PdfObject* root, bool followReferences);
+    PdfObjectModelTree(
+            PdfDocument * doc,
+            const std::vector<PdfObject*> & roots,
+            bool followReferences);
 
     ~PdfObjectModelTree();
 
-    PdfObjectModelNode * GetRoot() const { return m_pRoot; }
+    PdfObjectModelNode* GetRoot(int n) const { return m_roots[n]; }
+    const std::vector<PdfObjectModelNode*> & GetRoots() const { return m_roots; }
 
     PdfDocument* GetDocument() const { return m_pDoc; }
 
@@ -52,7 +56,7 @@ private:
     const bool m_bFollowReferences;
     typedef std::multimap<const PdfObject*,PdfObjectModelNode*> NodeAliasMap;
     NodeAliasMap m_nodeAliases;
-    PdfObjectModelNode * m_pRoot;
+    std::vector<PdfObjectModelNode*> m_roots;
 
 };
 
@@ -210,17 +214,31 @@ private:
 
 };
 
-PdfObjectModelTree::PdfObjectModelTree(PdfDocument * doc, PdfObject* root, bool followReferences)
+PdfObjectModelTree::PdfObjectModelTree(PdfDocument * doc, const std::vector<PdfObject*> & roots, bool followReferences)
     : m_pDoc(doc),
       m_bFollowReferences(followReferences),
       m_nodeAliases(),
-      m_pRoot( new PdfObjectModelNode(this, root, NULL, PdfName::KeyNull, PdfObjectModelNode::PT_Root) )
+      m_roots()
 {
+    std::vector<PdfObject*>::const_iterator itEnd = roots.end();
+    for (std::vector<PdfObject*>::const_iterator it = roots.begin();
+         it != itEnd;
+         ++it)
+    {
+        assert(*it);
+        m_roots.push_back( new PdfObjectModelNode(this, *it, NULL, PdfName::KeyNull, PdfObjectModelNode::PT_Root) );
+    }
 }
 
 PdfObjectModelTree::~PdfObjectModelTree()
 {
-    delete m_pRoot;
+    std::vector<PdfObjectModelNode*>::const_iterator itEnd = m_roots.end();
+    for (std::vector<PdfObjectModelNode*>::const_iterator it = m_roots.begin();
+         it != itEnd;
+         ++it)
+    {
+        delete (*it);
+    }
     assert(m_nodeAliases.size() == 0);
 }
 
@@ -230,7 +248,7 @@ std::vector<PdfObjectModelNode*> PdfObjectModelTree::GetAliases(const PdfObject*
     std::vector<PdfObjectModelNode*> aliases;
     for ( NodeAliasMap::const_iterator it = r.first;
           it != r.second;
-	  ++it)
+          ++it)
         aliases.push_back( (*it).second );
     return aliases;
 }
@@ -412,11 +430,15 @@ int PdfObjectModelNode::GetIndexInParent() const
 {
     if (!m_pParent)
     {
-        // We don't have a parent, ie we're in the top level table. Currently
-        // we only support one-entry top level tables, so we're the root element
-        // at row 0.
-        assert(this == m_pTree->GetRoot());
-        return 0;
+        // We don't have a parent, ie we're in the top level table. This is a vector
+        // of node pointers, so we can just find ourselves in that vector.
+        const std::vector<PdfObjectModelNode*> & roots = static_cast<PdfObjectModelTree*>(m_pTree)->GetRoots();
+        for (int i = 0; i < roots.size(); ++i)
+        {
+            if (roots[i] == this)
+                return i;
+        }
+        throw std::logic_error("Root node not found in root node list");
     }
 
     // find our index in the parent's child vector
@@ -447,10 +469,13 @@ bool PdfObjectModelNode::SetRawData(const QByteArray & data)
 }; // end anonymous namespace
 
 
-PdfObjectModel::PdfObjectModel(PdfDocument* doc, QObject* parent)
+PdfObjectModel::PdfObjectModel(PdfDocument* doc, QObject* parent, bool catalogRooted)
     : QAbstractTableModel(parent), m_bDocChanged(false), m_pTree(0)
 {
-    setupModelData(doc);
+    if (catalogRooted)
+        setupModelData_CatalogRooted(doc);
+    else
+        setupModelData_IndirectRooted(doc);
 }
 
 PdfObjectModel::~PdfObjectModel()
@@ -458,7 +483,7 @@ PdfObjectModel::~PdfObjectModel()
     delete static_cast<PdfObjectModelTree*>(m_pTree);
 }
 
-void PdfObjectModel::setupModelData(PdfDocument * doc)
+void PdfObjectModel::setupModelData_CatalogRooted(PdfDocument * doc)
 {
     // Find the document catalog dictionary, which we'll use as the root
     // of the tree
@@ -482,7 +507,14 @@ void PdfObjectModel::setupModelData(PdfDocument * doc)
 
     // Create a new tree rooted on document catalog with reference following
     // turned on
-    m_pTree = new PdfObjectModelTree(doc, catalog, true);
+    std::vector<PdfObject*> rootObjects;
+    rootObjects.push_back(catalog);
+    m_pTree = new PdfObjectModelTree(doc, rootObjects, true);
+}
+
+void PdfObjectModel::setupModelData_IndirectRooted(PdfDocument * doc)
+{
+    m_pTree = new PdfObjectModelTree(doc, doc->GetObjects(), false);
 }
 
 void PdfObjectModel::PrepareForSubtreeChange(const QModelIndex& index)
@@ -550,8 +582,8 @@ QModelIndex PdfObjectModel::index(int row, int column, const QModelIndex& parent
     {
         // We've been asked for an item in the top-level table. We currently only
         // support one-item trees (single rooted) so just return the root node.
-        if (row == 0)
-            return createIndex(row, column, static_cast<PdfObjectModelTree*>(m_pTree)->GetRoot());
+        if (row >= 0 && row < static_cast<PdfObjectModelTree*>(m_pTree)->GetRoots().size())
+            return createIndex(row, column, static_cast<PdfObjectModelTree*>(m_pTree)->GetRoot(row));
         else
             return QModelIndex();
     }
@@ -753,8 +785,11 @@ QModelIndex PdfObjectModel::parent(const QModelIndex &index) const
     PdfObjectModelNode * const parent = child->GetParent();
     if (!parent)
     {
-        if (child != static_cast<PdfObjectModelTree*>(m_pTree)->GetRoot())
-            throw std::logic_error("node with no parent not the root node");
+        // The child whose parent was requested appears to be a root node.
+        // Verify this and return an invalid index.
+        PdfObjectModelTree* tree = static_cast<PdfObjectModelTree*>(m_pTree);
+        if ( std::find(tree->GetRoots().begin(), tree->GetRoots().end(), child) == tree->GetRoots().end() )
+            throw std::logic_error("node with no parent not in root node list");
         else
             return QModelIndex();
     }
@@ -769,8 +804,7 @@ int PdfObjectModel::rowCount(const QModelIndex &parent) const
 {
     if (!parent.isValid())
     {
-        // Want a row count on the top level. We only support one element, so:
-        return 1;
+        return static_cast<PdfObjectModelTree*>(m_pTree)->GetRoots().size();
     }
     else
     {
@@ -832,10 +866,12 @@ bool PdfObjectModel::setData ( const QModelIndex & index, const QVariant & value
 bool PdfObjectModel::insertElement( int row, const QModelIndex & parent )
 {
     PdfObjectModelNode * node;
-    if (parent.isValid())
-        node = static_cast<PdfObjectModelNode*>(parent.internalPointer());
-    else
-        node = static_cast<PdfObjectModelTree*>(m_pTree)->GetRoot();
+    if (!parent.isValid())
+    {
+        qDebug("Tried to insert row into root node list!");
+        return false;
+    }
+    node = static_cast<PdfObjectModelNode*>(parent.internalPointer());
     if (node->CanInsertElement(row))
     {
         PrepareForSubtreeChange(parent);
@@ -849,10 +885,12 @@ bool PdfObjectModel::insertElement( int row, const QModelIndex & parent )
 bool PdfObjectModel::insertKey(const PdfName& keyName, const QModelIndex & parent )
 {
     PdfObjectModelNode * node;
-    if (parent.isValid())
-        node = static_cast<PdfObjectModelNode*>(parent.internalPointer());
-    else
-        node = static_cast<PdfObjectModelTree*>(m_pTree)->GetRoot();
+    if (!parent.isValid())
+    {
+        qDebug("Tried to insert key into root node list!");
+        return false;
+    }
+    node = static_cast<PdfObjectModelNode*>(parent.internalPointer());
     if (node->CanInsertKey(keyName))
     {
         PrepareForSubtreeChange(parent);
@@ -866,7 +904,10 @@ bool PdfObjectModel::insertKey(const PdfName& keyName, const QModelIndex & paren
 bool PdfObjectModel::deleteIndex(const QModelIndex & index)
 {
     if (!index.isValid())
+    {
+        qDebug("Tried to delete invalid index!");
         return false;
+    }
     const QModelIndex parent = index.parent();
     if (!parent.isValid())
         return false;

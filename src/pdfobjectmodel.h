@@ -49,7 +49,7 @@ public:
         Column_Type = 2
     };
 
-    PdfObjectModel(PoDoFo::PdfDocument* doc, QObject* parent = 0);
+    PdfObjectModel(PoDoFo::PdfDocument* doc, QObject* parent = 0, bool catalogRooted = true);
     virtual ~PdfObjectModel();
 
     virtual QVariant data(const QModelIndex& index, int role) const;
@@ -105,7 +105,8 @@ private:
     // have any changes been made to the document tree through the model?
     bool m_bDocChanged;
 
-    void setupModelData(PoDoFo::PdfDocument* doc);
+    void setupModelData_CatalogRooted(PoDoFo::PdfDocument* doc);
+    void setupModelData_IndirectRooted(PoDoFo::PdfDocument* doc);
 
     // PdfObjectModelTree instance for the model
     void * m_pTree;
