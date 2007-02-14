@@ -10,7 +10,6 @@ using std::pair;
 #include <exception>
 #include <stdexcept>
 
-#include <podofo/podofo.h>
 using namespace PoDoFo;
 
 namespace {
@@ -93,7 +92,7 @@ public:
 
     // Return the value PdfObject tracked by this node.
     // Do not delete the returned object.
-    const PdfObject * GetObject() const { return m_pObject; }
+    const PdfObject * GetObject() const throw() { return m_pObject; }
 
     // Return the appropriate data for the node given a particular role
     QVariant GetData(int role) const;
@@ -715,17 +714,19 @@ QVariant PdfObjectModel::data(const QModelIndex& index, int role) const
 
 Qt::ItemFlags PdfObjectModel::flags(const QModelIndex &index) const
 {
+    static const Qt::ItemFlags noEditFlags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+    static const Qt::ItemFlags editFlags = noEditFlags | Qt::ItemIsEditable;
+
     if (!index.isValid())
         return Qt::ItemIsEnabled;
 
-    PdfObjectModelNode* node = static_cast<PdfObjectModelNode*>(index.internalPointer());
-    const PdfObject* obj = node->GetObject();
+    const PdfObjectModelNode * const node = static_cast<PdfObjectModelNode*>(index.internalPointer());
+    const PdfObject * const obj = node->GetObject();
 
-    Qt::ItemFlags f = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
     if ( index.column() == Column_RawValue && !(obj->IsArray() || obj->IsDictionary()) )
-        f = f | Qt::ItemIsEditable;
-
-    return f;
+        return editFlags;
+    else
+        return noEditFlags;
 }
 
 QVariant PdfObjectModel::headerData(int section, Qt::Orientation orientation,
@@ -769,15 +770,7 @@ QModelIndex PdfObjectModel::parent(const QModelIndex &index) const
     assert(child);
     PdfObjectModelNode * const parent = child->GetParent();
     if (!parent)
-    {
-        // The child whose parent was requested appears to be a root node.
-        // Verify this and return an invalid index.
-        PdfObjectModelTree* tree = static_cast<PdfObjectModelTree*>(m_pTree);
-        if ( std::find(tree->GetRoots().begin(), tree->GetRoots().end(), child) == tree->GetRoots().end() )
-            throw std::logic_error("node with no parent not in root node list");
-        else
-            return QModelIndex();
-    }
+        return QModelIndex();
 
     int parentRow = parent->GetIndexInParent();
     assert(parentRow >= 0);
@@ -924,27 +917,8 @@ void PdfObjectModel::InvalidateChildren(const QModelIndex & index)
     }
 }
 
-bool PdfObjectModel::IndexIsDictionary(const QModelIndex & index) const
-{
-    if (!index.isValid()) return false;
-    return static_cast<PdfObjectModelNode*>(index.internalPointer())->GetObject()->IsDictionary();
-}
-
-bool PdfObjectModel::IndexIsArray(const QModelIndex & index) const
-{
-    if (!index.isValid()) return false;
-    return static_cast<PdfObjectModelNode*>(index.internalPointer())->GetObject()->IsArray();
-}
-
-bool PdfObjectModel::IndexIsReference(const QModelIndex & index) const
-{
-    if (!index.isValid()) return false;
-    return static_cast<PdfObjectModelNode*>(index.internalPointer())->GetObject()->IsReference();
-}
-
 int PdfObjectModel::IndexChildCount(const QModelIndex & index) const
 {
-    if (!index.isValid()) return -1;
     return static_cast<PdfObjectModelNode*>(index.internalPointer())->CountChildren();
 }
 

@@ -6,6 +6,8 @@
 #include <QAbstractTableModel>
 #include <QMap>
 
+#include <podofo/podofo.h>
+
 namespace PoDoFo {
     class PdfDocument;
     class PdfObject;
@@ -67,9 +69,9 @@ public:
     const PoDoFo::PdfObject* GetObjectForIndex(const QModelIndex & index) const;
 
     // Convenience wrappers around some really common node/PdfObject functions
-    bool IndexIsDictionary(const QModelIndex & index) const;
-    bool IndexIsArray(const QModelIndex & index) const;
-    bool IndexIsReference(const QModelIndex & index) const;
+    inline bool IndexIsDictionary(const QModelIndex & index) const;
+    inline bool IndexIsArray(const QModelIndex & index) const;
+    inline bool IndexIsReference(const QModelIndex & index) const;
     int IndexChildCount(const QModelIndex & index) const;
 
     // Invalidate the children of `index' so that they're re-loaded next time
@@ -114,5 +116,20 @@ private:
     // This inherited method explicitly fails
     virtual bool insertRow(int,const QModelIndex&);
 };
+
+bool PdfObjectModel::IndexIsDictionary(const QModelIndex & index) const
+{
+    return GetObjectForIndex(index)->IsDictionary();
+}
+
+bool PdfObjectModel::IndexIsArray(const QModelIndex & index) const
+{
+    return GetObjectForIndex(index)->IsArray();
+}
+
+bool PdfObjectModel::IndexIsReference(const QModelIndex & index) const
+{
+    return GetObjectForIndex(index)->IsReference();
+}
 
 #endif
