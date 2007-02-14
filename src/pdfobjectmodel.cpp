@@ -392,7 +392,13 @@ void PdfObjectModelNode::PopulateChildren()
              it != keys.end();
              ++it )
         {
-            AddNode( (*it).second, PT_Contained, (*it).first );
+            if ( (*it).first == PdfName::KeyLength && m_pObject->HasStream() )
+            {
+                // We hide the `Length' and `Length1' keys from users of PoDoFo
+                // since the library plays with them behind our back.
+            }
+            else
+                AddNode( (*it).second, PT_Contained, (*it).first );
         }
     }
     else if (m_pObject->IsArray())
