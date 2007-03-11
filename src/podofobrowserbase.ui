@@ -21,124 +21,127 @@
      <number>6</number>
     </property>
     <item>
-     <widget class="QTreeView" name="listObjects" >
-      <property name="mouseTracking" >
-       <bool>false</bool>
-      </property>
-      <property name="alternatingRowColors" >
-       <bool>true</bool>
-      </property>
-      <property name="indentation" >
-       <number>15</number>
-      </property>
-      <property name="rootIsDecorated" >
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QSplitter" name="splitter3" >
+     <widget class="QSplitter" name="splitter" >
       <property name="orientation" >
-       <enum>Qt::Horizontal</enum>
+       <enum>Qt::Vertical</enum>
       </property>
-      <widget class="QSplitter" name="splitter2" >
-       <property name="orientation" >
-        <enum>Qt::Vertical</enum>
+      <widget class="QTreeView" name="listObjects" >
+       <property name="mouseTracking" >
+        <bool>false</bool>
        </property>
-       <widget class="QWidget" name="layout3" >
-        <layout class="QVBoxLayout" >
-         <property name="margin" >
-          <number>0</number>
-         </property>
-         <property name="spacing" >
-          <number>6</number>
-         </property>
-         <item>
-          <widget class="QLabel" name="textLabel1" >
-           <property name="text" >
-            <string>Contents of the associated stream:</string>
-           </property>
-           <property name="wordWrap" >
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="labelStream" >
-           <property name="text" >
-            <string/>
-           </property>
-           <property name="wordWrap" >
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QTextEdit" name="textStream" >
-           <property name="undoRedoEnabled" >
-            <bool>false</bool>
-           </property>
-           <property name="readOnly" >
-            <bool>false</bool>
-           </property>
-           <property name="acceptRichText" >
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" >
-           <property name="margin" >
-            <number>0</number>
-           </property>
-           <property name="spacing" >
-            <number>6</number>
-           </property>
-           <item>
-            <widget class="QPushButton" name="buttonImport" >
-             <property name="enabled" >
-              <bool>false</bool>
-             </property>
-             <property name="text" >
-              <string>&amp;Import Stream ...</string>
-             </property>
-             <property name="shortcut" >
-              <string>Alt+I</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="buttonExport" >
-             <property name="enabled" >
-              <bool>false</bool>
-             </property>
-             <property name="text" >
-              <string>&amp;Export Stream ...</string>
-             </property>
-             <property name="shortcut" >
-              <string>Alt+E</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer>
-             <property name="orientation" >
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeType" >
-              <enum>QSizePolicy::Expanding</enum>
-             </property>
-             <property name="sizeHint" >
-              <size>
-               <width>241</width>
-               <height>21</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-          </layout>
-         </item>
-        </layout>
+       <property name="alternatingRowColors" >
+        <bool>true</bool>
+       </property>
+       <property name="indentation" >
+        <number>15</number>
+       </property>
+       <property name="rootIsDecorated" >
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QSplitter" name="splitter3" >
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <widget class="QSplitter" name="splitter2" >
+        <property name="orientation" >
+         <enum>Qt::Vertical</enum>
+        </property>
+        <widget class="QWidget" name="layout3" >
+         <layout class="QVBoxLayout" >
+          <property name="margin" >
+           <number>0</number>
+          </property>
+          <property name="spacing" >
+           <number>6</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="textLabel1" >
+            <property name="text" >
+             <string>Contents of the associated stream:</string>
+            </property>
+            <property name="wordWrap" >
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="labelStream" >
+            <property name="text" >
+             <string/>
+            </property>
+            <property name="wordWrap" >
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QTextEdit" name="textStream" >
+            <property name="undoRedoEnabled" >
+             <bool>false</bool>
+            </property>
+            <property name="readOnly" >
+             <bool>false</bool>
+            </property>
+            <property name="acceptRichText" >
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" >
+            <property name="margin" >
+             <number>0</number>
+            </property>
+            <property name="spacing" >
+             <number>6</number>
+            </property>
+            <item>
+             <widget class="QPushButton" name="buttonImport" >
+              <property name="enabled" >
+               <bool>false</bool>
+              </property>
+              <property name="text" >
+               <string>&amp;Import Stream ...</string>
+              </property>
+              <property name="shortcut" >
+               <string>Alt+I</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="buttonExport" >
+              <property name="enabled" >
+               <bool>false</bool>
+              </property>
+              <property name="text" >
+               <string>&amp;Export Stream ...</string>
+              </property>
+              <property name="shortcut" >
+               <string>Alt+E</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer>
+              <property name="orientation" >
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType" >
+               <enum>QSizePolicy::Expanding</enum>
+              </property>
+              <property name="sizeHint" >
+               <size>
+                <width>241</width>
+                <height>21</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
        </widget>
       </widget>
      </widget>
@@ -172,9 +175,23 @@
      <x>0</x>
      <y>0</y>
      <width>758</width>
-     <height>22</height>
+     <height>29</height>
     </rect>
    </property>
+   <widget class="QMenu" name="helpMenu" >
+    <property name="title" >
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="helpAboutAction" />
+   </widget>
+   <widget class="QMenu" name="Tools" >
+    <property name="title" >
+     <string>&amp;Tools</string>
+    </property>
+    <addaction name="toolsToHexAction" />
+    <addaction name="toolsFromHexAction" />
+    <addaction name="actionToolsDisplayCodeForSelection" />
+   </widget>
    <widget class="QMenu" name="fileMenu" >
     <property name="title" >
      <string>&amp;File</string>
@@ -187,11 +204,12 @@
     <addaction name="separator" />
     <addaction name="fileExitAction" />
    </widget>
-   <widget class="QMenu" name="helpMenu" >
+   <widget class="QMenu" name="menuView" >
     <property name="title" >
-     <string>&amp;Help</string>
+     <string>View</string>
     </property>
-    <addaction name="helpAboutAction" />
+    <addaction name="actionRefreshView" />
+    <addaction name="actionCatalogView" />
    </widget>
    <widget class="QMenu" name="Edit" >
     <property name="title" >
@@ -210,21 +228,12 @@
     <addaction name="separator" />
     <addaction name="actionRemove_Item" />
     <addaction name="separator" />
-   </widget>
-   <widget class="QMenu" name="menuView" >
-    <property name="title" >
-     <string>View</string>
-    </property>
-    <addaction name="actionRefreshView" />
-    <addaction name="actionCatalogView" />
-   </widget>
-   <widget class="QMenu" name="Tools" >
-    <property name="title" >
-     <string>&amp;Tools</string>
-    </property>
-    <addaction name="toolsToHexAction" />
-    <addaction name="toolsFromHexAction" />
-    <addaction name="actionToolsDisplayCodeForSelection" />
+    <addaction name="actionFind" />
+    <addaction name="actionFindNext" />
+    <addaction name="actionFindPrevious" />
+    <addaction name="actionReplace" />
+    <addaction name="separator" />
+    <addaction name="actionGotoObject" />
    </widget>
    <addaction name="fileMenu" />
    <addaction name="Edit" />
@@ -466,6 +475,46 @@
    </property>
    <property name="text" >
     <string>Catalog View</string>
+   </property>
+  </action>
+  <action name="actionFind" >
+   <property name="text" >
+    <string>&amp;Find...</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionFindNext" >
+   <property name="text" >
+    <string>Find &amp;Next</string>
+   </property>
+   <property name="shortcut" >
+    <string>F3</string>
+   </property>
+  </action>
+  <action name="actionFindPrevious" >
+   <property name="text" >
+    <string>Find &amp;Previous</string>
+   </property>
+   <property name="shortcut" >
+    <string>Shift+F3</string>
+   </property>
+  </action>
+  <action name="actionReplace" >
+   <property name="text" >
+    <string>&amp;Replace...</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionGotoObject" >
+   <property name="text" >
+    <string>&amp;Goto Object...</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+G</string>
    </property>
   </action>
  </widget>

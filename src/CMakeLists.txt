@@ -1,6 +1,7 @@
 QT4_WRAP_UI(podofobrowser_UIC_HEADERS
 	podofoaboutdlg.ui
 	podofobrowserbase.ui
+	podofofinddlg.ui
 	)
 
 SET(podofobrowser_MOC_HEADERS

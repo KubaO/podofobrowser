@@ -23,6 +23,7 @@
 #include "podofoutil.h"
 #include "backgroundloader.h"
 #include "ui_podofoaboutdlg.h"
+#include "ui_podofofinddlg.h"
 #include "pdfobjectmodel.h"
 
 #include <Qt3Support>
@@ -68,7 +69,8 @@ PoDoFoBrowser::PoDoFoBrowser()
       PoDoFoBrowserBase(),
       m_pDocument( NULL ),
       m_pBackgroundLoader( NULL ),
-      m_pDelayedLoadProgress( NULL )
+      m_pDelayedLoadProgress( NULL ),
+      m_bHasFindText( false )
 {
     setupUi(this);
 
@@ -90,6 +92,11 @@ PoDoFoBrowser::PoDoFoBrowser()
     connect( actionCatalogView,   SIGNAL( activated() ), this, SLOT( viewRefreshView()) );
     connect( actionCreate_Missing_Object, SIGNAL( activated() ), this, SLOT( editCreateMissingObject()) );
     connect( actionToolsDisplayCodeForSelection, SIGNAL( activated() ), this, SLOT( toolsDisplayCodeForSelection()) );
+    connect( actionFind,          SIGNAL( activated() ), this, SLOT( editFind() ) );
+    connect( actionFindNext,      SIGNAL( activated() ), this, SLOT( editFindNext() ) );
+    connect( actionFindPrevious,  SIGNAL( activated() ), this, SLOT( editFindPrevious() ) );
+    connect( actionReplace,       SIGNAL( activated() ), this, SLOT( editReplace() ) );
+    connect( actionGotoObject,    SIGNAL( activated() ), this, SLOT( editGotoObject() ) );
 
     show();
     statusBar()->message( tr("Ready"), 2000 );
@@ -279,6 +286,7 @@ void PoDoFoBrowser::UpdateMenus()
     fileReloadAction->setEnabled(model != 0 && !m_filename.isEmpty() && model->DocChanged() );
     actionRefreshView->setEnabled(model != 0);
     actionCatalogView->setEnabled(model != 0);
+    actionGotoObject->setEnabled(model != 0);
 
     // Can add a child to any array or dictionary
     actionInsert_Child->setEnabled( sel.isValid() && (model->IndexIsDictionary(sel) || model->IndexIsArray(sel)) );
@@ -291,6 +299,14 @@ void PoDoFoBrowser::UpdateMenus()
     actionInsert_After->setEnabled(enableInsertBeforeAfter);
     actionInsert_Key->setEnabled(parent.isValid() && model->IndexIsDictionary(parent));
     actionRemove_Item->setEnabled(sel.isValid() && !model->GetObjectForIndex(sel)->Reference().IsIndirect());
+
+    bool enableFind = parent.isValid() && model->GetObjectForIndex(sel) 
+        && model->GetObjectForIndex(sel)->HasStream();
+
+    actionFind->setEnabled( enableFind );
+    actionFindNext->setEnabled( enableFind && m_bHasFindText );
+    actionFindPrevious->setEnabled( enableFind && m_bHasFindText );
+    actionReplace->setEnabled( enableFind );
 
     actionToolsDisplayCodeForSelection->setEnabled( sel.isValid() );
 }
@@ -546,6 +562,73 @@ void PoDoFoBrowser::editCreateMissingObject()
 {
 }
 
+void PoDoFoBrowser::editFind()
+{
+    // TODO: Wrap this dialog into a nice interface
+    Ui::PoDoFoFindDlg dlg;
+    dlg.setupUi( &dlg );
+
+    if( dlg.exec() == QDialog::Accepted ) 
+    {
+        m_bHasFindText = true;
+        m_sFindText    = dlg.comboBoxText->currentText();
+
+        m_findFlags    = 0;
+        if( dlg.checkBoxCaseSensitive->isChecked() )
+            m_findFlags |= QTextDocument::FindCaseSensitively;
+
+        if( dlg.checkBoxWholeWords->isChecked() )
+            m_findFlags |= QTextDocument::FindWholeWords;
+
+        if( dlg.checkBoxFindBackwards->isChecked() )
+            editFindPrevious();
+        else
+            editFindNext();
+
+        UpdateMenus(); // to enable Find Next and Find Previous
+    }
+}
+
+void PoDoFoBrowser::editFindNext()
+{
+    if( !textStream->find( m_sFindText, m_findFlags ) )
+        QMessageBox::warning( this, tr("Find Next"), tr("The Text \"%1\" could not be found!").arg( m_sFindText ) );
+
+    // TODO: continue at top
+}
+
+void PoDoFoBrowser::editFindPrevious()
+{
+    int  cursorPos = textStream->textCursor().position();
+    bool bFound = textStream->find( m_sFindText, m_findFlags | QTextDocument::FindBackward );
+    
+    // we most likely found the previous text again:
+    // so move the cursor before the selection and search again
+    if( bFound && cursorPos == textStream->textCursor().position() && textStream->textCursor().hasSelection() )
+    {
+        QTextCursor cursor = textStream->textCursor();
+        cursor.setPosition( cursor.selectionStart() );
+        textStream->setTextCursor( cursor );
+
+        bFound = textStream->find( m_sFindText, m_findFlags | QTextDocument::FindBackward );
+    }
+
+    if( !bFound )
+        QMessageBox::warning( this, tr("Find Previous"), tr("The Text \"%1\" could not be found!").arg( m_sFindText ) );
+
+    // TODO: continue at bottom
+}
+
+void PoDoFoBrowser::editReplace()
+{
+    // TODO: Replace
+}
+
+void PoDoFoBrowser::editGotoObject()
+{
+    // TODO: Goto Object
+}
+
 // For debugging: refresh the view
 void PoDoFoBrowser::viewRefreshView()
 {
@@ -592,7 +675,7 @@ void PoDoFoBrowser::slotImportStream()
     // XXX Set(...) should take const char
     // XXX Need proper way to clear/reset stream w/o resetting stream dict
     // XXX BUG FIXME If stream is filtered, filters aren't cleared and stream is fucked
-    stream->Set( const_cast<char*>(""), 0, false);
+    //stream->Set( const_cast<char*>(""), 0, false);
     qint64 bytesRead = 0;
     try {
         do
@@ -665,7 +748,7 @@ void PoDoFoBrowser::slotExportStream()
 
 void PoDoFoBrowser::toolsToHex()
 {
-    std::auto_ptr<const PdfFilter> hexfilter = PdfFilterFactory::Create(ePdfFilter_ASCIIHexDecode);
+    std::auto_ptr<PdfFilter> hexfilter = PdfFilterFactory::Create(ePdfFilter_ASCIIHexDecode);
 
     char* pBuffer = NULL;
     long  lLen    = 0;
@@ -687,7 +770,7 @@ void PoDoFoBrowser::toolsToHex()
 
 void PoDoFoBrowser::toolsFromHex()
 {
-    std::auto_ptr<const PdfFilter> hexfilter = PdfFilterFactory::Create(ePdfFilter_ASCIIHexDecode);
+    std::auto_ptr<PdfFilter> hexfilter = PdfFilterFactory::Create(ePdfFilter_ASCIIHexDecode);
 
     char* pBuffer = NULL;
     long  lLen    = 0;

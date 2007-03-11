@@ -72,8 +72,14 @@ class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
     void editInsertChildBelow();
     void editRemoveItem();
     void editCreateMissingObject();
+    void editFind();
+    void editFindNext();
+    void editFindPrevious();
+    void editReplace();
+    void editGotoObject();
 
     void viewRefreshView();
+
 
  private:
     void ModelChange(PdfObjectModel* newModel);
@@ -103,6 +109,12 @@ class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
     PoDoFo::PdfDocument*  m_pDocument;
     BackgroundLoader*     m_pBackgroundLoader;
     QProgressBar*         m_pDelayedLoadProgress;
+
+    // Members for find, findNext and findPrevious
+    bool                  m_bHasFindText;
+    QString               m_sFindText;
+
+    QTextDocument::FindFlags m_findFlags;
 };
 
 QModelIndex PoDoFoBrowser::GetSelectedItem()
