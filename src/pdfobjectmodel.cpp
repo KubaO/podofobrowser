@@ -40,6 +40,7 @@ public:
     PdfDocument* GetDocument() const { return m_pDoc; }
 
     bool FollowReferences() const { return m_bFollowReferences; }
+
 private:
     friend class PdfObjectModelNode;
     // XXX TODO Force full model creation for these calls to produce correct results
@@ -212,6 +213,21 @@ private:
     // A list of pointers to all children of this node
     std::vector<PdfObjectModelNode*> m_children;
 
+};
+
+class PdfObjectsComperator { 
+public:
+    PdfObjectsComperator( const PdfReference & ref )
+        : m_ref( ref )
+        {
+        }
+    
+    bool operator()(const PdfObjectModelNode* p1) const { 
+        return p1 ? (p1->GetObject()->Reference() == m_ref ) : false;
+    }
+
+private:
+    const PdfReference m_ref;
 };
 
 PdfObjectModelTree::PdfObjectModelTree(PdfDocument * doc, const std::vector<PdfObject*> & roots, bool followReferences)
@@ -810,6 +826,17 @@ const PdfObject* PdfObjectModel::GetObjectForIndex(const QModelIndex & index) co
         return NULL;
 
     return static_cast<PdfObjectModelNode*>(index.internalPointer())->GetObject();
+}
+
+int PdfObjectModel::FindObject( const PoDoFo::PdfReference & ref )
+{
+    PdfObjectModelTree* pTree = static_cast<PdfObjectModelTree*>(m_pTree);
+
+    // Only toplevel objects are searched.
+    const std::vector<PdfObjectModelNode*> & roots = pTree->GetRoots();
+    std::vector<PdfObjectModelNode*>::const_iterator it = std::find_if( roots.begin(), roots.end(), 
+                                                                        PdfObjectsComperator( ref ) );
+    return it != roots.end() ? it - roots.begin() : -1;
 }
 
 bool PdfObjectModel::setData ( const QModelIndex & index, const QVariant & value, int role )

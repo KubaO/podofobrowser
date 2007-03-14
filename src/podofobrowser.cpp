@@ -24,6 +24,7 @@
 #include "backgroundloader.h"
 #include "ui_podofoaboutdlg.h"
 #include "ui_podofofinddlg.h"
+#include "ui_podofogotodlg.h"
 #include "pdfobjectmodel.h"
 
 #include <Qt3Support>
@@ -158,7 +159,7 @@ void PoDoFoBrowser::loadConfig()
     Q3ValueList<int> list;
     QSettings       settings;
 
-    settings.setPath( "podofo.sf.net", "podofobrowser" );
+    settings.setPath( "podofo.sf.net", "podofobrowser", QSettings::UserScope );
 
     w = settings.readNumEntry("/geometry/width", width() );
     h = settings.readNumEntry("/geometry/height", height() );
@@ -170,16 +171,20 @@ void PoDoFoBrowser::loadConfig()
     splitter3->setSizes( list );
 
     this->resize( w, h );
+
+    actionCatalogView->setChecked( settings.readBoolEntry("/view/catalog", actionCatalogView->isChecked() ) );
 }
 
 void PoDoFoBrowser::saveConfig()
 {
+
     QSettings settings;
 
-    settings.setPath( "podofo.sf.net", "podofobrowser" );
+    settings.setPath( "podofo.sf.net", "podofobrowser", QSettings::UserScope );
 
     settings.writeEntry("/geometry/width", width() );
     settings.writeEntry("/geometry/height", height() );
+    settings.writeEntry("/view/catalog", actionCatalogView->isChecked() );
 }
 
 void PoDoFoBrowser::parseCmdLineArgs()
@@ -286,7 +291,7 @@ void PoDoFoBrowser::UpdateMenus()
     fileReloadAction->setEnabled(model != 0 && !m_filename.isEmpty() && model->DocChanged() );
     actionRefreshView->setEnabled(model != 0);
     actionCatalogView->setEnabled(model != 0);
-    actionGotoObject->setEnabled(model != 0);
+    actionGotoObject->setEnabled(model != 0 && !actionCatalogView->isChecked() );
 
     // Can add a child to any array or dictionary
     actionInsert_Child->setEnabled( sel.isValid() && (model->IndexIsDictionary(sel) || model->IndexIsArray(sel)) );
@@ -320,6 +325,10 @@ void PoDoFoBrowser::treeSelectionChanged( const QModelIndex & current, const QMo
     buttonImport->setEnabled( false );
     buttonExport->setEnabled( false );
     textStream->setEnabled(false);
+
+    // make keyboard navigation easier, especially in Catalog View mode
+    // hopefully this does not slow down to much
+    listObjects->resizeColumnToContents( 0 );
 
     PdfObjectModel * const model = static_cast<PdfObjectModel*>(listObjects->model());
     if (!model)
@@ -395,6 +404,7 @@ void PoDoFoBrowser::treeSelectionChanged( const QModelIndex & current, const QMo
             );
     buttonImport->setEnabled( true );
     buttonExport->setEnabled( true );
+
 }
 
 void PoDoFoBrowser::fileOpen()
@@ -626,7 +636,21 @@ void PoDoFoBrowser::editReplace()
 
 void PoDoFoBrowser::editGotoObject()
 {
-    // TODO: Goto Object
+    QDialog dlg( this );
+    Ui::PoDoFoGotoDlg dlgUi;
+    dlgUi.setupUi( &dlg );
+
+    dlgUi.spinObjectNumber->setValue( m_gotoReference.ObjectNumber() );
+    dlgUi.spinGenerationNumber->setValue( m_gotoReference.GenerationNumber() );
+    dlgUi.spinObjectNumber->selectAll();
+
+    if( dlg.exec() == QDialog::Accepted ) 
+    {
+        m_gotoReference = PoDoFo::PdfReference( dlgUi.spinObjectNumber->value(), 
+                                                dlgUi.spinGenerationNumber->value() );
+
+        this->GotoObject();
+    }
 }
 
 // For debugging: refresh the view
@@ -833,3 +857,18 @@ bool PoDoFoBrowser::trySave()
 
    return true;
 }
+
+void PoDoFoBrowser::GotoObject()
+{
+    PdfObjectModel * const model = static_cast<PdfObjectModel*>(listObjects->model());
+
+    int index = model->FindObject( m_gotoReference );
+    if( index == -1 )
+        QMessageBox::warning( this, tr("Object not found"), 
+                              tr("The object \"%1 %2\" could not be found!").arg( 
+                                  m_gotoReference.ObjectNumber() ).arg( 
+                                      m_gotoReference.GenerationNumber() ) );
+    else
+        listObjects->setCurrentIndex( model->index( index, 0 ) );
+}
+

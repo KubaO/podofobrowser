@@ -86,6 +86,10 @@ class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
     void DocChange(PoDoFo::PdfDocument* doc);
     void UpdateMenus();
 
+    // Find the object m_gotoReference
+    // in the current tree and select it in the list view.
+    void GotoObject();
+
     inline QModelIndex GetSelectedItem();
 
     void loadConfig();
@@ -113,6 +117,8 @@ class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
     // Members for find, findNext and findPrevious
     bool                  m_bHasFindText;
     QString               m_sFindText;
+
+    PoDoFo::PdfReference  m_gotoReference;
 
     QTextDocument::FindFlags m_findFlags;
 };

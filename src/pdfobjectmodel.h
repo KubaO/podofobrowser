@@ -68,6 +68,9 @@ public:
     // Return the object associed with `index'
     const PoDoFo::PdfObject* GetObjectForIndex(const QModelIndex & index) const;
 
+    // Find the object `ref' and return its index or -1
+    int FindObject( const PoDoFo::PdfReference & ref );
+
     // Convenience wrappers around some really common node/PdfObject functions
     inline bool IndexIsDictionary(const QModelIndex & index) const;
     inline bool IndexIsArray(const QModelIndex & index) const;
