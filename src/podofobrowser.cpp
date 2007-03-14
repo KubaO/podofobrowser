@@ -575,22 +575,23 @@ void PoDoFoBrowser::editCreateMissingObject()
 void PoDoFoBrowser::editFind()
 {
     // TODO: Wrap this dialog into a nice interface
-    Ui::PoDoFoFindDlg dlg;
-    dlg.setupUi( &dlg );
+    Ui::PoDoFoFindDlg dlgui;
+    QDialog dlg;
+    dlgui.setupUi( &dlg );
 
     if( dlg.exec() == QDialog::Accepted ) 
     {
         m_bHasFindText = true;
-        m_sFindText    = dlg.comboBoxText->currentText();
+        m_sFindText    = dlgui.comboBoxText->currentText();
 
         m_findFlags    = 0;
-        if( dlg.checkBoxCaseSensitive->isChecked() )
+        if( dlgui.checkBoxCaseSensitive->isChecked() )
             m_findFlags |= QTextDocument::FindCaseSensitively;
 
-        if( dlg.checkBoxWholeWords->isChecked() )
+        if( dlgui.checkBoxWholeWords->isChecked() )
             m_findFlags |= QTextDocument::FindWholeWords;
 
-        if( dlg.checkBoxFindBackwards->isChecked() )
+        if( dlgui.checkBoxFindBackwards->isChecked() )
             editFindPrevious();
         else
             editFindNext();
