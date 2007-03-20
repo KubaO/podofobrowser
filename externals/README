@@ -1,0 +1,12 @@
+This directory contains references to external repositories or other parts
+of the PoDoFoBrowser repository that will be checked out and updated in sync
+with PoDoFoBrowser. Its contents are controlled with the svn:externals property.
+
+See: http://svnbook.red-bean.com/en/1.1/ch07s04.html
+
+We currently use this to make sure that PoDoFoBrowser svn users get a version
+of PoDoFo that's compatible with the current PoDoFoBrowser code base. As
+PoDoFo is improved we often break API compatibility in the development series,
+and while this is usually for important fixes it still requires some adaptation to make PoDoFoBrowser compile and run with the new version of PoDoFo. To help
+users, the latest PoDoFo that was tested with PoDoFoBrowser will be checked out
+in externals/required_podofo .

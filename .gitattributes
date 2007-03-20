@@ -11,6 +11,7 @@ cmake/modules/FindLIBFREETYPE.cmake -text
 cmake/modules/FindLIBJPEG.cmake -text
 cmake/modules/FindLIBPODOFO.cmake -text
 cmake/modules/FindZLIB.cmake -text
+externals/README -text
 /podofobrowser.pro -text
 src/CMakeLists.txt -text
 src/backgroundloader.cpp -text
