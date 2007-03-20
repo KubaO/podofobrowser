@@ -545,7 +545,7 @@ void PdfObjectModel::PrepareForSubtreeChange(const QModelIndex& index)
         beginRemoveRows(
                         createIndex( (*it)->GetIndexInParent(), 0, (*it) ),
                         0,
-                        (*it)->CountChildren() - 1
+                        (*it)->CountChildren()
                         );
         (*it)->InvalidateChildren();
         (*it)->SetPretendEmpty(true);

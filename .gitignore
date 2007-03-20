@@ -48,6 +48,7 @@ src/debug
 src/libpodofo.a
 src/libpodofo.dll
 src/mingwm10.dll
+src/moc_backgroundloader.cxx
 src/moc_pdfobjectmodel.cxx
 src/moc_podofobrowser.cxx
 src/moc_ui_podofoaboutdlg.cxx
@@ -64,5 +65,7 @@ src/ui_podofoaboutdlg.cpp
 src/ui_podofoaboutdlg.h
 src/ui_podofobrowserbase.cpp
 src/ui_podofobrowserbase.h
+src/ui_podofofinddlg.h
+src/ui_podofogotodlg.h
 /ui_podofoaboutdlg.h
 /ui_podofobrowserbase.h

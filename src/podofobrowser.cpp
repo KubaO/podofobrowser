@@ -327,7 +327,9 @@ void PoDoFoBrowser::treeSelectionChanged( const QModelIndex & current, const QMo
     textStream->setEnabled(false);
 
     // make keyboard navigation easier, especially in Catalog View mode
-    // hopefully this does not slow down to much
+    // hopefully this does not slow down to much.
+    // CR: We may need a more efficient approach to this as the tree grows,
+    // since it does slow down a lot.
     listObjects->resizeColumnToContents( 0 );
 
     PdfObjectModel * const model = static_cast<PdfObjectModel*>(listObjects->model());
@@ -363,6 +365,10 @@ void PoDoFoBrowser::treeSelectionChanged( const QModelIndex & current, const QMo
         podofoError( e );
         return;
     }
+
+    // If we get this far, we can safely import a new stream even if 
+    // the current stream contents are invalid.
+    buttonImport->setEnabled( true );
 
     // XXX this should be in the model
     const PdfStream * const stream = object->GetStream();
@@ -696,13 +702,11 @@ void PoDoFoBrowser::slotImportStream()
     static const qint64 streamChunkSize=1024*64;
     char* pBuf = static_cast<char*>(malloc( streamChunkSize*sizeof(char) ));
 
-    // Clear the stream.
-    // XXX Set(...) should take const char
-    // XXX Need proper way to clear/reset stream w/o resetting stream dict
-    // XXX BUG FIXME If stream is filtered, filters aren't cleared and stream is fucked
-    //stream->Set( const_cast<char*>(""), 0, false);
     qint64 bytesRead = 0;
     try {
+	// Clear the stream and begin appending, with all data being encoded according
+	// to the current stream dictionary's filters.
+        stream->BeginAppend( PdfFilterFactory::CreateFilterList(obj), true );
         do
         {
             bytesRead = f.read(pBuf, streamChunkSize);
@@ -711,6 +715,7 @@ void PoDoFoBrowser::slotImportStream()
                 stream->Append(pBuf, bytesRead);
         }
         while (bytesRead > 0);
+	stream->EndAppend();
     } catch (PdfError& e) {
         free(pBuf);
         podofoError( e );
