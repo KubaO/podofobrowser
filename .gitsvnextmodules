@@ -1,0 +1,9 @@
+[submodule "externals/required_libpodofo"]
+	path = externals/required_libpodofo
+	owner = externals
+	url = http://podofo.svn.sourceforge.net/svnroot/podofo/podofo/trunk
+	revision = 457
+	branch = /
+	fetch = :refs/remotes/git-svn
+	remote = svn
+	type = dir
