@@ -403,10 +403,12 @@ void PdfObjectModelNode::PopulateChildren()
     }
     else if (m_pObject->IsDictionary())
     {
-        TKeyMap& keys ( m_pObject->GetDictionary().GetKeys() );
-        for (TKeyMap::iterator it = keys.begin();
-             it != keys.end();
-             ++it )
+        // Get a copy as AddNode might invalidate our iterator
+        // if not working on a copy, causing a crash
+        TKeyMap keys ( m_pObject->GetDictionary().GetKeys() );
+        TKeyMap::iterator it = keys.begin();
+        
+        while( it != keys.end() )
         {
             if ( (*it).first == PdfName::KeyLength && m_pObject->HasStream() )
             {
@@ -415,6 +417,8 @@ void PdfObjectModelNode::PopulateChildren()
             }
             else
                 AddNode( (*it).second, PT_Contained, (*it).first );
+
+            ++it;
         }
     }
     else if (m_pObject->IsArray())
