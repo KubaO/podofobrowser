@@ -71,7 +71,7 @@ class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
     void editInsertKey();
     void editInsertChildBelow();
     void editRemoveItem();
-    void editCreateMissingObject();
+    void editCreateNewObject();
     void editFind();
     void editFindNext();
     void editFindPrevious();

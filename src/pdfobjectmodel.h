@@ -85,7 +85,7 @@ public:
     // where the tree is modified, and only the model should be doing that.
     void PrepareForSubtreeChange(const QModelIndex& index);
     void SubtreeChanged(const QModelIndex& index);
-    
+
     // Insert a dictionary key into the PDF document.
     // The key will be named `keyName' and be inserted into the dictionary
     // at `parent'. If false is returned the change was not completed
@@ -102,6 +102,10 @@ public:
     // will fail and return false - you must instead remove the reference(s) to
     // it.
     bool deleteIndex(const QModelIndex & index);
+
+    // Create a new indirect object and replace the index `sel' with a new
+    // indirect reference to it.
+    bool createNewObject(const QModelIndex & index);
 
     /** \return true iff the document has changed */
     bool DocChanged() const throw() { return m_bDocChanged; }

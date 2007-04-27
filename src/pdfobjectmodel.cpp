@@ -141,8 +141,12 @@ public:
     // node's data.
     void ResetSubtree();
 
-    // Set the item's value to `data'. 
+    // Set the item's value to `data' by parsing the passed byte string as a PDF
+    // variant.
     bool SetRawData(const QByteArray& data);
+
+    // Set the item's value to the passed variant.
+    void SetData(const PdfVariant& data);
 
     // Pretend to have no children. This is useful when resetting a subtree.
     void SetPretendEmpty(bool empty) { m_bPretendEmpty = empty; }
@@ -469,9 +473,14 @@ bool PdfObjectModelNode::SetRawData(const QByteArray & data)
     PdfTokenizer tokenizer (data.data(), data.size());
     tokenizer.GetNextVariant(variant);
 
+    SetData(variant);
+    return true;
+}
+
+void PdfObjectModelNode::SetData(const PdfVariant& variant)
+{
     InvalidateChildren();
     *(m_pObject) = variant;
-    return true;
 }
 
 }; // end anonymous namespace
@@ -939,6 +948,32 @@ bool PdfObjectModel::deleteIndex(const QModelIndex & index)
         return true;
     }
     return false;
+}
+
+bool PdfObjectModel::createNewObject(const QModelIndex & index)
+{
+    if (!index.isValid())
+    {
+        qDebug("Tried to create object on invalid index!");
+        return false;
+    }
+
+    // We'll be modifying the selected item to turn it into an indirect
+    // reference.  This alters it, and may modify the subtree below it if one
+    // exists.
+
+
+    // Create the new indirect object
+    PdfObject* obj = static_cast<PdfObjectModelTree*>(m_pTree)->GetDocument()->GetObjects().CreateObject( PdfVariant() );
+
+    // and set the selected field to a reference
+    PrepareForSubtreeChange(index);
+    PdfObjectModelNode* node = static_cast<PdfObjectModelNode*>(index.internalPointer());
+    node->SetData(obj->Reference());
+    SubtreeChanged(index);
+    m_bDocChanged = true;
+
+    return true;
 }
 
 void PdfObjectModel::InvalidateChildren(const QModelIndex & index)

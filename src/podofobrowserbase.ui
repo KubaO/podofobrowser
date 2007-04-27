@@ -164,7 +164,7 @@
    <addaction name="actionInsert_After" />
    <addaction name="actionInsert_Key" />
    <addaction name="actionInsert_Child" />
-   <addaction name="actionCreate_Missing_Object" />
+   <addaction name="actionCreateNewObject" />
    <addaction name="actionRemove_Item" />
    <addaction name="separator" />
    <addaction name="actionCatalogView" />
@@ -175,7 +175,7 @@
      <x>0</x>
      <y>0</y>
      <width>758</width>
-     <height>29</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="helpMenu" >
@@ -183,14 +183,6 @@
      <string>&amp;Help</string>
     </property>
     <addaction name="helpAboutAction" />
-   </widget>
-   <widget class="QMenu" name="Tools" >
-    <property name="title" >
-     <string>&amp;Tools</string>
-    </property>
-    <addaction name="toolsToHexAction" />
-    <addaction name="toolsFromHexAction" />
-    <addaction name="actionToolsDisplayCodeForSelection" />
    </widget>
    <widget class="QMenu" name="fileMenu" >
     <property name="title" >
@@ -211,6 +203,14 @@
     <addaction name="actionRefreshView" />
     <addaction name="actionCatalogView" />
    </widget>
+   <widget class="QMenu" name="Tools" >
+    <property name="title" >
+     <string>&amp;Tools</string>
+    </property>
+    <addaction name="toolsToHexAction" />
+    <addaction name="toolsFromHexAction" />
+    <addaction name="actionToolsDisplayCodeForSelection" />
+   </widget>
    <widget class="QMenu" name="Edit" >
     <property name="title" >
      <string>&amp;Edit</string>
@@ -224,7 +224,7 @@
     <addaction name="actionInsert_Key" />
     <addaction name="actionInsert_Child" />
     <addaction name="separator" />
-    <addaction name="actionCreate_Missing_Object" />
+    <addaction name="actionCreateNewObject" />
     <addaction name="separator" />
     <addaction name="actionRemove_Item" />
     <addaction name="separator" />
@@ -418,7 +418,7 @@
     <string>&amp;Delete Item</string>
    </property>
   </action>
-  <action name="actionCreate_Missing_Object" >
+  <action name="actionCreateNewObject" >
    <property name="enabled" >
     <bool>false</bool>
    </property>
@@ -426,7 +426,7 @@
     <iconset resource="podofobrowserrsrc.qrc" >:/icons/fix_dangling_reference.png</iconset>
    </property>
    <property name="text" >
-    <string>Create Missing Object</string>
+    <string>Create New Object</string>
    </property>
   </action>
   <action name="actionInsert_Key" >

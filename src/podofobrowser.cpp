@@ -91,7 +91,7 @@ PoDoFoBrowser::PoDoFoBrowser()
     connect( actionRemove_Item,   SIGNAL( activated() ), this, SLOT( editRemoveItem()) );
     connect( actionRefreshView,   SIGNAL( activated() ), this, SLOT( viewRefreshView()) );
     connect( actionCatalogView,   SIGNAL( activated() ), this, SLOT( viewRefreshView()) );
-    connect( actionCreate_Missing_Object, SIGNAL( activated() ), this, SLOT( editCreateMissingObject()) );
+    connect( actionCreateNewObject, SIGNAL( activated() ), this, SLOT( editCreateNewObject()) );
     connect( actionToolsDisplayCodeForSelection, SIGNAL( activated() ), this, SLOT( toolsDisplayCodeForSelection()) );
     connect( actionFind,          SIGNAL( activated() ), this, SLOT( editFind() ) );
     connect( actionFindNext,      SIGNAL( activated() ), this, SLOT( editFindNext() ) );
@@ -295,8 +295,8 @@ void PoDoFoBrowser::UpdateMenus()
 
     // Can add a child to any array or dictionary
     actionInsert_Child->setEnabled( sel.isValid() && (model->IndexIsDictionary(sel) || model->IndexIsArray(sel)) );
-    // Can create missing child only of a dangling reference
-    actionCreate_Missing_Object->setEnabled( sel.isValid() && model->IndexIsReference(sel) && !model->IndexChildCount(sel) );
+    // Can create a new indirect object in place of any value
+    actionCreateNewObject->setEnabled( sel.isValid() );
 
     QModelIndex parent = sel.parent();
     bool enableInsertBeforeAfter = parent.isValid() && model->IndexIsArray(parent);
@@ -574,8 +574,17 @@ void PoDoFoBrowser::editRemoveItem()
     model->deleteIndex(sel);
 }
 
-void PoDoFoBrowser::editCreateMissingObject()
+void PoDoFoBrowser::editCreateNewObject()
 {
+    QModelIndex sel = GetSelectedItem();
+    if (!sel.isValid())
+    {
+        qDebug("%s: invalid selection", __FUNCTION__);
+        return;
+    }
+    PdfObjectModel * const model = static_cast<PdfObjectModel*>(listObjects->model());
+
+    model->createNewObject(sel);
 }
 
 void PoDoFoBrowser::editFind()
