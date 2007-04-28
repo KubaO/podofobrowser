@@ -10,6 +10,7 @@ cmake/modules/FindLIBFONTCONFIG.cmake -text
 cmake/modules/FindLIBFREETYPE.cmake -text
 cmake/modules/FindLIBJPEG.cmake -text
 cmake/modules/FindLIBPODOFO.cmake -text
+cmake/modules/FindLIBSTLPORT.cmake -text
 cmake/modules/FindZLIB.cmake -text
 externals/README -text
 /podofobrowser.pro -text
