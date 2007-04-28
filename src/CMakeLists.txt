@@ -48,6 +48,7 @@ TARGET_LINK_LIBRARIES(podofobrowser
 	${extra_libs}
 	${LIBJPEG_LIB}
 	${LIBZ_LIB}
+	${stlport_libraries_if_use_stlport}
 	)
 
 ADD_DEFINITIONS(
