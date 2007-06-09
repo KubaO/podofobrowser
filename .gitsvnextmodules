@@ -2,7 +2,7 @@
 	path = externals/required_libpodofo
 	owner = externals
 	url = http://podofo.svn.sourceforge.net/svnroot/podofo/podofo/trunk
-	revision = 475
+	revision = 529
 	branch = /
 	fetch = :refs/remotes/git-svn
 	remote = svn

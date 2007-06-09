@@ -133,7 +133,7 @@ void PoDoFoBrowser::DocChange(PdfDocument* newDoc)
     {
         // create a background loader and hook it up to the progress bar
         m_pBackgroundLoader = new BackgroundLoader(newDoc);
-        m_pDelayedLoadProgress->setMaximum( m_pDocument->GetObjects().size() );
+        m_pDelayedLoadProgress->setMaximum( m_pDocument->GetObjects().GetSize() );
         connect( m_pBackgroundLoader, SIGNAL(progress(int)), m_pDelayedLoadProgress, SLOT(setValue(int)) );
         connect( m_pBackgroundLoader, SIGNAL(done()), m_pDelayedLoadProgress, SLOT(reset()) );
 

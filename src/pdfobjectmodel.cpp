@@ -29,7 +29,7 @@ class PdfObjectModelTree
 public:
     PdfObjectModelTree(
             PdfDocument * doc,
-            const std::vector<PdfObject*> & roots,
+            const std::vector<PdfObject*>& roots,
             bool followReferences);
 
     ~PdfObjectModelTree();
@@ -234,7 +234,7 @@ private:
     const PdfReference m_ref;
 };
 
-PdfObjectModelTree::PdfObjectModelTree(PdfDocument * doc, const std::vector<PdfObject*> & roots, bool followReferences)
+PdfObjectModelTree::PdfObjectModelTree(PdfDocument * doc, const std::vector<PdfObject*>& roots, bool followReferences)
     : m_pDoc(doc),
       m_bFollowReferences(followReferences),
       m_nodeAliases(),
@@ -531,7 +531,9 @@ void PdfObjectModel::setupModelData_CatalogRooted(PdfDocument * doc)
 
 void PdfObjectModel::setupModelData_IndirectRooted(PdfDocument * doc)
 {
-    m_pTree = new PdfObjectModelTree(doc, doc->GetObjects(), false);
+    const PdfVecObjects& docObjs ( doc->GetObjects() );
+    std::vector<PdfObject*> rootObjects(docObjs.begin(), docObjs.end());
+    m_pTree = new PdfObjectModelTree(doc, rootObjects, false);
 }
 
 void PdfObjectModel::PrepareForSubtreeChange(const QModelIndex& index)

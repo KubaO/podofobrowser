@@ -11,7 +11,7 @@ BackgroundLoader::BackgroundLoader(PdfDocument* doc)
       m_pDoc(doc)
 {
     connect(&m_timer, SIGNAL(timeout()), SLOT(loadNextObject()));
-    qDebug("Beginning background load of %i objects", doc->GetObjects().size());
+    qDebug("Beginning background load of %i objects", doc->GetObjects().GetSize());
 }
 
 BackgroundLoader::~BackgroundLoader()
@@ -25,8 +25,10 @@ void BackgroundLoader::start()
 
 void BackgroundLoader::loadNextObject()
 {
-    const std::vector<PdfObject*> objs = m_pDoc->GetObjects();
-    const int objCount = objs.size();
+    // FIXME: We should not have to cast away constness in pdfvecobjects
+    // just to index its members.
+    PdfVecObjects & objs = const_cast<PdfVecObjects&>(m_pDoc->GetObjects());
+    const int objCount = objs.GetSize();
 
     if (m_lastObjectIdx + 1 >= objCount)
     {
@@ -38,6 +40,7 @@ void BackgroundLoader::loadNextObject()
     else
     {
         // XXX no podofo support for directly forcing delayed load
+	// FIXME unsafe if objects are removed while loading happening.
         objs[++m_lastObjectIdx]->GetDataType();
         emit progress(m_lastObjectIdx);
     }
