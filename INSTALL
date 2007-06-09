@@ -1,4 +1,6 @@
----- Dependencies ----
+*************************************
+Building PoDoFoBrowser - Dependencies
+*************************************
 
 podofobrowser svn generally requires PoDoFo svn to build and run. You will also
 need an installed copy of TrollTech's Qt library. Linux users should make sure
@@ -14,9 +16,13 @@ this process, as the authors do not have easy access to this configuration.
 
 Note that because the gcc and MSVC++ C++ APIs are incompatible (as are the ABIs
 of most other C++ compilers) you must build podofobrowser with the same
-compiler you used to build podofo.
+compiler you used to build podofo. Unless you have a reason to do something
+else, use the version of PoDoFo that was automatically checked out into
+externals/required_libpodofo as part of your PoDoFoBrowser checkout.
 
----- CMake ----
+*************************************
+  Building PoDoFoBrowser with CMake
+*************************************
 
 The Qt4 port of PoDoFoBrowser is best built with CMake version 2.4 or newer
 (CMake 2.5 from CMake CVS is best).
@@ -40,33 +46,23 @@ cmake -G "MinGW Makefiles"
 	-DCMAKE_INCLUDE_PATH=c:\progra~1\gnuwin32\include
 	-DCMAKE_LIBRARY_PATH=c:\progra~1\gnuwin32\lib
 
-Windows users MUST also set -DLIBPODOFO_SHARED to 0 if building against a static
-library, or to 1 if building against a PoDoFo DLL. This ensures the correct import
-symbols are used, preventing confusing link errors.
+Windows users MUST also set -DLIBPODOFO_SHARED to 0 if building against a
+static library, or to 1 if building against a PoDoFo DLL. This ensures the
+correct import symbols are used, preventing confusing link errors.
 
-Note that PoDoFoBrowser currently only builds against an installed copy of PoDoFo,
-not the podofo build tree.
+Note that PoDoFoBrowser currently only builds against an installed copy of
+PoDoFo, not the podofo build tree.
 
-To control where PoDoFoBrowser will be installed (with "make install" on supporting
-toolchains), set:
+To control where PoDoFoBrowser will be installed (with "make install" on
+supporting toolchains), set:
 	-DCMAKE_INSTALL_PREFIX=/path/to/install/dir
 
 If you want a debuggable build, set -DCMAKE_BUILD_TYPE=debug .
 
----- QMake ----
+*************************************
+    Troubleshooting CMake Builds
+*************************************
 
-You may also be able to build PoDoFoBrowser with qmake. You MUST edit the
-project file to reflect your local configuration. In particular, be sure to
-update INCLUDEPATH and :LIBS . Also be sure that DEFINES contains
-USING_SHARED_PODOFO if and only if you are building against a copy of podofo
-that was compiled as a shared library.
-
-Once you've updated the project file and (if necessary) ensured your compiler
-and qmake are on the PATH, run:
-
-	qmake
-	make
-	make install
-
-UNIX and Mac OS X users may need to use `sudo' or `su' to get the permissions
-required to run `make install'.
+If you have any problems building PoDoFoBrowser with CMake, please delete your
+out-of-tree build directory and try again. If you are using in-tree builds,
+remove CMakeCache.txt and the CMakeFiles directory instead.
