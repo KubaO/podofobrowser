@@ -719,7 +719,9 @@ QVariant PdfObjectModel::data(const QModelIndex& index, int role) const
                     }
                     else if (item->IsArray())
                     {
-                        // Do nothing, since we return QVariant()
+                        std::ostringstream s;
+                        s << '[' << item->GetArray().size() << ']';
+                        ret = QVariant( QString( s.str().c_str() ) );
                     }
                     else
                     {
