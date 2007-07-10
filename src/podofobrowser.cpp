@@ -18,16 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-// We can't use the QT ascii cast protection macros
-// here until we've got rid of qt3support, since a few
-// qt3support headers don't cope with it correctly.
-#ifdef QT_NO_CAST_FROM_ASCII
-#undef QT_NO_CAST_FROM_ASCII
-#endif
-#ifdef QT_NO_CAST_TO_ASCII
-#undef QT_NO_CAST_TO_ASCII
-#endif
-
 #include "podofobrowser.h"
 #include "podofoutil.h"
 #include "backgroundloader.h"
@@ -80,7 +70,7 @@ PoDoFoBrowser::PoDoFoBrowser()
       m_bHasFindText( false )
 {
     setupUi(this);
-    setObjectName("PoDoFoBrowser");
+    setObjectName(QString::fromUtf8("PoDoFoBrowser"));
     setAttribute(Qt::WA_DeleteOnClose);
 
     m_pDelayedLoadProgress = new QProgressBar( statusBar() );
@@ -203,7 +193,7 @@ void PoDoFoBrowser::parseCmdLineArgs()
 {
     if( qApp->argc() >= 2 )
     {
-        fileOpen( QString( qApp->argv()[1] ) );
+        fileOpen( QString::fromLocal8Bit( qApp->argv()[1] ) );
     }
 }
 
@@ -212,7 +202,7 @@ void PoDoFoBrowser::clear()
     m_filename = QString::null;
     setWindowTitle( tr("PoDoFoBrowser") );
 
-    labelStream->setText("");
+    labelStream->setText( QString::fromUtf8("") );
     textStream->clear();
     buttonImport->setEnabled( false );
     buttonExport->setEnabled( false );
@@ -449,7 +439,7 @@ bool PoDoFoBrowser::fileSave()
         const QString origFileName = m_filename;
         bool success = false;
         QString message;
-        if (!QFile::rename(origFileName, origFileName+".bak"))
+        if (!QFile::rename(origFileName, origFileName+QString::fromUtf8(".bak")))
         {
             message= tr("Unable to back up original file (rename failed)");
         }
@@ -459,7 +449,7 @@ bool PoDoFoBrowser::fileSave()
             {
                 message = tr("Unable to write new file");
                 QFile::remove(origFileName);
-                QFile::rename(origFileName+".bak", origFileName);
+                QFile::rename(origFileName+QString::fromUtf8(".bak"), origFileName);
             }
             else
             {
@@ -538,8 +528,10 @@ void PoDoFoBrowser::editInsertKey()
     if (!idx.isValid()) return; // shouldn't happen
 
     bool ok = false;
-    QString keyName = QInputDialog::getText(this, "Key Name", "Key Name (unescaped, without leading /)",
-                                            QLineEdit::Normal, "", &ok);
+    QString keyName = QInputDialog::getText(
+		    this, tr("Key Name"),
+		    tr("Key Name (unescaped, without leading /)"),
+                    QLineEdit::Normal, QString(), &ok);
     if (ok)
     {
         QModelIndex parent = idx.parent();
@@ -563,8 +555,10 @@ void PoDoFoBrowser::editInsertChildBelow()
     if (model->IndexIsDictionary(parent))
     {
         bool ok = false;
-        QString keyName = QInputDialog::getText(this, "Key Name", "Key Name (unescaped, without leading /)",
-                                            QLineEdit::Normal, "", &ok);
+        QString keyName = QInputDialog::getText(
+			this, tr("Key Name"),
+			tr("Key Name (unescaped, without leading /)"),
+                        QLineEdit::Normal, QString(), &ok);
         if (ok)
         {
             model->insertKey( PdfName( keyName.toUtf8().data() ), parent);
@@ -861,7 +855,9 @@ void PoDoFoBrowser::toolsDisplayCodeForSelection()
     const PdfObject* obj = model->GetObjectForIndex(idx);
     std::string s;
     obj->ToString(s);
-    QMessageBox::information(this, tr("PDF code for selection"), QString( s.c_str() ) );
+    QMessageBox::information(this,
+		    tr("PDF code for selection"),
+		    QString::fromAscii( s.c_str() ) );
 }
 
 void PoDoFoBrowser::helpAbout()
