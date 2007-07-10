@@ -1,7 +1,19 @@
+#
+# This project file is an example that can probably be adapted to build
+# PoDoFoBrowser. You will need to, at minimum, change the paths
+# to the required headers and libraries. As this file is not generally
+# tested or maintained, more changes may be required.
+#
+# Unless you have a really pressing need, use CMake to build PoDoFoBrowser.
+#
+# To build using this project file you will need to delete the following
+# line:
+
+	READ_THE_COMMENTS_AT_THE_START_OF_THIS_FILE_OR_JUST_USE_CMAKE
+
 TEMPLATE = app
 
 CONFIG += debug qt windows exceptions stl
-QT += qt3support
 TARGET = src/podofobrowser
 DEFINES += USING_SHARED_PODOFO
 DEPENDPATH += .

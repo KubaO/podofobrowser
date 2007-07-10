@@ -3,6 +3,7 @@
 /CMakeLists.txt -text
 /COPYING -text
 /Doxyfile -text
+/EXAMPLE_podofobrowser.pro -text
 /INSTALL -text
 /README -text
 /README.WIN32.txt -text
@@ -14,7 +15,6 @@ cmake/modules/FindLIBPODOFO.cmake -text
 cmake/modules/FindLIBSTLPORT.cmake -text
 cmake/modules/FindZLIB.cmake -text
 externals/README -text
-/podofobrowser.pro -text
 src/CMakeLists.txt -text
 src/backgroundloader.cpp -text
 src/backgroundloader.h -text
