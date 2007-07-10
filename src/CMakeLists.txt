@@ -59,7 +59,14 @@ ADD_DEFINITIONS(
 	-DQT_CORE_LIB
 	-DQT_GUI_LIB
 	-DQT_THREAD_SUPPORT
+	-DQT_NO_CAST_FROM_ASCII
+	-DQT_NO_CAST_TO_ASCII
 	)
+
+# For an explanation of QT_NO_CAST_FROM_ASCII and QT_NO_CAST_TO_ASCII see:
+# http://doc.trolltech.com/qq/qq05-achtung.html
+# though they've been renamed from QT_NO_ASCII_CAST and QT_NO_CAST_ASCII
+# respectively.
 
 INCLUDE_DIRECTORIES(
 	${QT_INCLUDES}

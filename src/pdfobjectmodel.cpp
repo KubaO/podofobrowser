@@ -1,7 +1,10 @@
 #include "pdfobjectmodel.h"
 #include "podofoutil.h"
 
+#include <QString>
 #include <QPixmap>
+#include <QVariant>
+#include <QByteArray>
 
 #include <utility>
 using std::pair;
@@ -627,7 +630,7 @@ QVariant PdfObjectModel::data(const QModelIndex& index, int role) const
     QVariant ret;
 
     const PdfObject* item;
-    QString fileName;
+    const char * iconFileName = 0;
     switch (index.column())
     {
         case Column_ParentIdentifier:
@@ -637,7 +640,9 @@ QVariant PdfObjectModel::data(const QModelIndex& index, int role) const
                     if (!node->GetParent())
                     {
                         const PdfReference & ref ( node->GetObject()->Reference() );
-                        ret = QVariant( QString("%1 %2 obj").arg(ref.ObjectNumber()).arg(ref.GenerationNumber()) );
+                        ret = QString::fromUtf8("%1 %2 obj")
+				.arg(ref.ObjectNumber())
+				.arg(ref.GenerationNumber());
                     }
                     else
                     {
@@ -646,42 +651,47 @@ QVariant PdfObjectModel::data(const QModelIndex& index, int role) const
                         if (item->IsDictionary())
                         {
                             // Item is a directly contained object in a dictionary, so show dictionary key
-                            ret = QVariant( QString( node->GetParentKey().GetName().c_str() ) );
+			    // We'll interpret the key as utf-8, which it usually should be if it's got any
+			    // high-bit stuff in it.
+                            ret = QString::fromUtf8( node->GetParentKey().GetName().c_str() );
                         }
                         else if (item->IsArray())
                         {
                             // directly contained array element
-                            ret = QVariant( QString("<element %1>").arg(node->GetIndexInParent()) );
+                            ret = QString::fromUtf8("<element %1>")
+				    .arg(node->GetIndexInParent());
                         }
                         else if (item->IsReference())
                         {
                             // item is an indirect object from a followed reference
                             const PdfReference& ref ( item->GetReference() );
-                            ret = QVariant( QString("%1 %2 obj").arg(ref.ObjectNumber()).arg(ref.GenerationNumber()) );
+                            ret = QString::fromUtf8("%1 %2 obj").
+				    arg(ref.ObjectNumber()).
+				    arg(ref.GenerationNumber());
                         }
                         else
-                            ret = QVariant( QString("<UNKNOWN>") );
+                            ret = QString::fromUtf8("<UNKNOWN>");
                     }
                     break;
                 case Qt::DecorationRole:
                     item = node->GetObject();
             switch (item->GetDataType())
             {
-                case ePdfDataType_Bool: fileName = ":/icons/bool.png"; break;
-                case ePdfDataType_Number: fileName = ":/icons/number.png"; break;
-                case ePdfDataType_Real: fileName = ":/icons/real.png"; break;
-                case ePdfDataType_String: fileName = ":/icons/litstring.png"; break;
-                case ePdfDataType_HexString: fileName = ":/icons/hexstring.png"; break;
-                case ePdfDataType_Name: fileName = ":/icons/name.png"; break;
-                case ePdfDataType_Array: fileName = ":/icons/array.png"; break;
-                case ePdfDataType_Dictionary: fileName = ":/icons/dictionary.png"; break;
-                case ePdfDataType_Null: fileName = ":/icons/empty.png"; break;
+                case ePdfDataType_Bool: iconFileName = ":/icons/bool.png"; break;
+                case ePdfDataType_Number: iconFileName = ":/icons/number.png"; break;
+                case ePdfDataType_Real: iconFileName = ":/icons/real.png"; break;
+                case ePdfDataType_String: iconFileName = ":/icons/litstring.png"; break;
+                case ePdfDataType_HexString: iconFileName = ":/icons/hexstring.png"; break;
+                case ePdfDataType_Name: iconFileName = ":/icons/name.png"; break;
+                case ePdfDataType_Array: iconFileName = ":/icons/array.png"; break;
+                case ePdfDataType_Dictionary: iconFileName = ":/icons/dictionary.png"; break;
+                case ePdfDataType_Null: iconFileName = ":/icons/empty.png"; break;
                 case ePdfDataType_Reference:
-                                 fileName = node->IsValidReference() ? ":/icons/reference.png" : ":/icons/dangling_reference.png";
+                                 iconFileName = node->IsValidReference() ? ":/icons/reference.png" : ":/icons/dangling_reference.png";
                                  break;
-                case ePdfDataType_RawData: fileName = ""; break;
+                case ePdfDataType_RawData: iconFileName = ""; break;
             }
-                    ret = QVariant( QPixmap(fileName) );
+                    ret = QPixmap(QString::fromUtf8(iconFileName));
                     break;
                 default:
                     break;
@@ -696,38 +706,41 @@ QVariant PdfObjectModel::data(const QModelIndex& index, int role) const
 
                     if (item->IsDictionary())
                     {
-                        QString value("<< ");
+                        QString value = QString::fromUtf8("<< ");
                         if (item->GetDictionary().HasKey( PdfName::KeyType ) )
                         {
                             std::string s;
                             item->GetDictionary().GetKey( PdfName::KeyType )->ToString(s);
-                            value += QString("/Type %1 ").arg(s.c_str());
+                            value += QString::fromUtf8("/Type %1 ")
+				    .arg(QString::fromUtf8(s.c_str()));
                         }
                         if (item->GetDictionary().HasKey( PdfName("SubType") ) )
                         {
                             std::string s;
                             item->GetDictionary().GetKey( PdfName("SubType") )->ToString(s);
-                            value += QString("/SubType %1 ").arg(s.c_str());
+                            value += QString::fromUtf8("/SubType %1 ")
+				    .arg(QString::fromUtf8(s.c_str()));
                         }
                         if (item->GetDictionary().HasKey( PdfName("Name") ) )
                         {
                             std::string s;
                             item->GetDictionary().GetKey( PdfName("Name") )->ToString(s);
-                            value += QString("/Name %1 ").arg(s.c_str());
+                            value += QString::fromUtf8("/Name %1 ")
+				    .arg(QString::fromUtf8(s.c_str()));
                         }
-                        ret = QVariant( value += "... >>" );
+                        ret = value += QString::fromUtf8("... >>");
                     }
                     else if (item->IsArray())
                     {
                         std::ostringstream s;
                         s << '[' << item->GetArray().size() << ']';
-                        ret = QVariant( QString( s.str().c_str() ) );
+                        ret = QString::fromUtf8( s.str().c_str() );
                     }
                     else
                     {
                         std::string s;
                         item->ToString(s);
-                        ret = QVariant( QString( s.c_str() ) );
+                        ret = QString::fromUtf8( s.c_str() );
                     }
                     break;
                 default:
@@ -739,7 +752,7 @@ QVariant PdfObjectModel::data(const QModelIndex& index, int role) const
             switch (role)
             {
                 case Qt::DisplayRole:
-                    ret = QVariant( QString( node->GetObject()->GetDataTypeString() ) );
+                    ret = QString::fromUtf8( node->GetObject()->GetDataTypeString() );
                     break;
                 default:
                     ret = QVariant();
@@ -779,11 +792,11 @@ QVariant PdfObjectModel::headerData(int section, Qt::Orientation orientation,
         switch (section)
         {
             case Column_ParentIdentifier:
-                return QVariant("Object");
+                return QString::fromUtf8("Object");
             case Column_RawValue:
-                return QVariant("Value");
+                return QString::fromUtf8("Value");
             case Column_Type:
-                return QVariant("Type");
+                return QString::fromUtf8("Type");
             default:
                 return QVariant();
         }

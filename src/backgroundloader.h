@@ -1,7 +1,8 @@
 #ifndef PODOFOBROWSER_BACKGROUNDLOADER_H
 #define PODOFOBROWSER_BACKGROUNDLOADER_H
 
-#include <QtCore>
+#include <QObject>
+#include <QTimer>
 
 namespace PoDoFo {
     class PdfDocument;

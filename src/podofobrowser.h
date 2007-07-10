@@ -21,10 +21,12 @@
 #ifndef PODOFOBROWSER_H
 #define PODOFOBROWSER_H
 
-// Sledge hammer approach to getting all the required definitions
-// for Qt4
-#include <QtCore>
-#include <QtGui>
+#include <QMainWindow>
+#include <QModelIndex>
+#include <QString>
+#include <QTextDocument>
+
+class QProgressBar;
 
 #include "ui_podofobrowserbase.h"
 #include <podofo/podofo.h>

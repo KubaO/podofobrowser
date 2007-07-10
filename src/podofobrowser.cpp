@@ -18,6 +18,15 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+// We can't use the QT ascii cast protection macros
+// here until we've got rid of qt3support, since a few
+// qt3support headers don't cope with it correctly.
+#ifdef QT_NO_CAST_FROM_ASCII
+#undef QT_NO_CAST_FROM_ASCII
+#endif
+#ifdef QT_NO_CAST_TO_ASCII
+#undef QT_NO_CAST_TO_ASCII
+#endif
 
 #include "podofobrowser.h"
 #include "podofoutil.h"
@@ -41,8 +50,10 @@
 #include <qstatusbar.h>
 #include <q3table.h>
 #include <q3textedit.h>
-//Added by qt3to4:
+
 #include <Q3ValueList>
+
+#include <QProgressBar>
 
 #include <cassert>
 #include <iostream>
