@@ -39,6 +39,12 @@ IF(NOT WIN32)
 	SET(extra_libs ${LIBFONTCONFIG_LIB})
 ELSE(NOT WIN32)
 	SET(extra_libs kernel32 user32 gdi32 winspool comdlg32 advapi32 shell32 ole32 oleaut32 uuid WS2_32)
+	# Suppress the console window for win32 release builds
+	SET_TARGET_PROPERTIES(podofobrowser PROPERTIES
+		LINK_FLAGS_RELEASE "-mwindows"
+		LINK_FLAGS_MINSIZEREL "-mwindows"
+		LINK_FLAGS_RELWITHDEBINFO "-mwindows"
+		)
 ENDIF(NOT WIN32)
 
 TARGET_LINK_LIBRARIES(podofobrowser
