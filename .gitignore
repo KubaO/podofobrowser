@@ -13,6 +13,7 @@ bin/qt-mt3.dll
 /podofoaboutdlg.h
 /podofobrowserbase.cpp
 /podofobrowserbase.h
+/progress.make
 /release
 src/*.cmake
 src/*.swp
@@ -45,6 +46,7 @@ src/QtTestd4.dll
 src/QtXml4.dll
 src/QtXmld4.dll
 src/debug
+src/freetype6.dll
 src/libpodofo.a
 src/libpodofo.dll
 src/mingwm10.dll
@@ -67,5 +69,6 @@ src/ui_podofobrowserbase.cpp
 src/ui_podofobrowserbase.h
 src/ui_podofofinddlg.h
 src/ui_podofogotodlg.h
+src/zlib1.dll
 /ui_podofoaboutdlg.h
 /ui_podofobrowserbase.h

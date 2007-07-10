@@ -36,24 +36,19 @@
 #include "ui_podofogotodlg.h"
 #include "pdfobjectmodel.h"
 
-#include <Qt3Support>
-#include <qapplication.h>
-#include <qcursor.h>
-#include <q3filedialog.h>
-#include <qinputdialog.h>
-#include <qlabel.h>
-#include <qmessagebox.h>
-#include <qpushbutton.h>
-#include <q3progressdialog.h> 
-#include <qsettings.h>
-#include <qsplitter.h>
-#include <qstatusbar.h>
-#include <q3table.h>
-#include <q3textedit.h>
-
-#include <Q3ValueList>
-
+#include <QApplication>
+#include <QCursor>
+#include <QFileDialog>
+#include <QInputDialog>
+#include <QLabel>
+#include <QMessageBox>
 #include <QProgressBar>
+#include <QProgressDialog>
+#include <QPushButton>
+#include <QSettings>
+#include <QSplitter>
+#include <QStatusBar>
+#include <QTextEdit>
 
 #include <cassert>
 #include <iostream>
@@ -77,7 +72,7 @@ private:
 };
 
 PoDoFoBrowser::PoDoFoBrowser()
-    : QMainWindow(0, "PoDoFoBrowser", Qt::WDestructiveClose ),
+    : QMainWindow(),
       PoDoFoBrowserBase(),
       m_pDocument( NULL ),
       m_pBackgroundLoader( NULL ),
@@ -85,6 +80,8 @@ PoDoFoBrowser::PoDoFoBrowser()
       m_bHasFindText( false )
 {
     setupUi(this);
+    setObjectName("PoDoFoBrowser");
+    setAttribute(Qt::WA_DeleteOnClose);
 
     m_pDelayedLoadProgress = new QProgressBar( statusBar() );
     m_pDelayedLoadProgress->setFormat( tr("%p% of objects loaded") );
@@ -111,7 +108,7 @@ PoDoFoBrowser::PoDoFoBrowser()
     connect( actionGotoObject,    SIGNAL( activated() ), this, SLOT( editGotoObject() ) );
 
     show();
-    statusBar()->message( tr("Ready"), 2000 );
+    statusBar()->showMessage( tr("Ready"), 2000 );
 
     loadConfig();
     parseCmdLineArgs();
@@ -167,13 +164,15 @@ void PoDoFoBrowser::loadConfig()
 {
     int w,h;
 
-    Q3ValueList<int> list;
+    QList<int> list;
     QSettings       settings;
 
-    settings.setPath( "podofo.sf.net", "podofobrowser", QSettings::UserScope );
+    settings.setPath( QSettings::IniFormat,
+		      QSettings::UserScope,
+		      QString::fromUtf8("podofobrowser") );
 
-    w = settings.readNumEntry("/geometry/width", width() );
-    h = settings.readNumEntry("/geometry/height", height() );
+    w = settings.value( QString::fromUtf8("/geometry/width"), width() ).toInt();
+    h = settings.value( QString::fromUtf8("/geometry/height"), height() ).toInt();
 
     list << width()/3;
     list << (width()/3 * 2);
@@ -183,7 +182,7 @@ void PoDoFoBrowser::loadConfig()
 
     this->resize( w, h );
 
-    actionCatalogView->setChecked( settings.readBoolEntry("/view/catalog", actionCatalogView->isChecked() ) );
+    actionCatalogView->setChecked( settings.value(QString::fromUtf8("/view/catalog"), actionCatalogView->isChecked() ).toBool() );
 }
 
 void PoDoFoBrowser::saveConfig()
@@ -191,11 +190,13 @@ void PoDoFoBrowser::saveConfig()
 
     QSettings settings;
 
-    settings.setPath( "podofo.sf.net", "podofobrowser", QSettings::UserScope );
+    settings.setPath( QSettings::IniFormat,
+		      QSettings::UserScope,
+		      QString::fromUtf8("podofobrowser") );
 
-    settings.writeEntry("/geometry/width", width() );
-    settings.writeEntry("/geometry/height", height() );
-    settings.writeEntry("/view/catalog", actionCatalogView->isChecked() );
+    settings.setValue(QString::fromUtf8("/geometry/width"), width() );
+    settings.setValue(QString::fromUtf8("/geometry/height"), height() );
+    settings.setValue(QString::fromUtf8("/view/catalog"), actionCatalogView->isChecked() );
 }
 
 void PoDoFoBrowser::parseCmdLineArgs()
@@ -209,7 +210,7 @@ void PoDoFoBrowser::parseCmdLineArgs()
 void PoDoFoBrowser::clear()
 {
     m_filename = QString::null;
-    setCaption( "PoDoFoBrowser" );
+    setWindowTitle( tr("PoDoFoBrowser") );
 
     labelStream->setText("");
     textStream->clear();
@@ -265,10 +266,10 @@ void PoDoFoBrowser::fileOpen( const QString & filename )
     DocChange(m_pDocument);
 
     m_filename = filename;
-    setCaption( m_filename );
+    setWindowTitle( m_filename );
 
     QApplication::restoreOverrideCursor();
-    statusBar()->message(  QString( tr("Opened file %1 successfully") ).arg( filename ), 2000 );
+    statusBar()->showMessage( tr("Opened file %1 successfully").arg( filename ), 2000 );
 }
 
 bool PoDoFoBrowser::fileSave( const QString & filename )
@@ -284,10 +285,10 @@ bool PoDoFoBrowser::fileSave( const QString & filename )
     }
 
     QApplication::restoreOverrideCursor();
-    statusBar()->message(  QString( tr("Wrote file %1 successfully") ).arg( filename ), 2000 );
+    statusBar()->showMessage( tr("Wrote file %1 successfully").arg( filename ), 2000 );
 
     m_filename = filename;
-    setCaption( m_filename );
+    setWindowTitle( m_filename );
 
     return true;
 }
@@ -403,11 +404,12 @@ void PoDoFoBrowser::treeSelectionChanged( const QModelIndex & current, const QMo
     const bool isBinary = std::find(pBuf, pBuf+lLen, 0) != pBuf+lLen;
     if (!isBinary)
     {
-        QByteArray data;
-        data.duplicate( pBuf, lLen );
+	// TODO FIXME XXX AUUGH! Encoding assumption like nothing ever
+	// seen before!
+	QString data = QString::fromAscii(pBuf, lLen);
         free( pBuf );
         textStream->setEnabled(true);
-        textStream->setText( QString( data ) );
+        textStream->setText( data );
         displayInfo = tr("displayed in full");
     }
     else
@@ -429,7 +431,8 @@ void PoDoFoBrowser::fileOpen()
    if( !trySave() ) 
        return;
 
-    QString filename = Q3FileDialog::getOpenFileName( QString::null, tr("PDF File (*.pdf)"), this );
+    QString filename = QFileDialog::getOpenFileName(
+		    this, tr("Open PDF..."), QString(), tr("PDF File (*.pdf)"));
     if( !filename.isNull() )
         fileOpen( filename );
 }
@@ -474,7 +477,8 @@ bool PoDoFoBrowser::fileSave()
 
 bool PoDoFoBrowser::fileSaveAs()
 {
-    QString filename = Q3FileDialog::getSaveFileName( QString::null, tr("PDF File (*.pdf)"), this );
+    QString filename = QFileDialog::getSaveFileName(
+		    this, tr("Save As..."), QString(), tr("PDF File (*.pdf)"));
     if( !filename.isNull() )
         return fileSave( filename );
     else
@@ -743,7 +747,7 @@ void PoDoFoBrowser::slotImportStream()
     }
     free(pBuf);
 
-    statusBar()->message( QString( tr("Stream imported from %1") ).arg( fn ), 2000 );
+    statusBar()->showMessage( tr("Stream imported from %1").arg( fn ), 2000 );
 
     // TODO: refresh stream
 }
@@ -793,7 +797,7 @@ void PoDoFoBrowser::slotExportStream()
         return;
     }
 
-    statusBar()->message( QString( tr("Stream exported to %1") ).arg( fn ), 2000 );
+    statusBar()->showMessage( tr("Stream exported to %1").arg( fn ), 2000 );
 }
 
 void PoDoFoBrowser::toolsToHex()
@@ -802,18 +806,22 @@ void PoDoFoBrowser::toolsToHex()
 
     char* pBuffer = NULL;
     long  lLen    = 0;
-    QString text  = QInputDialog::getText( tr("PoDoFoBrowser"), tr("Please input a string:") );
+    QString text  = QInputDialog::getText(
+			    this, tr("PoDoFoBrowser: To Hex"),
+			    tr("Please input a string (7-bit ASCII only):") );
 
     if( QString::null != text ) 
     {
         try {
-            hexfilter->Encode( text.latin1(), text.length(), &pBuffer, &lLen );
+	    // FIXME XXX TODO big bad encoding assumption
+            hexfilter->Encode( text.toLatin1().data(), text.length(), &pBuffer, &lLen );
         } catch( PdfError & e ) {
             podofoError( e );
             return;
         }
 
-        text.setLatin1( pBuffer, lLen );
+	// This ::fromAscii is safe since we're dealing with hex strings only.
+        text = QString::fromAscii( pBuffer, lLen );
         QMessageBox::information( this, tr("PoDoFoBrowser"), tr("The string converted to hex:<br>") + text );
     }
 }
@@ -824,18 +832,22 @@ void PoDoFoBrowser::toolsFromHex()
 
     char* pBuffer = NULL;
     long  lLen    = 0;
-    QString text  = QInputDialog::getText( tr("PoDoFoBrowser"), tr("Please input a hex string:") );
+    QString text  = QInputDialog::getText(
+		    		this, tr("PoDoFoBrowser: From Hex"),
+				tr("Please input a hex string:") );
 
     if( QString::null != text ) 
     {
         try {
-            hexfilter->Decode( text.latin1(), text.length(), &pBuffer, &lLen );
+            // This encoding assumption should be safe since we're reading hex strings
+            hexfilter->Decode( text.toLatin1(), text.length(), &pBuffer, &lLen );
         } catch( PdfError & e ) {
             podofoError( e );
             return;
         }
 
-        text.setLatin1( pBuffer, lLen );
+	// FIXME XXX TODO big bad encoding assumption
+        text = QString::fromLatin1( pBuffer, lLen );
         QMessageBox::information( this, tr("PoDoFoBrowser"), tr("The string converted to ascii:<br>") + text );
     }
 }
