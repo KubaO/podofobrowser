@@ -5,6 +5,7 @@
 /Doxyfile -text
 /INSTALL -text
 /README -text
+/README.WIN32.txt -text
 /TODO -text
 cmake/modules/FindLIBFONTCONFIG.cmake -text
 cmake/modules/FindLIBFREETYPE.cmake -text
