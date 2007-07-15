@@ -5,7 +5,7 @@
 #include <QTimer>
 
 namespace PoDoFo {
-    class PdfDocument;
+    class PdfMemDocument;
     class PdfObject;
 }
 
@@ -14,7 +14,7 @@ class BackgroundLoader : public QObject
     Q_OBJECT
 
 public:
-    BackgroundLoader(PoDoFo::PdfDocument* doc);
+    BackgroundLoader(PoDoFo::PdfMemDocument* doc);
 
     virtual ~BackgroundLoader();
 
@@ -35,7 +35,7 @@ private:
     // an invalid iterator could be _BAD_.
     int m_lastObjectIdx;
     // Document
-    PoDoFo::PdfDocument* m_pDoc;
+    PoDoFo::PdfMemDocument* m_pDoc;
 };
 
 #endif

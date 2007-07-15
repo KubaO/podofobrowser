@@ -122,7 +122,7 @@ void PoDoFoBrowser::ModelChange(PdfObjectModel* newModel)
     delete oldModel;
 }
 
-void PoDoFoBrowser::DocChange(PdfDocument* newDoc)
+void PoDoFoBrowser::DocChange(PdfMemDocument* newDoc)
 {
     delete m_pBackgroundLoader;
     m_pBackgroundLoader = NULL;
@@ -225,8 +225,8 @@ void PoDoFoBrowser::fileNew()
 
     this->clear();
 
-    PdfDocument* oldDoc = m_pDocument;
-    m_pDocument = new PdfDocument();
+    PdfMemDocument* oldDoc = m_pDocument;
+    m_pDocument = new PdfMemDocument();
 
     ModelChange( new PdfObjectModel(m_pDocument, listObjects, actionCatalogView->isChecked()) );
     DocChange(m_pDocument);
@@ -242,9 +242,9 @@ void PoDoFoBrowser::fileOpen( const QString & filename )
 
     QApplication::setOverrideCursor( Qt::WaitCursor );
 
-    PdfDocument* oldDoc = m_pDocument;
+    PdfMemDocument* oldDoc = m_pDocument;
     try {
-        m_pDocument = new PdfDocument( filename.toLocal8Bit().data() );
+        m_pDocument = new PdfMemDocument( filename.toLocal8Bit().data() );
         delete oldDoc;
     } catch( PdfError & e ) {
         QApplication::restoreOverrideCursor();

@@ -5,7 +5,7 @@ using namespace PoDoFo;
 
 #include <iostream>
 
-BackgroundLoader::BackgroundLoader(PdfDocument* doc)
+BackgroundLoader::BackgroundLoader(PdfMemDocument* doc)
     : m_timer(),
       m_lastObjectIdx(-1),
       m_pDoc(doc)

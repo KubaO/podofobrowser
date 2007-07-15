@@ -85,7 +85,7 @@ class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
 
  private:
     void ModelChange(PdfObjectModel* newModel);
-    void DocChange(PoDoFo::PdfDocument* doc);
+    void DocChange(PoDoFo::PdfMemDocument* doc);
     void UpdateMenus();
 
     // Find the object m_gotoReference
@@ -112,7 +112,7 @@ class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
 
     QString               m_filename;
 
-    PoDoFo::PdfDocument*  m_pDocument;
+    PoDoFo::PdfMemDocument*  m_pDocument;
     BackgroundLoader*     m_pBackgroundLoader;
     QProgressBar*         m_pDelayedLoadProgress;
 

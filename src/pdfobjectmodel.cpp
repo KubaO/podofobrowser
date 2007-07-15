@@ -31,7 +31,7 @@ class PdfObjectModelTree
 {
 public:
     PdfObjectModelTree(
-            PdfDocument * doc,
+            PdfMemDocument * doc,
             const std::vector<PdfObject*>& roots,
             bool followReferences);
 
@@ -40,7 +40,7 @@ public:
     PdfObjectModelNode* GetRoot(int n) const { return m_roots[n]; }
     const std::vector<PdfObjectModelNode*> & GetRoots() const { return m_roots; }
 
-    PdfDocument* GetDocument() const { return m_pDoc; }
+    PdfMemDocument* GetDocument() const { return m_pDoc; }
 
     bool FollowReferences() const { return m_bFollowReferences; }
 
@@ -55,7 +55,7 @@ private:
     // Called from each node's dtor
     void NodeDeleted(PdfObjectModelNode* node);
 
-    PdfDocument* m_pDoc;
+    PdfMemDocument* m_pDoc;
     const bool m_bFollowReferences;
     typedef std::multimap<const PdfObject*,PdfObjectModelNode*> NodeAliasMap;
     NodeAliasMap m_nodeAliases;
@@ -237,7 +237,7 @@ private:
     const PdfReference m_ref;
 };
 
-PdfObjectModelTree::PdfObjectModelTree(PdfDocument * doc, const std::vector<PdfObject*>& roots, bool followReferences)
+PdfObjectModelTree::PdfObjectModelTree(PdfMemDocument * doc, const std::vector<PdfObject*>& roots, bool followReferences)
     : m_pDoc(doc),
       m_bFollowReferences(followReferences),
       m_nodeAliases(),
@@ -489,7 +489,7 @@ void PdfObjectModelNode::SetData(const PdfVariant& variant)
 }; // end anonymous namespace
 
 
-PdfObjectModel::PdfObjectModel(PdfDocument* doc, QObject* parent, bool catalogRooted)
+PdfObjectModel::PdfObjectModel(PdfMemDocument* doc, QObject* parent, bool catalogRooted)
     : QAbstractTableModel(parent), m_bDocChanged(false), m_pTree(0)
 {
     if (catalogRooted)
@@ -503,7 +503,7 @@ PdfObjectModel::~PdfObjectModel()
     delete static_cast<PdfObjectModelTree*>(m_pTree);
 }
 
-void PdfObjectModel::setupModelData_CatalogRooted(PdfDocument * doc)
+void PdfObjectModel::setupModelData_CatalogRooted(PdfMemDocument * doc)
 {
     // Find the document catalog dictionary, which we'll use as the root
     // of the tree
@@ -532,7 +532,7 @@ void PdfObjectModel::setupModelData_CatalogRooted(PdfDocument * doc)
     m_pTree = new PdfObjectModelTree(doc, rootObjects, true);
 }
 
-void PdfObjectModel::setupModelData_IndirectRooted(PdfDocument * doc)
+void PdfObjectModel::setupModelData_IndirectRooted(PdfMemDocument * doc)
 {
     const PdfVecObjects& docObjs ( doc->GetObjects() );
     std::vector<PdfObject*> rootObjects(docObjs.begin(), docObjs.end());
