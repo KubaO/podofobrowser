@@ -5,6 +5,7 @@
 /Doxyfile -text
 /EXAMPLE_podofobrowser.pro -text
 /INSTALL -text
+PoDoFoBrowser.app/Contents/Info.plist -text
 /README -text
 /README.WIN32.txt -text
 /TODO -text

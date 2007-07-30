@@ -3,6 +3,9 @@
 /Makefile
 /Makefile.Debug
 /Makefile.Release
+PoDoFoBrowser.app/Contents/Frameworks/*.framework
+PoDoFoBrowser.app/Contents/MacOS/*.dylib
+PoDoFoBrowser.app/Contents/MacOS/podofobrowser
 bin/libpodofo.dll
 bin/podofobrowser.exe
 bin/qt-mt3.dll

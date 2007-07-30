@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>pdf</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>document.icns</string>
+			<key>CFBundleTypeMIMETypes</key>
+			<array>
+				<string>application/pdf</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>Adobe PDF Document</string>
+		</dict>
+	</array>
+	<key>CFBundleExecutable</key>
+	<string>PoDoFoBrowser</string>
+	<key>CFBundleGetInfoString</key>
+	<string>0.5.99, Copyright 2007 Dominik Seichter and Craig Ringer.</string>
+	<key>CFBundleIdentifier</key>
+	<string>org.podofo.PoDoFoBrowser</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>PoDoFoBrowser</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.5.99</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.3.0</string>
+	<key>NSAppleScriptEnabled</key>
+	<string>No</string>
+</dict>
+</plist>
