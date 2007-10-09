@@ -6,13 +6,8 @@ podofobrowser svn generally requires PoDoFo svn to build and run. You will also
 need an installed copy of TrollTech's Qt library. Linux users should make sure
 the -dev or -devel package for Qt is installed too.
 
-Windows users will need the MinGW compilation environment. The Qt installer will
-download and install this for you if you don't already have it.
-
-The open source version of Qt4 does not support building with Visual Studio.
-PoDoFoBrowser should build fine with CMake and Visual Studio if you are using
-a version of Qt that supports this configuration. Please report any issues with
-this process, as the authors do not have easy access to this configuration.
+On windows, both Visual Studio (versions 8 and 9 tested) and MinGW are supported.
+Use CMake to generate a project file (VC++) or makefile (MinGW).
 
 Note that because the gcc and MSVC++ C++ APIs are incompatible (as are the ABIs
 of most other C++ compilers) you must build podofobrowser with the same
@@ -33,11 +28,12 @@ cmake -G "Unix Makefiles" \
 	-DCMAKE_LIBRARY_PATH=/path/to/extra/libraries
 
 Windows users can also build PoDoFoBrowser using CMake. You will need an
-installed copy of PoDoFo and will need to have Qt 4 installed. Set QTDIR to
-point to your Qt install directory, ensure MinGW is on your PATH, and make sure
-to set CMAKE_INCLUDE_PATH and CMAKE_LIBRARY_PATH to point to the same libraries
-you used to build PoDoFo against (important!). LIBPODOFO_DIR should point to the
-PoDoFo installation directory (NOT the build directory, which WILL NOT WORK).
+installed copy of PoDoFo and will need to have Qt 4.3.2 or 4.4 installed. Set
+QTDIR to point to your Qt install directory, ensure MinGW is on your PATH, and
+make sure to set CMAKE_INCLUDE_PATH and CMAKE_LIBRARY_PATH to point to the same
+libraries you used to build PoDoFo against (important!). LIBPODOFO_DIR should
+point to the PoDoFo installation directory (NOT the build directory, which WILL
+NOT WORK).
 
 SET QTDIR=c:\qt\4.2.1
 SET PATH=c:\mingw\bin;%PATH%
@@ -46,12 +42,14 @@ cmake -G "MinGW Makefiles"
 	-DCMAKE_INCLUDE_PATH=c:\progra~1\gnuwin32\include
 	-DCMAKE_LIBRARY_PATH=c:\progra~1\gnuwin32\lib
 
+If you want to use Visual Studio, just change the -G argument from "MinGW Makefiles"
+to one appropriate for your Visual Studio version (eg "Visual Studio 8 2005").
+To find out which targets are supported by your version of cmake, run it
+without any arguments.
+
 Windows users MUST also set -DLIBPODOFO_SHARED to 0 if building against a
 static library, or to 1 if building against a PoDoFo DLL. This ensures the
 correct import symbols are used, preventing confusing link errors.
-
-Note that PoDoFoBrowser currently only builds against an installed copy of
-PoDoFo, not the podofo build tree.
 
 To control where PoDoFoBrowser will be installed (with "make install" on
 supporting toolchains), set:
