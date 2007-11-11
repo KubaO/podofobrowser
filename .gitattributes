@@ -9,7 +9,7 @@ PoDoFoBrowser.app/Contents/Info.plist -text
 /README -text
 /README.WIN32.txt -text
 /TODO -text
-/build_win32.bat -text
+/build_win32.cmd -text
 cmake/modules/FindLIBFONTCONFIG.cmake -text
 cmake/modules/FindLIBFREETYPE.cmake -text
 cmake/modules/FindLIBJPEG.cmake -text

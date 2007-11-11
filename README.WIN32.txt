@@ -11,7 +11,7 @@ Qt will install this for you.
 
 See the INSTALL file for detailed instructons.
 
-A batch file, build_win32.bat, is provided to make it a bit more convenient to
+A batch file, build_win32.cmd, is provided to make it a bit more convenient to
 run builds on win32, where it's usually necessary to pass many parameters to
 CMake. You MUST edit the parameters in this file to ensure it matches your
 local configuration. Don't just go ahead and run it, read the INSTALL file
