@@ -1,0 +1,51 @@
+{
+   Err_QtXLibError_writeBuf
+   Memcheck:Param
+   write(buf)
+   fun:write
+   fun:_X11TransWrite
+}
+{
+   Err_QtXLibError_writeVec
+   Memcheck:Param
+   writev(vector[...])
+   fun:do_writev
+   fun:writev
+}
+{
+   Err_QtGuiErrors_QPainter_begin
+   Memcheck:Cond
+   obj:/usr/lib/libQtGui.so.4.2.1
+   fun:_ZN8QPainter5beginEP12QPaintDevice
+}
+{
+   Err_QtGuiErrors_QPainter_setWorldMatrix
+   Memcheck:Cond
+   obj:/usr/lib/libQtGui.so.4.2.1
+   fun:_ZN8QPainter14setWorldMatrixERK7QMatrixb
+}
+{
+   Err_QtGuiErrors_QPainter_setWorldMatrixEnabled
+   Memcheck:Cond
+   obj:/usr/lib/libQtGui.so.4.2.1
+   fun:_ZN8QPainter21setWorldMatrixEnabledEb
+}
+{
+   Err_QtGuiErrors_Deep
+   Memcheck:Cond
+   obj:/usr/lib/libQtGui.so.4.2.1
+   obj:/usr/lib/libQtGui.so.4.2.1
+}
+{
+   Err_Qt_Clone_UninitedParams
+   Memcheck:Param
+   clone(child_tidptr)
+   fun:clone
+   fun:clone
+}
+{
+   Err_Qt_Pthread_Cond
+   Memcheck:Cond
+   fun:__pthread_manager
+   fun:clone
+}

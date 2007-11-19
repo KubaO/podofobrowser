@@ -58,3 +58,4 @@ src/podofoutil.h -text
 src/qt.suppressions -text
 templates/cpp -text
 templates/h -text
+/valgrind.suppressions -text
