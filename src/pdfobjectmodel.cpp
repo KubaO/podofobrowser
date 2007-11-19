@@ -17,6 +17,8 @@ using namespace PoDoFo;
 
 namespace {
 
+static PdfEncrypt* pEncrypt = 0; //XXX
+
 class PdfObjectModelNode;
 
 // PdfObjectModelTree keeps track of the nodes associated with a particular
@@ -474,7 +476,7 @@ bool PdfObjectModelNode::SetRawData(const QByteArray & data)
     // Try to parse as a PdfVariant. Failure will throw an exception.
     PdfVariant variant;
     PdfTokenizer tokenizer (data.data(), data.size());
-    tokenizer.GetNextVariant(variant);
+    tokenizer.GetNextVariant(variant, pEncrypt);
 
     SetData(variant);
     return true;
