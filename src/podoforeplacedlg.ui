@@ -1,0 +1,222 @@
+<ui version="4.0" >
+ <class>PoDoFoReplaceDlg</class>
+ <widget class="QDialog" name="PoDoFoReplaceDlg" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>434</width>
+    <height>471</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Dialog</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_3" >
+   <item>
+    <widget class="QGroupBox" name="groupBoxFind" >
+     <property name="title" >
+      <string>Find</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout" >
+      <item>
+       <widget class="QLabel" name="label" >
+        <property name="text" >
+         <string>&amp;Text to find:</string>
+        </property>
+        <property name="buddy" >
+         <cstring>comboBoxText</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="comboBoxText" >
+        <property name="editable" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkRegularExpression" >
+        <property name="text" >
+         <string>Regular e&amp;xpression</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBoxReplace" >
+     <property name="title" >
+      <string>Replace With</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2" >
+      <item>
+       <widget class="QLabel" name="label_2" >
+        <property name="text" >
+         <string>Replace&amp;ment text:</string>
+        </property>
+        <property name="buddy" >
+         <cstring>label_2</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="comboBoxReplace" >
+        <property name="editable" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout" >
+        <item>
+         <widget class="QCheckBox" name="checkPlaceholders" >
+          <property name="text" >
+           <string>Use p&amp;laceholders</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="buttonInsert" >
+          <property name="text" >
+           <string>Insert Place&amp;holder</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBoxOptions" >
+     <property name="title" >
+      <string>Options</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout" >
+      <item row="0" column="0" >
+       <widget class="QCheckBox" name="checkBoxCaseSensitive" >
+        <property name="text" >
+         <string>C&amp;ase sensitive</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1" >
+       <widget class="QCheckBox" name="checkBoxFindBackwards_2" >
+        <property name="text" >
+         <string>Find &amp;backwards</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" >
+       <widget class="QCheckBox" name="checkBoxWholeWords" >
+        <property name="text" >
+         <string>&amp;Whole words only</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" >
+       <widget class="QCheckBox" name="checkBoxSelectedText" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
+        <property name="text" >
+         <string>&amp;Selected text</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" >
+       <widget class="QCheckBox" name="checkBoxFindBackwards" >
+        <property name="text" >
+         <string>Find &amp;backwards</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" >
+       <widget class="QCheckBox" name="checkBoxPromtOnReplace" >
+        <property name="text" >
+         <string>&amp;Promt on replace</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer name="spacer" >
+     <property name="orientation" >
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0" >
+      <size>
+       <width>20</width>
+       <height>19</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="_3" >
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType" >
+        <enum>QSizePolicy::Expanding</enum>
+       </property>
+       <property name="sizeHint" stdset="0" >
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonReplace" >
+       <property name="text" >
+        <string>&amp;Replace</string>
+       </property>
+       <property name="default" >
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonClose" >
+       <property name="text" >
+        <string>&amp;Close</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>comboBoxText</tabstop>
+  <tabstop>checkRegularExpression</tabstop>
+  <tabstop>comboBoxReplace</tabstop>
+  <tabstop>checkPlaceholders</tabstop>
+  <tabstop>buttonInsert</tabstop>
+  <tabstop>checkBoxCaseSensitive</tabstop>
+  <tabstop>checkBoxFindBackwards_2</tabstop>
+  <tabstop>checkBoxWholeWords</tabstop>
+  <tabstop>checkBoxSelectedText</tabstop>
+  <tabstop>checkBoxFindBackwards</tabstop>
+  <tabstop>checkBoxPromtOnReplace</tabstop>
+  <tabstop>buttonReplace</tabstop>
+  <tabstop>buttonClose</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

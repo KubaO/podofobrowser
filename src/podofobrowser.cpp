@@ -24,6 +24,7 @@
 #include "ui_podofoaboutdlg.h"
 #include "ui_podofofinddlg.h"
 #include "ui_podofogotodlg.h"
+#include "ui_podoforeplacedlg.h"
 #include "pdfobjectmodel.h"
 
 #include <QApplication>
@@ -661,6 +662,16 @@ void PoDoFoBrowser::editFindPrevious()
 
 void PoDoFoBrowser::editReplace()
 {
+    // TODO: Wrap this dialog into a nice interface
+    Ui::PoDoFoReplaceDlg dlgui;
+    QDialog dlg;
+    dlgui.setupUi( &dlg );
+
+    if( dlg.exec() == QDialog::Accepted ) 
+    {
+
+
+    }
     // TODO: Replace
 }
 

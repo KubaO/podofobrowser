@@ -53,6 +53,7 @@ src/podofobrowserbase.ui -text
 src/podofobrowserrsrc.qrc -text
 src/podofofinddlg.ui -text
 src/podofogotodlg.ui -text
+src/podoforeplacedlg.ui -text
 src/podofoutil.cpp -text
 src/podofoutil.h -text
 src/qt.suppressions -text
