@@ -332,7 +332,9 @@ void PoDoFoBrowser::treeSelectionChanged( const QModelIndex & current, const QMo
     // hopefully this does not slow down to much.
     // CR: We may need a more efficient approach to this as the tree grows,
     // since it does slow down a lot.
-    listObjects->resizeColumnToContents( 0 );
+    // DS: Disabled because it is annyoing so that the column is always resized
+    // even if you have set a manual columnwidth
+    // listObjects->resizeColumnToContents( 0 );
 
     PdfObjectModel * const model = static_cast<PdfObjectModel*>(listObjects->model());
     if (!model)

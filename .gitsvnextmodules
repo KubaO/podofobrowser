@@ -1,8 +1,7 @@
 [submodule "externals/required_libpodofo"]
 	path = externals/required_libpodofo
 	owner = externals
-	url = http://podofo.svn.sourceforge.net/svnroot/podofo/podofo/trunk
-	revision = 737
+	url = http://podofo.svn.sourceforge.net/svnroot/podofo/podofo/branches/PODOFO_0_6_BRANCH
 	branch = /
 	fetch = :refs/remotes/git-svn
 	remote = svn
