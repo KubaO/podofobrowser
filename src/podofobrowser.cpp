@@ -307,8 +307,11 @@ void PoDoFoBrowser::UpdateMenus()
     actionInsert_Key->setEnabled(parent.isValid() && model->IndexIsDictionary(parent));
     actionRemove_Item->setEnabled(sel.isValid() && !model->GetObjectForIndex(sel)->Reference().IsIndirect());
 
-    bool enableFind = parent.isValid() && model->GetObjectForIndex(sel) 
-        && model->GetObjectForIndex(sel)->HasStream();
+    // DS: parent.isValid() is never true, if not in catalog view mode
+    //     and should not be needed anyways
+    // bool enableFind = parent.isValid() && model->GetObjectForIndex(sel) 
+    //    && model->GetObjectForIndex(sel)->HasStream();
+    bool enableFind = model->GetObjectForIndex(sel) && model->GetObjectForIndex(sel)->HasStream();
 
     actionFind->setEnabled( enableFind );
     actionFindNext->setEnabled( enableFind && m_bHasFindText );
