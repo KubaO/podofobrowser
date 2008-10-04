@@ -20,6 +20,8 @@ externals/README -text
 src/CMakeLists.txt -text
 src/backgroundloader.cpp -text
 src/backgroundloader.h -text
+src/hexwidget/QHexView.cpp -text
+src/hexwidget/QHexView.h -text
 src/icons/CREDITS -text
 src/icons/array.png -text
 src/icons/bool.png -text

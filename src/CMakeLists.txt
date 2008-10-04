@@ -11,6 +11,7 @@ SET(podofobrowser_MOC_HEADERS
 	backgroundloader.h
 	podofobrowser.h
 	pdfobjectmodel.h
+	hexwidget/QHexView.h
 	)
 QT4_WRAP_CPP(podofobrowser_MOC_SRCS ${podofobrowser_MOC_HEADERS})
 
@@ -33,6 +34,7 @@ ADD_EXECUTABLE(podofobrowser
 	pdfobjectmodel.cpp
 	podofobrowser.cpp
 	main.cpp
+	hexwidget/QHexView.cpp
 	${podofobrowser_QRC_SRCS}
 	${podofobrowser_MOC_SRCS}
 	)

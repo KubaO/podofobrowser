@@ -36,7 +36,9 @@
     <widget class="QLabel" name="textLabel3" >
      <property name="text" >
       <string>(c) 2006-2007 Dominik Seichter - domseichter@web.de
-(c) 2007-2008 Craig Ringer - craig@postnewspapers.com.au</string>
+(c) 2007-2008 Craig Ringer - craig@postnewspapers.com.au
+
+HexWidget by Evan Teran - eteran@alum.rit.edu</string>
      </property>
      <property name="alignment" >
       <set>Qt::AlignCenter</set>

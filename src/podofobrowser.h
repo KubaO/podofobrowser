@@ -123,6 +123,7 @@ class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
     PoDoFo::PdfReference  m_gotoReference;
 
     QTextDocument::FindFlags m_findFlags;
+    QByteArray*           m_pByteArray;
 };
 
 QModelIndex PoDoFoBrowser::GetSelectedItem()

@@ -84,16 +84,50 @@
            </widget>
           </item>
           <item>
-           <widget class="QTextEdit" name="textStream" >
-            <property name="undoRedoEnabled" >
-             <bool>false</bool>
+           <widget class="QStackedWidget" name="stackedWidget" >
+            <property name="currentIndex" >
+             <number>0</number>
             </property>
-            <property name="readOnly" >
-             <bool>false</bool>
-            </property>
-            <property name="acceptRichText" >
-             <bool>false</bool>
-            </property>
+            <widget class="QWidget" name="pageStream" >
+             <property name="geometry" >
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>738</width>
+               <height>246</height>
+              </rect>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout" >
+              <item>
+               <widget class="QTextEdit" name="textStream" >
+                <property name="undoRedoEnabled" >
+                 <bool>false</bool>
+                </property>
+                <property name="readOnly" >
+                 <bool>false</bool>
+                </property>
+                <property name="acceptRichText" >
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="pageHexView" >
+             <property name="geometry" >
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>738</width>
+               <height>246</height>
+              </rect>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_2" >
+              <item>
+               <widget class="QHexView" native="1" name="hexView" />
+              </item>
+             </layout>
+            </widget>
            </widget>
           </item>
           <item>
@@ -558,6 +592,14 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11" />
+ <customwidgets>
+  <customwidget>
+   <class>QHexView</class>
+   <extends>QWidget</extends>
+   <header>hexwidget/QHexView.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="podofobrowserrsrc.qrc" />
  </resources>

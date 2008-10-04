@@ -27,6 +27,7 @@
 #include "ui_podofogotopagedlg.h"
 #include "ui_podoforeplacedlg.h"
 #include "pdfobjectmodel.h"
+#include "hexwidget/QHexView.h"
 
 #include <QApplication>
 #include <QCursor>
@@ -69,7 +70,8 @@ PoDoFoBrowser::PoDoFoBrowser( const QString & filename )
       m_pDocument( NULL ),
       m_pBackgroundLoader( NULL ),
       m_pDelayedLoadProgress( NULL ),
-      m_bHasFindText( false )
+      m_bHasFindText( false ),
+      m_pByteArray( NULL )
 {
     setupUi(this);
     setObjectName(QString::fromUtf8("PoDoFoBrowser"));
@@ -153,6 +155,7 @@ PoDoFoBrowser::~PoDoFoBrowser()
     saveConfig();
 
     delete m_pDocument;
+    delete m_pByteArray;
 }
 
 void PoDoFoBrowser::loadConfig()
@@ -208,9 +211,12 @@ void PoDoFoBrowser::clear()
     ModelChange(NULL);
     DocChange(NULL);
 
-    delete m_pDocument; m_pDocument=0;
-
+    delete m_pDocument;
     m_pDocument       = NULL;
+
+    hexView->setData( NULL );
+    delete m_pByteArray;
+    m_pByteArray = NULL;
 }
 
 void PoDoFoBrowser::fileNew()
@@ -229,6 +235,10 @@ void PoDoFoBrowser::fileNew()
     DocChange(m_pDocument);
 
     delete oldDoc;
+
+    hexView->setData( NULL );
+    delete m_pByteArray;
+    m_pByteArray = NULL;
 }
 
 void PoDoFoBrowser::fileOpen( const QString & filename )
@@ -327,6 +337,10 @@ void PoDoFoBrowser::treeSelectionChanged( const QModelIndex & current, const QMo
     buttonImport->setEnabled( false );
     buttonExport->setEnabled( false );
     textStream->setEnabled(false);
+        
+    hexView->setData( NULL );
+    delete m_pByteArray;
+    m_pByteArray = NULL;
 
     // make keyboard navigation easier, especially in Catalog View mode
     // hopefully this does not slow down to much.
@@ -396,16 +410,22 @@ void PoDoFoBrowser::treeSelectionChanged( const QModelIndex & current, const QMo
     const bool isBinary = std::find(pBuf, pBuf+lLen, 0) != pBuf+lLen;
     if (!isBinary)
     {
-	// TODO FIXME XXX AUUGH! Encoding assumption like nothing ever
-	// seen before!
-	QString data = QString::fromAscii(pBuf, lLen);
-        free( pBuf );
+        // TODO FIXME XXX AUUGH! Encoding assumption like nothing ever
+        // seen before!
+        QString data = QString::fromAscii(pBuf, lLen);
         textStream->setEnabled(true);
         textStream->setText( data );
         displayInfo = tr("displayed in full");
+        stackedWidget->setCurrentWidget( pageStream );
     }
     else
-        displayInfo = tr("not shown because it contains binary data");
+    {
+        m_pByteArray = new QByteArray( pBuf, lLen );
+        hexView->setData( m_pByteArray );
+        displayInfo = tr("contains binary data");
+        stackedWidget->setCurrentWidget( pageHexView );
+    }
+    free( pBuf );
 
     labelStream->setText( tr("Stream from object %1 %2 obj of unfiltered length %3 bytes %4")
             .arg(ref.ObjectNumber())
