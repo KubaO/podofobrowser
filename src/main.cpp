@@ -27,9 +27,18 @@ int main( int argc, char ** argv ) {
     QApplication a( argc, argv );
     Q_INIT_RESOURCE(podofobrowserrsrc);
 
-    PoDoFoBrowser * mw = new PoDoFoBrowser();    
-
     a.connect( &a, SIGNAL(lastWindowClosed()), &a, SLOT(quit()) );
+
+    if( qApp->argc() >= 2 )
+    {
+        for( int i=1; i<qApp->argc(); i++ )
+            new PoDoFoBrowser( QString::fromLocal8Bit( qApp->argv()[i] ) );
+    }
+    else
+    {
+        // Open empty window
+        new PoDoFoBrowser();
+    }
 
     return a.exec();
 }

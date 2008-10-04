@@ -38,6 +38,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="checkRegularExpression" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
         <property name="text" >
          <string>Regular e&amp;xpression</string>
         </property>
@@ -73,6 +76,9 @@
        <layout class="QHBoxLayout" name="horizontalLayout" >
         <item>
          <widget class="QCheckBox" name="checkPlaceholders" >
+          <property name="enabled" >
+           <bool>false</bool>
+          </property>
           <property name="text" >
            <string>Use p&amp;laceholders</string>
           </property>
@@ -80,6 +86,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="buttonInsert" >
+          <property name="enabled" >
+           <bool>false</bool>
+          </property>
           <property name="text" >
            <string>Insert Place&amp;holder</string>
           </property>
@@ -104,7 +113,7 @@
        </widget>
       </item>
       <item row="0" column="1" >
-       <widget class="QCheckBox" name="checkBoxFindBackwards_2" >
+       <widget class="QCheckBox" name="checkBoxFindBackwards" >
         <property name="text" >
          <string>Find &amp;backwards</string>
         </property>
@@ -128,14 +137,14 @@
        </widget>
       </item>
       <item row="2" column="0" >
-       <widget class="QCheckBox" name="checkBoxFindBackwards" >
+       <widget class="QCheckBox" name="checkBoxFromCursor" >
         <property name="text" >
-         <string>Find &amp;backwards</string>
+         <string>&amp;From Cursor</string>
         </property>
        </widget>
       </item>
       <item row="2" column="1" >
-       <widget class="QCheckBox" name="checkBoxPromtOnReplace" >
+       <widget class="QCheckBox" name="checkBoxPromptOnReplace" >
         <property name="text" >
          <string>&amp;Promt on replace</string>
         </property>
@@ -209,14 +218,47 @@
   <tabstop>checkPlaceholders</tabstop>
   <tabstop>buttonInsert</tabstop>
   <tabstop>checkBoxCaseSensitive</tabstop>
-  <tabstop>checkBoxFindBackwards_2</tabstop>
+  <tabstop>checkBoxFindBackwards</tabstop>
   <tabstop>checkBoxWholeWords</tabstop>
   <tabstop>checkBoxSelectedText</tabstop>
-  <tabstop>checkBoxFindBackwards</tabstop>
-  <tabstop>checkBoxPromtOnReplace</tabstop>
+  <tabstop>checkBoxFromCursor</tabstop>
+  <tabstop>checkBoxPromptOnReplace</tabstop>
   <tabstop>buttonReplace</tabstop>
   <tabstop>buttonClose</tabstop>
  </tabstops>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>buttonClose</sender>
+   <signal>clicked()</signal>
+   <receiver>PoDoFoReplaceDlg</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>385</x>
+     <y>445</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>216</x>
+     <y>235</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonReplace</sender>
+   <signal>clicked()</signal>
+   <receiver>PoDoFoReplaceDlg</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>302</x>
+     <y>445</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>216</x>
+     <y>235</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

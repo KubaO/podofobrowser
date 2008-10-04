@@ -41,7 +41,7 @@ class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
     Q_OBJECT
 
  public:
-    PoDoFoBrowser();
+    PoDoFoBrowser( const QString & filename = QString::null );
     ~PoDoFoBrowser();
 
  private slots:
@@ -79,6 +79,7 @@ class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
     void editFindPrevious();
     void editReplace();
     void editGotoObject();
+    void editGotoPage();
 
     void viewRefreshView();
 
@@ -97,7 +98,6 @@ class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
     void loadConfig();
     void saveConfig();
 
-    void parseCmdLineArgs();
     void clear();
 
     bool saveObject();

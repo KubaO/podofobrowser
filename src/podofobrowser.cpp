@@ -24,6 +24,7 @@
 #include "ui_podofoaboutdlg.h"
 #include "ui_podofofinddlg.h"
 #include "ui_podofogotodlg.h"
+#include "ui_podofogotopagedlg.h"
 #include "ui_podoforeplacedlg.h"
 #include "pdfobjectmodel.h"
 
@@ -62,7 +63,7 @@ private:
     unsigned long m_lGeneration;
 };
 
-PoDoFoBrowser::PoDoFoBrowser()
+PoDoFoBrowser::PoDoFoBrowser( const QString & filename )
     : QMainWindow(),
       PoDoFoBrowserBase(),
       m_pDocument( NULL ),
@@ -97,12 +98,15 @@ PoDoFoBrowser::PoDoFoBrowser()
     connect( actionFindPrevious,  SIGNAL( activated() ), this, SLOT( editFindPrevious() ) );
     connect( actionReplace,       SIGNAL( activated() ), this, SLOT( editReplace() ) );
     connect( actionGotoObject,    SIGNAL( activated() ), this, SLOT( editGotoObject() ) );
+    connect( actionGotoPage,      SIGNAL( activated() ), this, SLOT( editGotoPage() ) );
 
     show();
     statusBar()->showMessage( tr("Ready"), 2000 );
 
     loadConfig();
-    parseCmdLineArgs();
+
+    if( !filename.isNull() )
+        fileOpen( filename );
 }
 
 void PoDoFoBrowser::ModelChange(PdfObjectModel* newModel)
@@ -188,14 +192,6 @@ void PoDoFoBrowser::saveConfig()
     settings.setValue(QString::fromUtf8("/geometry/width"), width() );
     settings.setValue(QString::fromUtf8("/geometry/height"), height() );
     settings.setValue(QString::fromUtf8("/view/catalog"), actionCatalogView->isChecked() );
-}
-
-void PoDoFoBrowser::parseCmdLineArgs()
-{
-    if( qApp->argc() >= 2 )
-    {
-        fileOpen( QString::fromLocal8Bit( qApp->argv()[1] ) );
-    }
 }
 
 void PoDoFoBrowser::clear()
@@ -662,17 +658,109 @@ void PoDoFoBrowser::editFindPrevious()
 
 void PoDoFoBrowser::editReplace()
 {
-    // TODO: Wrap this dialog into a nice interface
     Ui::PoDoFoReplaceDlg dlgui;
     QDialog dlg;
     dlgui.setupUi( &dlg );
 
     if( dlg.exec() == QDialog::Accepted ) 
     {
+        QString sFind     = dlgui.comboBoxText->currentText();
+        QString sReplace  = dlgui.comboBoxReplace->currentText();
 
+        QTextDocument::FindFlags findFlags = 0;
 
+        if( dlgui.checkBoxCaseSensitive->isChecked() )
+            findFlags |= QTextDocument::FindCaseSensitively;
+
+        if( dlgui.checkBoxWholeWords->isChecked() )
+            findFlags |= QTextDocument::FindWholeWords;
+
+        bool bFromCursor = dlgui.checkBoxFromCursor->isChecked();
+        bool bBackwards  = dlgui.checkBoxFindBackwards->isChecked();
+        bool bSelected   = dlgui.checkBoxSelectedText->isChecked();
+        bool bPrompt     = dlgui.checkBoxPromptOnReplace->isChecked();
+
+        int nCount = 0;
+
+        while( true ) 
+        {
+            // Find the text
+            // TODO: Reg exp
+            bool bFound;
+            if( !bBackwards ) 
+                bFound = textStream->find( sFind, findFlags );
+            else
+            {
+                int cursorPos = textStream->textCursor().position();
+                bFound = textStream->find( sFind, findFlags | QTextDocument::FindBackward );
+    
+                // we most likely found the previous text again:
+                // so move the cursor before the selection and search again
+                if( bFound && cursorPos == textStream->textCursor().position() && textStream->textCursor().hasSelection() )
+                {
+                    QTextCursor cursor = textStream->textCursor();
+                    cursor.setPosition( cursor.selectionStart() );
+                    textStream->setTextCursor( cursor );
+
+                    bFound = textStream->find( sFind, findFlags | QTextDocument::FindBackward );
+                }
+            }
+
+            if( !bFound )
+            {
+                if( !nCount )
+                    QMessageBox::warning( this, tr("Replace"), tr("The Text \"%1\" could not be found!").arg( sFind ) );
+                break;
+            }
+
+            // Select the text
+            textStream->textCursor().movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, sFind.length());
+            
+            // Prompt
+            bool bPerformReplace = true;
+            if( bPrompt ) 
+            {
+                QMessageBox msgBox;
+                msgBox.setWindowTitle( tr("Replace confirmantion") );
+                msgBox.setText( tr("Found an occurence of your search term. What do you want to do?") );
+                QPushButton* buttonReplace    = msgBox.addButton(tr("Replace"), QMessageBox::ActionRole);
+                QPushButton* buttonReplaceAll = msgBox.addButton(tr("Replace All"), QMessageBox::ActionRole);
+                QPushButton* buttonFindNext   = msgBox.addButton(tr("Find Next"), QMessageBox::ActionRole);
+                QPushButton* buttonClose      = msgBox.addButton(tr("Close"), QMessageBox::ActionRole);
+
+                msgBox.exec();
+
+                if (msgBox.clickedButton() == buttonReplace ) 
+                {
+                    bPerformReplace = true;
+                } 
+                else if (msgBox.clickedButton() == buttonReplaceAll) 
+                {
+                    bPrompt = false;
+                    bPerformReplace = true;
+                }
+                else if (msgBox.clickedButton() == buttonFindNext) 
+                {
+                    bPerformReplace = false;
+                }
+                else if (msgBox.clickedButton() == buttonClose) 
+                {
+                    bPerformReplace = false;
+                    break;
+                }
+            }
+
+            if( bPerformReplace ) 
+            {
+                ++nCount;
+                textStream->textCursor().removeSelectedText();
+                textStream->textCursor().insertText( sReplace );
+            }
+        }
+        
+
+        QMessageBox::information( this, tr("Replace"), tr("Replaced %1 occurences of \"%2\".").arg( nCount ).arg( sFind ) );
     }
-    // TODO: Replace
 }
 
 void PoDoFoBrowser::editGotoObject()
@@ -691,6 +779,29 @@ void PoDoFoBrowser::editGotoObject()
                                                 dlgUi.spinGenerationNumber->value() );
 
         this->GotoObject();
+    }
+}
+
+void PoDoFoBrowser::editGotoPage()
+{
+    QDialog dlg( this );
+    Ui::PoDoFoGotoPageDlg dlgUi;
+    dlgUi.setupUi( &dlg );
+
+    dlgUi.spinPage->setValue( 0 );
+    dlgUi.spinPage->setMinimum( 1 );
+    dlgUi.spinPage->setMaximum( m_pDocument->GetPageCount() );
+    dlgUi.spinPage->selectAll();
+
+    if( dlg.exec() == QDialog::Accepted ) 
+    {
+        PdfPage* pPage = m_pDocument->GetPage( dlgUi.spinPage->value() - 1 );
+        if( pPage ) 
+        {
+            m_gotoReference = pPage->GetObject()->Reference();
+
+            this->GotoObject();
+        }
     }
 }
 

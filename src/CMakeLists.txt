@@ -3,6 +3,7 @@ QT4_WRAP_UI(podofobrowser_UIC_HEADERS
 	podofobrowserbase.ui
 	podofofinddlg.ui
 	podofogotodlg.ui
+	podofogotopagedlg.ui
 	podoforeplacedlg.ui
 	)
 
