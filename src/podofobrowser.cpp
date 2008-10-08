@@ -45,6 +45,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <algorithm>
 
 using namespace PoDoFo;
 

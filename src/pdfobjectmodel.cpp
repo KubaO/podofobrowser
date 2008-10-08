@@ -8,6 +8,7 @@
 
 #include <utility>
 using std::pair;
+#include <algorithm>
 #include <vector>
 #include <cassert>
 #include <exception>
