@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2006 Evan Teran
+Copyright (QByteArray) 2006 Evan Teran
                    eteran@alum.rit.edu
 
 This program is free software; you can redistribute it and/or modify
@@ -41,7 +41,7 @@ QHexView::QHexView(QWidget * parent) : QAbstractScrollArea(parent),
 		m_RowWidth(16), m_WordWidth(1), m_AddressColor(Qt::red), 
 		m_ShowHex(true), m_ShowAscii(true), 
 		m_ShowAddress(true), m_ShowComments(true), m_Origin(0), m_AddressOffset(0), 
-		m_SelectionStart(-1), m_SelectionEnd(-1), m_Data(0),
+		m_SelectionStart(-1), m_SelectionEnd(-1), m_io(0),
 		m_Highlighting(Highlighting_None),
 		m_EvenWord(Qt::blue), m_NonPrintableText(Qt::red), 
 		m_UnprintableChar('.'), m_ShowLine1(true), m_ShowLine2(true), 
@@ -104,7 +104,10 @@ void QHexView::repaint() {
 // Desc: returns how much data we are viewing
 //------------------------------------------------------------------------------
 int QHexView::dataSize() const {
-	return m_Data != 0 ? m_Data->size() : 0;
+	if (m_io == 0)
+		return 0;
+	else
+		return m_dataSize;
 }
 
 //------------------------------------------------------------------------------
@@ -220,18 +223,6 @@ void QHexView::mnuCopy() {
 //------------------------------------------------------------------------------
 void QHexView::mnuSetFont() {
     setFont(QFontDialog::getFont(0, font(), this));
-}
-
-//------------------------------------------------------------------------------
-// Name: clear()
-// Desc: clears all data from the view
-//------------------------------------------------------------------------------
-void QHexView::clear() {
-	if(m_Data != 0) {
-		m_Data->clear();
-	}
-
-	repaint();
 }
 
 //------------------------------------------------------------------------------
@@ -688,9 +679,22 @@ void QHexView::mouseReleaseEvent(QMouseEvent *event) {
 //------------------------------------------------------------------------------
 // Name: 
 //------------------------------------------------------------------------------
-void QHexView::setData(C *d) {
+void QHexView::setData(QIODevice *d, size_t s)
+{
+	m_buf.clear();
+	m_bufOffset = 0;
 
-	m_Data = d;
+	if (d)
+	{
+		m_io = d;
+		m_dataSize = s;
+	}
+	else
+	{
+		// Clear the viewer
+		m_io = 0;
+		m_dataSize = 0;
+	}
 	
 	deselect();
 	updateScrollbars();
@@ -755,13 +759,58 @@ void QHexView::drawComments(QPainter &painter, unsigned int offset, unsigned int
 		);
 }
 
+void QHexView::fetchData(unsigned int offset, unsigned int size) const
+{
+	if (!m_io)
+		return;
+
+	if (m_bufOffset <= offset && m_bufOffset + m_buf.size() >= offset + size)
+		// Request already satisfied; buffer contains required data.
+		return;
+
+	// We need to do some real work, since the buffer needs more data. If we're
+	// doing sequential I/O that means reading more data. For random I/O we throw
+	// the old data away and replace it.
+	if (m_io->isSequential())
+	{
+		// Read from the stream and append to our internal bufffer until
+		// we have enough data to satisfy the caller's request or we know
+		// we can read nothing more.
+		// m_bufOffset will always be zero for sequential streams.
+		while (offset + size < m_bufOffset + m_buf.size())
+		{
+			static const int fd_max_read = 8192;
+			char readBuffer[fd_max_read];
+			qint64 bytesRead = m_io->read(&readBuffer[0], fd_max_read);
+			if (bytesRead <= 0)
+				break;
+			m_buf.append( QByteArray(&readBuffer[0], bytesRead) );
+		}
+	}
+	else
+	{
+		// Device is random I/O capable, so we can just grab a new
+		// buffer to work on and throw out the old one. No attempt
+		// to check for reading past the end of the available data, etc
+		// is made here.
+		static const int readahead = 4096;
+		m_io->seek(offset);
+		m_buf = m_io->read(size + readahead);
+		m_bufOffset = offset;
+	}
+}
+
 //------------------------------------------------------------------------------
 // Name: 
 //------------------------------------------------------------------------------
 void QHexView::drawHexDump(QPainter &painter, unsigned int offset, unsigned int row, int &wordCount) const {
 
-	const C &dataRef(*m_Data);
+	const QByteArray &dataRef(m_buf);
 	const int size = dataSize();
+
+	// Try to fill the buffer to satisfy the request
+	fetchData(offset, m_WordWidth * m_RowWidth );
+	// TODO FIXME: test to make sure we managed to obtain the data required
 
 	// i is the word we are currently rendering
 	for(int i = 0; i < m_RowWidth; ++i) {
@@ -782,34 +831,39 @@ void QHexView::drawHexDump(QPainter &painter, unsigned int offset, unsigned int 
 
 			QString byteBuffer;		
 
+			// Location of the start of the current word within the
+			// current working buffer (rather than absolute
+			// stream position).
+			const int bufIdx = index - m_bufOffset;
+	
 			switch(m_WordWidth) {
 			case 1:
-				value.b |= dataRef[index + 0];
+				value.b |= dataRef[bufIdx + 0];
 				byteBuffer.sprintf("%02x", value.b);
 				break;
 			case 2:
-				value.w |= dataRef[index + 0];
-				value.w |= dataRef[index + 1] << 8;
+				value.w |= dataRef[bufIdx + 0];
+				value.w |= dataRef[bufIdx + 1] << 8;
 				byteBuffer.sprintf("%04x", value.w);
 				break;
 			case 4:
-				value.d |= dataRef[index + 0];
-				value.d |= dataRef[index + 1] << 8;
-				value.d |= dataRef[index + 2] << 16;
-				value.d |= dataRef[index + 3] << 24;
+				value.d |= dataRef[bufIdx + 0];
+				value.d |= dataRef[bufIdx + 1] << 8;
+				value.d |= dataRef[bufIdx + 2] << 16;
+				value.d |= dataRef[bufIdx + 3] << 24;
 				byteBuffer.sprintf("%08x", value.d);
 				break;
 			case 8:
 				// we need the cast to ensure that it won't assume 32-bit
 				// and drop bits shifted more that 31
-				value.q |= static_cast<quint64>(dataRef[index + 0]);
-				value.q |= static_cast<quint64>(dataRef[index + 1]) << 8;
-				value.q |= static_cast<quint64>(dataRef[index + 2]) << 16;
-				value.q |= static_cast<quint64>(dataRef[index + 3]) << 24;
-				value.q |= static_cast<quint64>(dataRef[index + 4]) << 32;
-				value.q |= static_cast<quint64>(dataRef[index + 5]) << 40;
-				value.q |= static_cast<quint64>(dataRef[index + 6]) << 48;
-				value.q |= static_cast<quint64>(dataRef[index + 7]) << 56;
+				value.q |= static_cast<quint64>(dataRef[bufIdx + 0]);
+				value.q |= static_cast<quint64>(dataRef[bufIdx + 1]) << 8;
+				value.q |= static_cast<quint64>(dataRef[bufIdx + 2]) << 16;
+				value.q |= static_cast<quint64>(dataRef[bufIdx + 3]) << 24;
+				value.q |= static_cast<quint64>(dataRef[bufIdx + 4]) << 32;
+				value.q |= static_cast<quint64>(dataRef[bufIdx + 5]) << 40;
+				value.q |= static_cast<quint64>(dataRef[bufIdx + 6]) << 48;
+				value.q |= static_cast<quint64>(dataRef[bufIdx + 7]) << 56;
 				byteBuffer.sprintf("%016llx", value.q);
 				break;
 			}
@@ -866,11 +920,14 @@ void QHexView::drawHexDump(QPainter &painter, unsigned int offset, unsigned int 
 //------------------------------------------------------------------------------
 void QHexView::drawAsciiDump(QPainter &painter, unsigned int offset, unsigned int row) const {
 	
-	const C &dataRef(*m_Data);
+	const QByteArray &dataRef(m_buf);
 	const int size = dataSize();
 	
 	// i is the byte index
 	const int charsPerRow = bytesPerRow();
+
+	// Try to ensure we have enough data to work with
+	fetchData(offset, charsPerRow);
 	
 	for(int i = 0; i < charsPerRow; ++i) {
 		
@@ -878,7 +935,9 @@ void QHexView::drawAsciiDump(QPainter &painter, unsigned int offset, unsigned in
 
 		if(index < size) {
 			
-			const char ch = dataRef[index];
+			// Read the char out of the current window into the data
+			const char ch = dataRef[index - m_bufOffset];
+
 			const int drawLeft = asciiDumpLeft() + i * m_FontWidth;
 			const bool printable = isPrintable(ch);
 
@@ -999,28 +1058,25 @@ void QHexView::deselect() {
 }
 
 //------------------------------------------------------------------------------
-// Name: allBytes() const
-//------------------------------------------------------------------------------
-QByteArray QHexView::allBytes() const {
-	QByteArray ret;
-	const C &dataRef(*m_Data);
-	const int size = dataSize();
-	for(int i = 0; i < size; ++i) {
-		ret.push_back(dataRef[i]);
-	}
-	return ret;
-}
-
-//------------------------------------------------------------------------------
 // Name: selectedBytes() const
 //------------------------------------------------------------------------------
 QByteArray QHexView::selectedBytes() const {
 	QByteArray ret;
-	const C &dataRef(*m_Data);
+	const QByteArray &dataRef(m_buf);
 	const int size = dataSize();
+	// TODO: For sequential streams, stop reading when we hit the end
+	// of the currently read data, since we know that no bytes that're
+	// as yet unseen may be selected.
 	for(int i = 0; i < size; ++i) {
 		if(isSelected(i)) {
-			ret.push_back(dataRef[i]);
+			// Fetch the required byte. The fetch code will optimise
+			// this to operate efficiently.
+			fetchData(i, 1);
+			// The fetch must not fail, or we'll try to access a negative
+			// index, overflow, and read unallocated memory.
+			Q_ASSERT(i >= m_bufOffset);
+			ret.push_back(dataRef[i - m_bufOffset]);
+			//qDebug("i: %i, o: %i, data: %c (bufstate: %i + %i)", i, i - m_bufOffset, dataRef[i - m_bufOffset], m_bufOffset, m_buf.size());
 		}
 	}
 	

@@ -124,6 +124,7 @@ class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
 
     QTextDocument::FindFlags m_findFlags;
     QByteArray*           m_pByteArray;
+    QIODevice*            m_pByteArrayIO;
 };
 
 QModelIndex PoDoFoBrowser::GetSelectedItem()

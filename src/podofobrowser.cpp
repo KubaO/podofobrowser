@@ -42,6 +42,7 @@
 #include <QSplitter>
 #include <QStatusBar>
 #include <QTextEdit>
+#include <QBuffer>
 
 #include <cassert>
 #include <iostream>
@@ -72,7 +73,8 @@ PoDoFoBrowser::PoDoFoBrowser( const QString & filename )
       m_pBackgroundLoader( NULL ),
       m_pDelayedLoadProgress( NULL ),
       m_bHasFindText( false ),
-      m_pByteArray( NULL )
+      m_pByteArray( NULL ),
+      m_pByteArrayIO (NULL)
 {
     setupUi(this);
     setObjectName(QString::fromUtf8("PoDoFoBrowser"));
@@ -156,6 +158,7 @@ PoDoFoBrowser::~PoDoFoBrowser()
     saveConfig();
 
     delete m_pDocument;
+    delete m_pByteArrayIO;
     delete m_pByteArray;
 }
 
@@ -215,7 +218,9 @@ void PoDoFoBrowser::clear()
     delete m_pDocument;
     m_pDocument       = NULL;
 
-    hexView->setData( NULL );
+    hexView->clear();
+    delete m_pByteArrayIO;
+    m_pByteArrayIO = NULL;
     delete m_pByteArray;
     m_pByteArray = NULL;
 }
@@ -237,7 +242,9 @@ void PoDoFoBrowser::fileNew()
 
     delete oldDoc;
 
-    hexView->setData( NULL );
+    hexView->clear();
+    delete m_pByteArrayIO;
+    m_pByteArrayIO = NULL;
     delete m_pByteArray;
     m_pByteArray = NULL;
 }
@@ -339,7 +346,9 @@ void PoDoFoBrowser::treeSelectionChanged( const QModelIndex & current, const QMo
     buttonExport->setEnabled( false );
     textStream->setEnabled(false);
         
-    hexView->setData( NULL );
+    hexView->clear();
+    delete m_pByteArrayIO;
+    m_pByteArrayIO = NULL;
     delete m_pByteArray;
     m_pByteArray = NULL;
 
@@ -421,8 +430,14 @@ void PoDoFoBrowser::treeSelectionChanged( const QModelIndex & current, const QMo
     }
     else
     {
+	// Read the whole stream into memory and point the hex editor at it.
+	// Later we'll support progressive I/O.
         m_pByteArray = new QByteArray( pBuf, lLen );
-        hexView->setData( m_pByteArray );
+	m_pByteArrayIO = new QBuffer( m_pByteArray );
+	// Open for random R/W I/O
+	m_pByteArrayIO->open(QIODevice::ReadWrite);
+	// and tell the hex editor to display the new data
+        hexView->setData( m_pByteArrayIO, m_pByteArrayIO->size() );
         displayInfo = tr("contains binary data");
         stackedWidget->setCurrentWidget( pageHexView );
     }

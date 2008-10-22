@@ -1,6 +1,11 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.4)
 PROJECT(PoDoFoBrowser)
 
+# See CMake documentation on CMP0003
+if(COMMAND cmake_policy)
+  cmake_policy(SET CMP0003 NEW)
+endif(COMMAND cmake_policy)
+
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
 MESSAGE("Remember to set QTDIR in your environment if qmake is not found")

@@ -2,6 +2,10 @@
 Copyright (C) 2006 Evan Teran
                    eteran@alum.rit.edu
 
+Modified by Craig Ringer to use a QIODevice interface rather than a
+pre-allocated byte array, and to operate on a view of the target data
+rather than owning a copy of the data.
+
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
@@ -35,7 +39,6 @@ class QHexView : public QAbstractScrollArea {
 	Q_OBJECT
 	
 public:
-	typedef QByteArray C;
 #if QT_POINTER_SIZE == 4
 	typedef uint32_t address_t;
 #elif QT_POINTER_SIZE == 8
@@ -91,19 +94,51 @@ private:
 	bool m_ShowAddress;		// should we show the address display?
 	bool m_ShowComments;
 
+	QIODevice * m_io;		// The data stream. We do not own this object
+					// and must never destroy it.
+					
+	size_t m_dataSize;		// Size of data source being operated on.
+
+	mutable QByteArray m_buf;	// The current data segment being operated on.
+					// For a random I/O device it's just the visible
+					// page; for a sequential I/O device it's everything
+					// up to the current point.
+	
+	mutable size_t m_bufOffset;	// Offset in bytes of the buffer into the data.
+
 public:
-	void setData(C *d);
+	/**
+	 * Operate on the I/O device `d', which must remain valid until this
+	 * object is destroyed, setData(...) is called with a different
+	 * target, or clear() is called.
+	 *
+	 * The second parameter, s, is the total size in bytes of the available data.
+	 * For a random I/O stream you may just pass size() ; for a sequential stream
+	 * you'll have to derive it some other way.
+	 *
+	 * The target device must already be open.
+	 *
+	 * If the target device is not seekable, the hex editor widget may
+	 * use quite a bit of memory or attempt to use a temp file to store
+	 * the data.
+	 */
+	void setData(QIODevice* d, size_t s);
+
+	/**
+	 * Release all references to the current data being accessed and reset the
+	 * viewer to empty.
+	 */
+	inline void clear() { setData(0,0); }
+
 	void setAddressOffset(address_t offset);
 	void scrollTo(unsigned int offset);
 	
 	address_t selectedBytesAddress() const;
 	unsigned int selectedBytesSize() const;
 	QByteArray selectedBytes() const;
-	QByteArray allBytes() const;
 	QMenu *createStandardContextMenu();
 
 public slots:
-	void clear();
 	void selectAll();
 	void deselect();
 	bool hasSelectedText() const;
@@ -111,6 +146,13 @@ public slots:
 	void mnuCopy();
 
 private:
+	// Attempt to ensure that the working buffer contains data from
+	// `offset' up to at least `size'. Prefetching etc may be used
+	// internally.
+	// This operation does touch object state, but only internal
+	// machinery invisible though the interface.
+	void fetchData(unsigned int offset, unsigned int size) const;
+
 	void updateScrollbars();
 	
 	bool isSelected(int index) const;
@@ -148,7 +190,6 @@ private:
 	int m_SelectionEnd;				// index of last selected word (or -1)
 	int m_FontWidth;				// width of a character in this font
 	int m_FontHeight;				// height of a character in this font
-	C *m_Data;						// the current data
 	
 	enum {
 		Highlighting_None,
