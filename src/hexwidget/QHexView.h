@@ -104,7 +104,7 @@ private:
 					// page; for a sequential I/O device it's everything
 					// up to the current point.
 	
-	mutable size_t m_bufOffset;	// Offset in bytes of the buffer into the data.
+	mutable unsigned int m_bufOffset;	// Offset in bytes of the buffer into the data.
 
 public:
 	/**
