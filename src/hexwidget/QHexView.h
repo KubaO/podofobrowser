@@ -31,6 +31,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <QString>
 #include <QVector>
 
+// added to pacify gcc44
+#include <stdint.h>
+#include <ctype.h>
+
+
+
 class QMenu;
 class ByteStream;
 class CommentServerInterface;
