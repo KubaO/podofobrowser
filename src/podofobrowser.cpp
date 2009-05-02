@@ -401,7 +401,7 @@ void PoDoFoBrowser::treeSelectionChanged( const QModelIndex & current, const QMo
     // XXX this should be in the model
     const PdfStream * const stream = object->GetStream();
     char * pBuf = NULL;
-    long lLen = -1;
+    pdf_long lLen = -1;
     try {
         stream->GetFilteredCopy( &pBuf, &lLen );
     } catch( PdfError & e ) {
@@ -930,7 +930,7 @@ void PoDoFoBrowser::slotExportStream()
 
     // TODO: progressive reading of stream
     char* pBuf = 0;
-    long lLen = 0;
+    pdf_long lLen = 0;
     try {
         obj->GetStream()->GetFilteredCopy( &pBuf, &lLen );
     } catch( PdfError & e ) {
@@ -962,7 +962,7 @@ void PoDoFoBrowser::toolsToHex()
     std::auto_ptr<PdfFilter> hexfilter = PdfFilterFactory::Create(ePdfFilter_ASCIIHexDecode);
 
     char* pBuffer = NULL;
-    long  lLen    = 0;
+    pdf_long  lLen    = 0;
     QString text  = QInputDialog::getText(
 			    this, tr("PoDoFoBrowser: To Hex"),
 			    tr("Please input a string (7-bit ASCII only):") );
@@ -988,7 +988,7 @@ void PoDoFoBrowser::toolsFromHex()
     std::auto_ptr<PdfFilter> hexfilter = PdfFilterFactory::Create(ePdfFilter_ASCIIHexDecode);
 
     char* pBuffer = NULL;
-    long  lLen    = 0;
+    pdf_long  lLen    = 0;
     QString text  = QInputDialog::getText(
 		    		this, tr("PoDoFoBrowser: From Hex"),
 				tr("Please input a hex string:") );
