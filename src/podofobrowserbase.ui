@@ -1,7 +1,8 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>PoDoFoBrowserBase</class>
- <widget class="QMainWindow" name="PoDoFoBrowserBase" >
-  <property name="geometry" >
+ <widget class="QMainWindow" name="PoDoFoBrowserBase">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -9,176 +10,159 @@
     <height>629</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>PoDoFo Browser</string>
   </property>
-  <widget class="QWidget" name="widget" >
-   <property name="geometry" >
-    <rect>
-     <x>0</x>
-     <y>58</y>
-     <width>758</width>
-     <height>571</height>
-    </rect>
-   </property>
-   <layout class="QVBoxLayout" >
-    <property name="spacing" >
+  <property name="windowIcon">
+   <iconset resource="podofobrowserrsrc.qrc">
+    <normaloff>:/icons/podofobrowser_64.png</normaloff>:/icons/podofobrowser_64.png</iconset>
+  </property>
+  <widget class="QWidget" name="widget">
+   <layout class="QVBoxLayout">
+    <property name="spacing">
      <number>6</number>
     </property>
-    <property name="margin" >
+    <property name="margin">
      <number>9</number>
     </property>
     <item>
-     <widget class="QSplitter" name="splitter" >
-      <property name="orientation" >
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
-      <widget class="QTreeView" name="listObjects" >
-       <property name="mouseTracking" >
-        <bool>false</bool>
-       </property>
-       <property name="alternatingRowColors" >
-        <bool>true</bool>
-       </property>
-       <property name="indentation" >
-        <number>15</number>
-       </property>
-       <property name="rootIsDecorated" >
-        <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QSplitter" name="splitter3" >
-       <property name="orientation" >
+      <widget class="QSplitter" name="splitter3">
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <widget class="QSplitter" name="splitter2" >
-        <property name="orientation" >
+       <widget class="QSplitter" name="splitter2">
+        <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
-        <widget class="QWidget" name="layout3" >
-         <layout class="QVBoxLayout" >
-          <property name="spacing" >
+        <widget class="QWidget" name="layout3">
+         <layout class="QVBoxLayout">
+          <property name="spacing">
            <number>6</number>
           </property>
-          <property name="margin" >
+          <property name="margin">
            <number>0</number>
           </property>
           <item>
-           <widget class="QLabel" name="textLabel1" >
-            <property name="text" >
+           <widget class="QLabel" name="textLabel1">
+            <property name="text">
              <string>Contents of the associated stream:</string>
             </property>
-            <property name="wordWrap" >
+            <property name="wordWrap">
              <bool>false</bool>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="labelStream" >
-            <property name="text" >
+           <widget class="QLabel" name="labelStream">
+            <property name="text">
              <string/>
             </property>
-            <property name="wordWrap" >
+            <property name="wordWrap">
              <bool>false</bool>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QStackedWidget" name="stackedWidget" >
-            <property name="currentIndex" >
+           <widget class="QStackedWidget" name="stackedWidget">
+            <property name="currentIndex">
              <number>0</number>
             </property>
-            <widget class="QWidget" name="pageStream" >
-             <property name="geometry" >
-              <rect>
-               <x>0</x>
-               <y>0</y>
-               <width>738</width>
-               <height>246</height>
-              </rect>
-             </property>
-             <layout class="QVBoxLayout" name="verticalLayout" >
+            <widget class="QWidget" name="pageStream">
+             <layout class="QVBoxLayout" name="verticalLayout">
               <item>
-               <widget class="QTextEdit" name="textStream" >
-                <property name="undoRedoEnabled" >
+               <widget class="QTextEdit" name="textStream">
+                <property name="undoRedoEnabled">
                  <bool>false</bool>
                 </property>
-                <property name="readOnly" >
+                <property name="readOnly">
                  <bool>false</bool>
                 </property>
-                <property name="acceptRichText" >
+                <property name="acceptRichText">
                  <bool>false</bool>
                 </property>
                </widget>
               </item>
              </layout>
             </widget>
-            <widget class="QWidget" name="pageHexView" >
-             <property name="geometry" >
-              <rect>
-               <x>0</x>
-               <y>0</y>
-               <width>738</width>
-               <height>246</height>
-              </rect>
-             </property>
-             <layout class="QVBoxLayout" name="verticalLayout_2" >
+            <widget class="QWidget" name="pageHexView">
+             <layout class="QVBoxLayout" name="verticalLayout_2">
               <item>
-               <widget class="QHexView" native="1" name="hexView" />
+               <widget class="QHexView" name="hexView" native="true"/>
               </item>
              </layout>
             </widget>
            </widget>
           </item>
           <item>
-           <layout class="QHBoxLayout" >
-            <property name="spacing" >
+           <layout class="QHBoxLayout">
+            <property name="spacing">
              <number>6</number>
             </property>
-            <property name="margin" >
+            <property name="margin">
              <number>0</number>
             </property>
             <item>
-             <widget class="QPushButton" name="buttonImport" >
-              <property name="enabled" >
+             <widget class="QPushButton" name="buttonImport">
+              <property name="enabled">
                <bool>false</bool>
               </property>
-              <property name="text" >
+              <property name="text">
                <string>&amp;Import Stream ...</string>
               </property>
-              <property name="shortcut" >
+              <property name="shortcut">
                <string>Alt+I</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="buttonExport" >
-              <property name="enabled" >
+             <widget class="QPushButton" name="buttonExport">
+              <property name="enabled">
                <bool>false</bool>
               </property>
-              <property name="text" >
+              <property name="text">
                <string>&amp;Export Stream ...</string>
               </property>
-              <property name="shortcut" >
+              <property name="shortcut">
                <string>Alt+E</string>
               </property>
              </widget>
             </item>
             <item>
              <spacer>
-              <property name="orientation" >
+              <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <property name="sizeType" >
+              <property name="sizeType">
                <enum>QSizePolicy::Expanding</enum>
               </property>
-              <property name="sizeHint" stdset="0" >
+              <property name="sizeHint" stdset="0">
                <size>
                 <width>241</width>
                 <height>21</height>
                </size>
               </property>
              </spacer>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="checkEditable">
+              <property name="text">
+               <string>Editable</string>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="commitButton">
+              <property name="text">
+               <string>Commit</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -190,408 +174,400 @@
     </item>
    </layout>
   </widget>
-  <widget class="QToolBar" name="toolBar" >
-   <property name="geometry" >
-    <rect>
-     <x>0</x>
-     <y>24</y>
-     <width>758</width>
-     <height>34</height>
-    </rect>
-   </property>
-   <property name="orientation" >
+  <widget class="QToolBar" name="toolBar">
+   <property name="orientation">
     <enum>Qt::Horizontal</enum>
    </property>
-   <attribute name="toolBarArea" >
+   <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
-   <attribute name="toolBarBreak" >
+   <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="fileNewAction" />
-   <addaction name="fileOpenAction" />
-   <addaction name="fileSaveAction" />
-   <addaction name="fileReloadAction" />
-   <addaction name="separator" />
-   <addaction name="actionInsert_Before" />
-   <addaction name="actionInsert_After" />
-   <addaction name="actionInsert_Key" />
-   <addaction name="actionInsert_Child" />
-   <addaction name="actionCreateNewObject" />
-   <addaction name="actionRemove_Item" />
-   <addaction name="separator" />
-   <addaction name="actionCatalogView" />
+   <addaction name="fileNewAction"/>
+   <addaction name="fileOpenAction"/>
+   <addaction name="fileSaveAction"/>
+   <addaction name="fileReloadAction"/>
+   <addaction name="separator"/>
+   <addaction name="actionInsert_Before"/>
+   <addaction name="actionInsert_After"/>
+   <addaction name="actionInsert_Key"/>
+   <addaction name="actionInsert_Child"/>
+   <addaction name="actionCreateNewObject"/>
+   <addaction name="actionRemove_Item"/>
+   <addaction name="separator"/>
+   <addaction name="actionCatalogView"/>
   </widget>
-  <widget class="QMenuBar" name="MenuBar" >
-   <property name="geometry" >
+  <widget class="QMenuBar" name="MenuBar">
+   <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
      <width>758</width>
-     <height>24</height>
+     <height>25</height>
     </rect>
    </property>
-   <widget class="QMenu" name="helpMenu" >
-    <property name="title" >
+   <widget class="QMenu" name="helpMenu">
+    <property name="title">
      <string>&amp;Help</string>
     </property>
-    <addaction name="helpAboutAction" />
+    <addaction name="helpAboutAction"/>
    </widget>
-   <widget class="QMenu" name="fileMenu" >
-    <property name="title" >
+   <widget class="QMenu" name="fileMenu">
+    <property name="title">
      <string>&amp;File</string>
     </property>
-    <addaction name="fileNewAction" />
-    <addaction name="fileOpenAction" />
-    <addaction name="fileSaveAction" />
-    <addaction name="fileSaveAsAction" />
-    <addaction name="fileReloadAction" />
-    <addaction name="separator" />
-    <addaction name="fileExitAction" />
+    <addaction name="fileNewAction"/>
+    <addaction name="fileOpenAction"/>
+    <addaction name="fileSaveAction"/>
+    <addaction name="fileSaveAsAction"/>
+    <addaction name="fileReloadAction"/>
+    <addaction name="separator"/>
+    <addaction name="fileExitAction"/>
    </widget>
-   <widget class="QMenu" name="menuView" >
-    <property name="title" >
+   <widget class="QMenu" name="menuView">
+    <property name="title">
      <string>View</string>
     </property>
-    <addaction name="actionRefreshView" />
-    <addaction name="actionCatalogView" />
+    <addaction name="actionRefreshView"/>
+    <addaction name="actionCatalogView"/>
    </widget>
-   <widget class="QMenu" name="Tools" >
-    <property name="title" >
+   <widget class="QMenu" name="Tools">
+    <property name="title">
      <string>&amp;Tools</string>
     </property>
-    <addaction name="toolsToHexAction" />
-    <addaction name="toolsFromHexAction" />
-    <addaction name="actionToolsDisplayCodeForSelection" />
+    <addaction name="toolsToHexAction"/>
+    <addaction name="toolsFromHexAction"/>
+    <addaction name="actionToolsDisplayCodeForSelection"/>
    </widget>
-   <widget class="QMenu" name="Edit" >
-    <property name="title" >
+   <widget class="QMenu" name="Edit">
+    <property name="title">
      <string>&amp;Edit</string>
     </property>
-    <addaction name="editCutAction" />
-    <addaction name="editnew_itemAction" />
-    <addaction name="editPasteAction" />
-    <addaction name="separator" />
-    <addaction name="actionInsert_Before" />
-    <addaction name="actionInsert_After" />
-    <addaction name="actionInsert_Key" />
-    <addaction name="actionInsert_Child" />
-    <addaction name="separator" />
-    <addaction name="actionCreateNewObject" />
-    <addaction name="separator" />
-    <addaction name="actionRemove_Item" />
-    <addaction name="separator" />
-    <addaction name="actionFind" />
-    <addaction name="actionFindNext" />
-    <addaction name="actionFindPrevious" />
-    <addaction name="actionReplace" />
-    <addaction name="separator" />
-    <addaction name="actionGotoObject" />
-    <addaction name="actionGotoPage" />
+    <addaction name="editCutAction"/>
+    <addaction name="editnew_itemAction"/>
+    <addaction name="editPasteAction"/>
+    <addaction name="separator"/>
+    <addaction name="actionInsert_Before"/>
+    <addaction name="actionInsert_After"/>
+    <addaction name="actionInsert_Key"/>
+    <addaction name="actionInsert_Child"/>
+    <addaction name="separator"/>
+    <addaction name="actionCreateNewObject"/>
+    <addaction name="separator"/>
+    <addaction name="actionRemove_Item"/>
+    <addaction name="separator"/>
+    <addaction name="actionFind"/>
+    <addaction name="actionFindNext"/>
+    <addaction name="actionFindPrevious"/>
+    <addaction name="actionReplace"/>
+    <addaction name="separator"/>
+    <addaction name="actionGotoObject"/>
+    <addaction name="actionGotoPage"/>
    </widget>
-   <addaction name="fileMenu" />
-   <addaction name="Edit" />
-   <addaction name="Tools" />
-   <addaction name="menuView" />
-   <addaction name="helpMenu" />
+   <addaction name="fileMenu"/>
+   <addaction name="Edit"/>
+   <addaction name="Tools"/>
+   <addaction name="menuView"/>
+   <addaction name="helpMenu"/>
   </widget>
-  <action name="fileNewAction" >
-   <property name="icon" >
-    <iconset resource="podofobrowserrsrc.qrc" >
+  <action name="fileNewAction">
+   <property name="icon">
+    <iconset resource="podofobrowserrsrc.qrc">
      <normaloff>:/icons/filenew.png</normaloff>:/icons/filenew.png</iconset>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>&amp;New</string>
    </property>
-   <property name="iconText" >
+   <property name="iconText">
     <string>New</string>
    </property>
-   <property name="shortcut" >
+   <property name="shortcut">
     <string>Ctrl+N</string>
    </property>
   </action>
-  <action name="fileOpenAction" >
-   <property name="icon" >
-    <iconset resource="podofobrowserrsrc.qrc" >
+  <action name="fileOpenAction">
+   <property name="icon">
+    <iconset resource="podofobrowserrsrc.qrc">
      <normaloff>:/icons/fileopen.png</normaloff>:/icons/fileopen.png</iconset>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>&amp;Open...</string>
    </property>
-   <property name="iconText" >
+   <property name="iconText">
     <string>Open</string>
    </property>
-   <property name="shortcut" >
+   <property name="shortcut">
     <string>Ctrl+O</string>
    </property>
   </action>
-  <action name="fileSaveAction" >
-   <property name="enabled" >
+  <action name="fileSaveAction">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="icon" >
-    <iconset resource="podofobrowserrsrc.qrc" >
+   <property name="icon">
+    <iconset resource="podofobrowserrsrc.qrc">
      <normaloff>:/icons/filesave.png</normaloff>:/icons/filesave.png</iconset>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>&amp;Save</string>
    </property>
-   <property name="iconText" >
+   <property name="iconText">
     <string>Save</string>
    </property>
-   <property name="shortcut" >
+   <property name="shortcut">
     <string>Ctrl+S</string>
    </property>
   </action>
-  <action name="fileSaveAsAction" >
-   <property name="enabled" >
+  <action name="fileSaveAsAction">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="icon" >
-    <iconset resource="podofobrowserrsrc.qrc" >
+   <property name="icon">
+    <iconset resource="podofobrowserrsrc.qrc">
      <normaloff>:/icons/filesaveas.png</normaloff>:/icons/filesaveas.png</iconset>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Save &amp;As...</string>
    </property>
-   <property name="iconText" >
+   <property name="iconText">
     <string>Save As</string>
    </property>
-   <property name="shortcut" >
+   <property name="shortcut">
     <string/>
    </property>
   </action>
-  <action name="fileExitAction" >
-   <property name="text" >
+  <action name="fileExitAction">
+   <property name="text">
     <string>E&amp;xit</string>
    </property>
-   <property name="iconText" >
+   <property name="iconText">
     <string>Exit</string>
    </property>
-   <property name="shortcut" >
+   <property name="shortcut">
     <string/>
    </property>
   </action>
-  <action name="helpAboutAction" >
-   <property name="text" >
+  <action name="helpAboutAction">
+   <property name="text">
     <string>&amp;About</string>
    </property>
-   <property name="iconText" >
+   <property name="iconText">
     <string>About</string>
    </property>
-   <property name="shortcut" >
+   <property name="shortcut">
     <string/>
    </property>
   </action>
-  <action name="toolsToHexAction" >
-   <property name="text" >
+  <action name="toolsToHexAction">
+   <property name="text">
     <string>Convert &amp;to Hexstring</string>
    </property>
-   <property name="iconText" >
+   <property name="iconText">
     <string>Convert &amp;to Hexstring</string>
    </property>
   </action>
-  <action name="toolsFromHexAction" >
-   <property name="text" >
+  <action name="toolsFromHexAction">
+   <property name="text">
     <string>Convert &amp;from Hexstring</string>
    </property>
-   <property name="iconText" >
+   <property name="iconText">
     <string>Convert &amp;from Hexstring</string>
    </property>
   </action>
-  <action name="editCutAction" >
-   <property name="enabled" >
+  <action name="editCutAction">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Cu&amp;t</string>
    </property>
-   <property name="iconText" >
+   <property name="iconText">
     <string>Cu&amp;t</string>
    </property>
   </action>
-  <action name="editnew_itemAction" >
-   <property name="enabled" >
+  <action name="editnew_itemAction">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>&amp;Copy</string>
    </property>
-   <property name="iconText" >
+   <property name="iconText">
     <string>&amp;Copy</string>
    </property>
   </action>
-  <action name="editPasteAction" >
-   <property name="enabled" >
+  <action name="editPasteAction">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>&amp;Paste</string>
    </property>
-   <property name="iconText" >
+   <property name="iconText">
     <string>&amp;Paste</string>
    </property>
   </action>
-  <action name="actionInsert_Before" >
-   <property name="enabled" >
+  <action name="actionInsert_Before">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="icon" >
-    <iconset resource="podofobrowserrsrc.qrc" >
+   <property name="icon">
+    <iconset resource="podofobrowserrsrc.qrc">
      <normaloff>:/icons/insert_elem_above.png</normaloff>:/icons/insert_elem_above.png</iconset>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Insert &amp;Before</string>
    </property>
   </action>
-  <action name="actionInsert_After" >
-   <property name="enabled" >
+  <action name="actionInsert_After">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="icon" >
-    <iconset resource="podofobrowserrsrc.qrc" >
+   <property name="icon">
+    <iconset resource="podofobrowserrsrc.qrc">
      <normaloff>:/icons/insert_elem_below.png</normaloff>:/icons/insert_elem_below.png</iconset>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Insert &amp;After</string>
    </property>
   </action>
-  <action name="actionInsert_Child" >
-   <property name="enabled" >
+  <action name="actionInsert_Child">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="icon" >
-    <iconset resource="podofobrowserrsrc.qrc" >
+   <property name="icon">
+    <iconset resource="podofobrowserrsrc.qrc">
      <normaloff>:/icons/insert_child.png</normaloff>:/icons/insert_child.png</iconset>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Insert New &amp;Child</string>
    </property>
   </action>
-  <action name="actionRemove_Item" >
-   <property name="enabled" >
+  <action name="actionRemove_Item">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="icon" >
-    <iconset resource="podofobrowserrsrc.qrc" >
+   <property name="icon">
+    <iconset resource="podofobrowserrsrc.qrc">
      <normaloff>:/icons/deleteitem.png</normaloff>:/icons/deleteitem.png</iconset>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>&amp;Delete Item</string>
    </property>
   </action>
-  <action name="actionCreateNewObject" >
-   <property name="enabled" >
+  <action name="actionCreateNewObject">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="icon" >
-    <iconset resource="podofobrowserrsrc.qrc" >
+   <property name="icon">
+    <iconset resource="podofobrowserrsrc.qrc">
      <normaloff>:/icons/fix_dangling_reference.png</normaloff>:/icons/fix_dangling_reference.png</iconset>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Create New Object</string>
    </property>
   </action>
-  <action name="actionInsert_Key" >
-   <property name="enabled" >
+  <action name="actionInsert_Key">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="icon" >
-    <iconset resource="podofobrowserrsrc.qrc" >
+   <property name="icon">
+    <iconset resource="podofobrowserrsrc.qrc">
      <normaloff>:/icons/insert_key.png</normaloff>:/icons/insert_key.png</iconset>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Insert &amp;Key</string>
    </property>
   </action>
-  <action name="fileReloadAction" >
-   <property name="icon" >
-    <iconset resource="podofobrowserrsrc.qrc" >
+  <action name="fileReloadAction">
+   <property name="icon">
+    <iconset resource="podofobrowserrsrc.qrc">
      <normaloff>:/icons/reload.png</normaloff>:/icons/reload.png</iconset>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Reload</string>
    </property>
   </action>
-  <action name="actionRefreshView" >
-   <property name="text" >
+  <action name="actionRefreshView">
+   <property name="text">
     <string>Refresh View (DEBUG)</string>
    </property>
   </action>
-  <action name="actionDisplay_Selected_Object" >
-   <property name="text" >
+  <action name="actionDisplay_Selected_Object">
+   <property name="text">
     <string>Display Selected Object</string>
    </property>
   </action>
-  <action name="actionToolsDisplayCodeForSelection" >
-   <property name="text" >
+  <action name="actionToolsDisplayCodeForSelection">
+   <property name="text">
     <string>&amp;Display Code For Selection</string>
    </property>
   </action>
-  <action name="actionCatalogView" >
-   <property name="checkable" >
+  <action name="actionCatalogView">
+   <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="checked" >
+   <property name="checked">
     <bool>true</bool>
    </property>
-   <property name="enabled" >
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Catalog View</string>
    </property>
   </action>
-  <action name="actionFind" >
-   <property name="text" >
+  <action name="actionFind">
+   <property name="text">
     <string>&amp;Find...</string>
    </property>
-   <property name="shortcut" >
+   <property name="shortcut">
     <string>Ctrl+F</string>
    </property>
   </action>
-  <action name="actionFindNext" >
-   <property name="text" >
+  <action name="actionFindNext">
+   <property name="text">
     <string>Find &amp;Next</string>
    </property>
-   <property name="shortcut" >
+   <property name="shortcut">
     <string>F3</string>
    </property>
   </action>
-  <action name="actionFindPrevious" >
-   <property name="text" >
+  <action name="actionFindPrevious">
+   <property name="text">
     <string>Find &amp;Previous</string>
    </property>
-   <property name="shortcut" >
+   <property name="shortcut">
     <string>Shift+F3</string>
    </property>
   </action>
-  <action name="actionReplace" >
-   <property name="text" >
+  <action name="actionReplace">
+   <property name="text">
     <string>&amp;Replace...</string>
    </property>
-   <property name="shortcut" >
+   <property name="shortcut">
     <string>Ctrl+R</string>
    </property>
   </action>
-  <action name="actionGotoObject" >
-   <property name="text" >
+  <action name="actionGotoObject">
+   <property name="text">
     <string>&amp;Goto Object...</string>
    </property>
-   <property name="shortcut" >
+   <property name="shortcut">
     <string>Ctrl+G</string>
    </property>
   </action>
-  <action name="actionGotoPage" >
-   <property name="text" >
+  <action name="actionGotoPage">
+   <property name="text">
     <string>Goto Pa&amp;ge...</string>
    </property>
-   <property name="shortcut" >
+   <property name="shortcut">
     <string>Ctrl+P</string>
    </property>
   </action>
  </widget>
- <layoutdefault spacing="6" margin="11" />
+ <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
    <class>QHexView</class>
@@ -601,7 +577,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="podofobrowserrsrc.qrc" />
+  <include location="podofobrowserrsrc.qrc"/>
  </resources>
  <connections>
   <connection>
@@ -610,11 +586,11 @@
    <receiver>PoDoFoBrowserBase</receiver>
    <slot>fileNew()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>20</x>
      <y>20</y>
     </hint>
@@ -626,11 +602,11 @@
    <receiver>PoDoFoBrowserBase</receiver>
    <slot>fileOpen()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>20</x>
      <y>20</y>
     </hint>
@@ -642,11 +618,11 @@
    <receiver>PoDoFoBrowserBase</receiver>
    <slot>fileSave()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>20</x>
      <y>20</y>
     </hint>
@@ -658,11 +634,11 @@
    <receiver>PoDoFoBrowserBase</receiver>
    <slot>fileSaveAs()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>20</x>
      <y>20</y>
     </hint>
@@ -674,11 +650,11 @@
    <receiver>PoDoFoBrowserBase</receiver>
    <slot>fileExit()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>20</x>
      <y>20</y>
     </hint>
@@ -690,11 +666,11 @@
    <receiver>PoDoFoBrowserBase</receiver>
    <slot>helpAbout()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>20</x>
      <y>20</y>
     </hint>
@@ -706,11 +682,11 @@
    <receiver>PoDoFoBrowserBase</receiver>
    <slot>toolsToHex()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>20</x>
      <y>20</y>
     </hint>
@@ -722,11 +698,11 @@
    <receiver>PoDoFoBrowserBase</receiver>
    <slot>toolsFromHex()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>20</x>
      <y>20</y>
     </hint>

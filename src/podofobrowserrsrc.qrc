@@ -1,26 +1,29 @@
-<!DOCTYPE RCC><RCC version="1.0">
-<qresource>
-    <file>icons/array.png</file>
-    <file>icons/bool.png</file>
-    <file>icons/dictionary.png</file>
-    <file>icons/empty.png</file>
-    <file>icons/hexstring.png</file>
-    <file>icons/litstring.png</file>
-    <file>icons/name.png</file>
-    <file>icons/number.png</file>
-    <file>icons/real.png</file>
-    <file>icons/reference.png</file>
-    <file>icons/dangling_reference.png</file>
-    <file>icons/fileopen.png</file>
-    <file>icons/filesave.png</file>
-    <file>icons/filesaveas.png</file>
-    <file>icons/filenew.png</file>
-    <file>icons/reload.png</file>
-    <file>icons/insert_elem_above.png</file>
-    <file>icons/insert_elem_below.png</file>
-    <file>icons/insert_key.png</file>
-    <file>icons/insert_child.png</file>
-    <file>icons/deleteitem.png</file>
-    <file>icons/fix_dangling_reference.png</file>
-</qresource>
+<RCC>
+    <qresource prefix="/" >
+        <file>icons/array.png</file>
+        <file>icons/bool.png</file>
+        <file>icons/dictionary.png</file>
+        <file>icons/empty.png</file>
+        <file>icons/hexstring.png</file>
+        <file>icons/litstring.png</file>
+        <file>icons/name.png</file>
+        <file>icons/number.png</file>
+        <file>icons/real.png</file>
+        <file>icons/reference.png</file>
+        <file>icons/dangling_reference.png</file>
+        <file>icons/fileopen.png</file>
+        <file>icons/filesave.png</file>
+        <file>icons/filesaveas.png</file>
+        <file>icons/filenew.png</file>
+        <file>icons/reload.png</file>
+        <file>icons/insert_elem_above.png</file>
+        <file>icons/insert_elem_below.png</file>
+        <file>icons/insert_key.png</file>
+        <file>icons/insert_child.png</file>
+        <file>icons/deleteitem.png</file>
+        <file>icons/fix_dangling_reference.png</file>
+        <file>icons/podofobrowser_64.png</file>
+        <file>icons/podofobrowser_128.png</file>
+        <file>icons/podofobrowser_256.png</file>
+    </qresource>
 </RCC>

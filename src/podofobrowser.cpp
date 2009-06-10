@@ -30,8 +30,11 @@
 #include "hexwidget/QHexView.h"
 
 #include <QApplication>
+#include <QDockWidget>
 #include <QCursor>
+#include <QDir>
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QInputDialog>
 #include <QLabel>
 #include <QMessageBox>
@@ -41,6 +44,7 @@
 #include <QSettings>
 #include <QSplitter>
 #include <QStatusBar>
+#include <QTextCodec>
 #include <QTextEdit>
 #include <QBuffer>
 
@@ -80,6 +84,15 @@ PoDoFoBrowser::PoDoFoBrowser( const QString & filename )
     setObjectName(QString::fromUtf8("PoDoFoBrowser"));
     setAttribute(Qt::WA_DeleteOnClose);
 
+    // tree view
+    dockObjects = new QDockWidget(tr("Objects"),this);
+    listObjects = new QTreeView(0);
+    dockObjects->setWidget(listObjects);
+    addDockWidget(Qt::TopDockWidgetArea, dockObjects);
+
+    // stream edition
+    slotSetStreamEditable(false);
+
     m_pDelayedLoadProgress = new QProgressBar( statusBar() );
     m_pDelayedLoadProgress->setFormat( tr("%p% of objects loaded") );
     statusBar()->addPermanentWidget(m_pDelayedLoadProgress);
@@ -104,6 +117,9 @@ PoDoFoBrowser::PoDoFoBrowser( const QString & filename )
     connect( actionReplace,       SIGNAL( activated() ), this, SLOT( editReplace() ) );
     connect( actionGotoObject,    SIGNAL( activated() ), this, SLOT( editGotoObject() ) );
     connect( actionGotoPage,      SIGNAL( activated() ), this, SLOT( editGotoPage() ) );
+
+    connect( checkEditable, SIGNAL(toggled(bool)), this, SLOT(slotSetStreamEditable(bool)) );
+    connect( commitButton, SIGNAL(clicked()), this, SLOT(slotCommitStream()) );
 
     show();
     statusBar()->showMessage( tr("Ready"), 2000 );
@@ -176,6 +192,8 @@ void PoDoFoBrowser::loadConfig()
     w = settings.value( QString::fromUtf8("/geometry/width"), width() ).toInt();
     h = settings.value( QString::fromUtf8("/geometry/height"), height() ).toInt();
 
+    m_codecForStream = QTextCodec::codecForName(settings.value( QString::fromUtf8("/Stream/Codec"),QString::fromUtf8("ISO 8859-1") ).toString().toUtf8());
+
     list << width()/3;
     list << (width()/3 * 2);
 
@@ -199,6 +217,8 @@ void PoDoFoBrowser::saveConfig()
     settings.setValue(QString::fromUtf8("/geometry/width"), width() );
     settings.setValue(QString::fromUtf8("/geometry/height"), height() );
     settings.setValue(QString::fromUtf8("/view/catalog"), actionCatalogView->isChecked() );
+
+    settings.setValue(QString::fromUtf8("/Stream/Codec"), m_codecForStream->name());
 }
 
 void PoDoFoBrowser::clear()
@@ -270,8 +290,7 @@ void PoDoFoBrowser::fileOpen( const QString & filename )
     ModelChange( new PdfObjectModel(m_pDocument, listObjects, actionCatalogView->isChecked()) );
     DocChange(m_pDocument);
 
-    m_filename = filename;
-    setWindowTitle( m_filename );
+    SetFileName( filename );
 
     QApplication::restoreOverrideCursor();
     statusBar()->showMessage( tr("Opened file %1 successfully").arg( filename ), 2000 );
@@ -292,8 +311,7 @@ bool PoDoFoBrowser::fileSave( const QString & filename )
     QApplication::restoreOverrideCursor();
     statusBar()->showMessage( tr("Wrote file %1 successfully").arg( filename ), 2000 );
 
-    m_filename = filename;
-    setWindowTitle( m_filename );
+    SetFileName( filename );
 
     return true;
 }
@@ -335,6 +353,12 @@ void PoDoFoBrowser::UpdateMenus()
 
     actionToolsDisplayCodeForSelection->setEnabled( sel.isValid() );
 }
+
+ void PoDoFoBrowser::SetFileName(const QString& name)
+ {
+	m_filename = name;
+	setWindowTitle( m_filename );
+ }
 
 // Triggered when the selected object in the list view changes
 void PoDoFoBrowser::treeSelectionChanged( const QModelIndex & current, const QModelIndex & previous )
@@ -422,7 +446,9 @@ void PoDoFoBrowser::treeSelectionChanged( const QModelIndex & current, const QMo
     {
         // TODO FIXME XXX AUUGH! Encoding assumption like nothing ever
         // seen before!
-        QString data = QString::fromAscii(pBuf, lLen);
+//        QString data = QString::fromAscii(pBuf, lLen);
+	QByteArray pArray(pBuf, lLen);
+	QString data = m_codecForStream->toUnicode(pArray);
         textStream->setEnabled(true);
         textStream->setText( data );
         displayInfo = tr("displayed in full");
@@ -473,32 +499,41 @@ bool PoDoFoBrowser::fileSave()
     {
         // can't just overwrite existing file, since we might have file streams
         // reading from it as we write. Instead we write to a temp file and then
-        // swap it with the original.
+	// swap it with the original.
+	    // lets try something else. pm
         const QString origFileName = m_filename;
+	const QFileInfo origFileInfo(origFileName);
+	QDir tmpDir = QDir::temp();
+	const QString tmpFileName = QString::number(QCoreApplication::applicationPid())
+				    + QString::fromAscii("-")
+				    + origFileInfo.fileName();
+	tmpDir.remove(tmpFileName);
         bool success = false;
         QString message;
-        if (!QFile::rename(origFileName, origFileName+QString::fromUtf8(".bak")))
-        {
-            message= tr("Unable to back up original file (rename failed)");
-        }
-        else
-        {
-            if (!fileSave(origFileName))
-            {
-                message = tr("Unable to write new file");
-                QFile::remove(origFileName);
-                QFile::rename(origFileName+QString::fromUtf8(".bak"), origFileName);
-            }
-            else
-            {
-                success = true;
-            }
-        }
-        m_filename = origFileName;
+
+	if (!fileSave( tmpDir.absoluteFilePath(tmpFileName) ))
+	{
+		message = tr("Unable to write file \"%1\"").arg(tmpDir.absoluteFilePath(tmpFileName));
+		tmpDir.remove(tmpFileName);
+	}
+	else
+	{
+		if(!QFile::remove(origFileName))
+		{
+			message = tr("Unable to remove original file.");
+		}
+		else if(!QFile::copy(tmpDir.absoluteFilePath(tmpFileName), origFileName))
+		{
+			message = tr("Unable to replace original file by the new file \"%1\".\nNote that the original file has been already removed.").arg(tmpDir.absoluteFilePath(tmpFileName));
+		}
+		else
+			success = true;
+	}
+	SetFileName( origFileName );
 
         if (!success)
             QMessageBox::critical(this, tr("Saving failed"),
-                    tr("Unable to save %1: %2").arg(origFileName).arg(message));
+		    tr("Unable to save %1:\n%2").arg(origFileName).arg(message));
         return success;
     }
 }
@@ -1067,5 +1102,46 @@ void PoDoFoBrowser::GotoObject()
                                       m_gotoReference.GenerationNumber() ) );
     else
         listObjects->setCurrentIndex( model->index( index, 0 ) );
+}
+
+
+void PoDoFoBrowser::slotSetStreamEditable(bool e)
+{
+	if(e)
+	{
+		textStream->setReadOnly(false);
+		textStream->setTextInteractionFlags(Qt::TextEditorInteraction);
+		commitButton->setEnabled(true);
+	}
+	else
+	{
+		textStream->setReadOnly(true);
+		textStream->setTextInteractionFlags(Qt::TextBrowserInteraction);
+		commitButton->setEnabled(false);
+	}
+}
+
+void PoDoFoBrowser::slotCommitStream()
+{
+	QModelIndex idx = GetSelectedItem();
+	if (!idx.isValid())
+	{
+	    return; // shouldn't happen
+	}
+
+
+	PdfObjectModel * const model = static_cast<PdfObjectModel*>(listObjects->model());
+
+	const PdfObject * obj = model->GetObjectForIndex(idx);
+	if (!obj->HasStream())
+	{
+		return;
+	}
+
+	QByteArray cs(m_codecForStream->fromUnicode(textStream->toPlainText()));
+	PdfStream * stream = const_cast<PdfObject*>(obj)->GetStream();
+	stream->Set(cs.data(), cs.size());
+	statusBar()->showMessage( tr("Stream Committed"), 2000 );
+
 }
 

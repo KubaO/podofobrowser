@@ -25,6 +25,7 @@
 #include <QModelIndex>
 #include <QString>
 #include <QTextDocument>
+#include <QTreeView>
 
 class QProgressBar;
 
@@ -35,6 +36,7 @@ class QProgressBar;
 class PdfObjectModel;
 class BackgroundLoader;
 class QModelIndex;
+class QDockWidget;
 
 class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
 {
@@ -83,11 +85,15 @@ class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
 
     void viewRefreshView();
 
+    void slotSetStreamEditable(bool e);
+    void slotCommitStream();
 
  private:
     void ModelChange(PdfObjectModel* newModel);
     void DocChange(PoDoFo::PdfMemDocument* doc);
     void UpdateMenus();
+
+    void SetFileName(const QString& name);
 
     // Find the object m_gotoReference
     // in the current tree and select it in the list view.
@@ -109,6 +115,8 @@ class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
     void insertElement(int row, const QModelIndex& parent);
 
  private:
+    QDockWidget * dockObjects;
+    QTreeView * listObjects;
 
     QString               m_filename;
 
@@ -125,6 +133,8 @@ class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
     QTextDocument::FindFlags m_findFlags;
     QByteArray*           m_pByteArray;
     QIODevice*            m_pByteArrayIO;
+
+    QTextCodec*	m_codecForStream;
 };
 
 QModelIndex PoDoFoBrowser::GetSelectedItem()
