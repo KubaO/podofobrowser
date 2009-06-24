@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include "podofobrowser.h"
+#include "podofoinfodlg.h"
 #include "podofoutil.h"
 #include "backgroundloader.h"
 #include "ui_podofoaboutdlg.h"
@@ -102,6 +103,7 @@ PoDoFoBrowser::PoDoFoBrowser( const QString & filename )
     connect( buttonImport, SIGNAL( clicked() ), this, SLOT( slotImportStream() ) );
     connect( buttonExport, SIGNAL( clicked() ), this, SLOT( slotExportStream() ) );
     connect( fileReloadAction, SIGNAL( activated() ), this, SLOT( fileReload() ) );
+    connect( actionInformations, SIGNAL( activated() ), this, SLOT( fileInfo() ) );
     connect( actionInsert_Before, SIGNAL( activated() ), this, SLOT( editInsertBefore() ) );
     connect( actionInsert_After,  SIGNAL( activated() ), this, SLOT( editInsertAfter() ) );
     connect( actionInsert_Key,    SIGNAL( activated() ), this, SLOT( editInsertKey() ) );
@@ -559,6 +561,15 @@ void PoDoFoBrowser::fileReload()
         const QString filename = m_filename;
         fileOpen(filename);
     }
+}
+
+void PoDoFoBrowser::fileInfo()
+{
+	if(m_pDocument)
+	{
+		PodofoInfoDialog infoDlg( m_filename , m_pDocument , this);
+		infoDlg.exec();
+	}
 }
 
 void PoDoFoBrowser::fileExit()
@@ -1144,4 +1155,5 @@ void PoDoFoBrowser::slotCommitStream()
 	statusBar()->showMessage( tr("Stream Committed"), 2000 );
 
 }
+
 

@@ -2,6 +2,7 @@ QT4_WRAP_UI(podofobrowser_UIC_HEADERS
 	podofoaboutdlg.ui
 	podofobrowserbase.ui
 	podofofinddlg.ui
+	podofoinfodlg.ui
 	podofogotodlg.ui
 	podofogotopagedlg.ui
 	podoforeplacedlg.ui
@@ -33,6 +34,7 @@ ADD_EXECUTABLE(podofobrowser
 	podofoutil.cpp
 	pdfobjectmodel.cpp
 	podofobrowser.cpp
+	podofoinfodlg.cpp
 	main.cpp
 	hexwidget/QHexView.cpp
 	${podofobrowser_QRC_SRCS}

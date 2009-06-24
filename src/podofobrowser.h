@@ -56,6 +56,7 @@ class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
     bool fileSave( const QString & filename );
     bool fileSaveAs();
     void fileReload();
+    void fileInfo();
 
     void fileExit();
 

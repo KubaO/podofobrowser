@@ -204,7 +204,7 @@
      <x>0</x>
      <y>0</y>
      <width>758</width>
-     <height>25</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="helpMenu">
@@ -222,6 +222,8 @@
     <addaction name="fileSaveAction"/>
     <addaction name="fileSaveAsAction"/>
     <addaction name="fileReloadAction"/>
+    <addaction name="separator"/>
+    <addaction name="actionInformations"/>
     <addaction name="separator"/>
     <addaction name="fileExitAction"/>
    </widget>
@@ -564,6 +566,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="actionInformations">
+   <property name="text">
+    <string>&amp;Informations…</string>
    </property>
   </action>
  </widget>
