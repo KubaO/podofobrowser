@@ -1,6 +1,5 @@
 * text=auto !eol
 /AUTHORS -text
-/CMakeLists.txt -text
 /COPYING -text
 /Doxyfile -text
 /EXAMPLE_podofobrowser.pro -text
