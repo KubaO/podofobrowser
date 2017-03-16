@@ -589,7 +589,7 @@
  <connections>
   <connection>
    <sender>fileNewAction</sender>
-   <signal>activated()</signal>
+   <signal>triggered()</signal>
    <receiver>PoDoFoBrowserBase</receiver>
    <slot>fileNew()</slot>
    <hints>
@@ -605,7 +605,7 @@
   </connection>
   <connection>
    <sender>fileOpenAction</sender>
-   <signal>activated()</signal>
+   <signal>triggered()</signal>
    <receiver>PoDoFoBrowserBase</receiver>
    <slot>fileOpen()</slot>
    <hints>
@@ -621,7 +621,7 @@
   </connection>
   <connection>
    <sender>fileSaveAction</sender>
-   <signal>activated()</signal>
+   <signal>triggered()</signal>
    <receiver>PoDoFoBrowserBase</receiver>
    <slot>fileSave()</slot>
    <hints>
@@ -637,7 +637,7 @@
   </connection>
   <connection>
    <sender>fileSaveAsAction</sender>
-   <signal>activated()</signal>
+   <signal>triggered()</signal>
    <receiver>PoDoFoBrowserBase</receiver>
    <slot>fileSaveAs()</slot>
    <hints>
@@ -653,7 +653,7 @@
   </connection>
   <connection>
    <sender>fileExitAction</sender>
-   <signal>activated()</signal>
+   <signal>triggered()</signal>
    <receiver>PoDoFoBrowserBase</receiver>
    <slot>fileExit()</slot>
    <hints>
@@ -669,7 +669,7 @@
   </connection>
   <connection>
    <sender>helpAboutAction</sender>
-   <signal>activated()</signal>
+   <signal>triggered()</signal>
    <receiver>PoDoFoBrowserBase</receiver>
    <slot>helpAbout()</slot>
    <hints>
@@ -685,7 +685,7 @@
   </connection>
   <connection>
    <sender>toolsToHexAction</sender>
-   <signal>activated()</signal>
+   <signal>triggered()</signal>
    <receiver>PoDoFoBrowserBase</receiver>
    <slot>toolsToHex()</slot>
    <hints>
@@ -701,7 +701,7 @@
   </connection>
   <connection>
    <sender>toolsFromHexAction</sender>
-   <signal>activated()</signal>
+   <signal>triggered()</signal>
    <receiver>PoDoFoBrowserBase</receiver>
    <slot>toolsFromHex()</slot>
    <hints>

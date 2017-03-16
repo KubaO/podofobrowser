@@ -102,23 +102,23 @@ PoDoFoBrowser::PoDoFoBrowser( const QString & filename )
 
     connect( buttonImport, SIGNAL( clicked() ), this, SLOT( slotImportStream() ) );
     connect( buttonExport, SIGNAL( clicked() ), this, SLOT( slotExportStream() ) );
-    connect( fileReloadAction, SIGNAL( activated() ), this, SLOT( fileReload() ) );
-    connect( actionInformations, SIGNAL( activated() ), this, SLOT( fileInfo() ) );
-    connect( actionInsert_Before, SIGNAL( activated() ), this, SLOT( editInsertBefore() ) );
-    connect( actionInsert_After,  SIGNAL( activated() ), this, SLOT( editInsertAfter() ) );
-    connect( actionInsert_Key,    SIGNAL( activated() ), this, SLOT( editInsertKey() ) );
-    connect( actionInsert_Child,  SIGNAL( activated() ), this, SLOT( editInsertChildBelow() ) );
-    connect( actionRemove_Item,   SIGNAL( activated() ), this, SLOT( editRemoveItem()) );
-    connect( actionRefreshView,   SIGNAL( activated() ), this, SLOT( viewRefreshView()) );
-    connect( actionCatalogView,   SIGNAL( activated() ), this, SLOT( viewRefreshView()) );
-    connect( actionCreateNewObject, SIGNAL( activated() ), this, SLOT( editCreateNewObject()) );
-    connect( actionToolsDisplayCodeForSelection, SIGNAL( activated() ), this, SLOT( toolsDisplayCodeForSelection()) );
-    connect( actionFind,          SIGNAL( activated() ), this, SLOT( editFind() ) );
-    connect( actionFindNext,      SIGNAL( activated() ), this, SLOT( editFindNext() ) );
-    connect( actionFindPrevious,  SIGNAL( activated() ), this, SLOT( editFindPrevious() ) );
-    connect( actionReplace,       SIGNAL( activated() ), this, SLOT( editReplace() ) );
-    connect( actionGotoObject,    SIGNAL( activated() ), this, SLOT( editGotoObject() ) );
-    connect( actionGotoPage,      SIGNAL( activated() ), this, SLOT( editGotoPage() ) );
+    connect( fileReloadAction, SIGNAL( triggered() ), this, SLOT( fileReload() ) );
+    connect( actionInformations, SIGNAL( triggered() ), this, SLOT( fileInfo() ) );
+    connect( actionInsert_Before, SIGNAL( triggered() ), this, SLOT( editInsertBefore() ) );
+    connect( actionInsert_After,  SIGNAL( triggered() ), this, SLOT( editInsertAfter() ) );
+    connect( actionInsert_Key,    SIGNAL( triggered() ), this, SLOT( editInsertKey() ) );
+    connect( actionInsert_Child,  SIGNAL( triggered() ), this, SLOT( editInsertChildBelow() ) );
+    connect( actionRemove_Item,   SIGNAL( triggered() ), this, SLOT( editRemoveItem()) );
+    connect( actionRefreshView,   SIGNAL( triggered() ), this, SLOT( viewRefreshView()) );
+    connect( actionCatalogView,   SIGNAL( triggered() ), this, SLOT( viewRefreshView()) );
+    connect( actionCreateNewObject, SIGNAL( triggered() ), this, SLOT( editCreateNewObject()) );
+    connect( actionToolsDisplayCodeForSelection, SIGNAL( triggered() ), this, SLOT( toolsDisplayCodeForSelection()) );
+    connect( actionFind,          SIGNAL( triggered() ), this, SLOT( editFind() ) );
+    connect( actionFindNext,      SIGNAL( triggered() ), this, SLOT( editFindNext() ) );
+    connect( actionFindPrevious,  SIGNAL( triggered() ), this, SLOT( editFindPrevious() ) );
+    connect( actionReplace,       SIGNAL( triggered() ), this, SLOT( editReplace() ) );
+    connect( actionGotoObject,    SIGNAL( triggered() ), this, SLOT( editGotoObject() ) );
+    connect( actionGotoPage,      SIGNAL( triggered() ), this, SLOT( editGotoPage() ) );
 
     connect( checkEditable, SIGNAL(toggled(bool)), this, SLOT(slotSetStreamEditable(bool)) );
     connect( commitButton, SIGNAL(clicked()), this, SLOT(slotCommitStream()) );
@@ -507,7 +507,7 @@ bool PoDoFoBrowser::fileSave()
 	const QFileInfo origFileInfo(origFileName);
 	QDir tmpDir = QDir::temp();
 	const QString tmpFileName = QString::number(QCoreApplication::applicationPid())
-				    + QString::fromAscii("-")
+                    + QStringLiteral("-")
 				    + origFileInfo.fileName();
 	tmpDir.remove(tmpFileName);
         bool success = false;
@@ -1024,7 +1024,7 @@ void PoDoFoBrowser::toolsToHex()
         }
 
 	// This ::fromAscii is safe since we're dealing with hex strings only.
-        text = QString::fromAscii( pBuffer, lLen );
+        text = QString::fromLatin1( pBuffer, lLen );
         QMessageBox::information( this, tr("PoDoFoBrowser"), tr("The string converted to hex:<br>") + text );
     }
 }
@@ -1066,7 +1066,7 @@ void PoDoFoBrowser::toolsDisplayCodeForSelection()
     obj->ToString(s);
     QMessageBox::information(this,
 		    tr("PDF code for selection"),
-		    QString::fromAscii( s.c_str() ) );
+            QString::fromLatin1( s.c_str() ) );
 }
 
 void PoDoFoBrowser::helpAbout()

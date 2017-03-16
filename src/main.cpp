@@ -18,25 +18,24 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <QApplication>
-
 #include "podofobrowser.h"
-#include <qapplication.h>
+
+#include <QApplication>
 
 int main( int argc, char ** argv ) {
     QApplication a( argc, argv );
     Q_INIT_RESOURCE(podofobrowserrsrc);
 
     a.connect( &a, SIGNAL(lastWindowClosed()), &a, SLOT(quit()) );
+    auto args = a.arguments();
 
-    if( qApp->argc() >= 2 )
+    if(args.size() > 1)
     {
-        for( int i=1; i<qApp->argc(); i++ )
-            new PoDoFoBrowser( QString::fromLocal8Bit( qApp->argv()[i] ) );
+        for(int i=1; i<args.size(); i++)
+            new PoDoFoBrowser(args[i]);
     }
     else
     {
-        // Open empty window
         new PoDoFoBrowser();
     }
 

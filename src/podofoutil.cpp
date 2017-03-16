@@ -2,8 +2,7 @@
 #include <string>
 #include <iostream>
 #include <podofo/podofo.h>
-#include <QtCore>
-#include <QtGui>
+#include <QtWidgets>
 using namespace PoDoFo;
 
 void podofoError( const PdfError & eCode ) 

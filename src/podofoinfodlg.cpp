@@ -42,22 +42,22 @@ PodofoInfoDialog::PodofoInfoDialog (const QString& filename, PoDoFo::PdfDocument
 		QString unit; 
 		if(size < 1024.0)
 		{
-			unit = QString::fromAscii("%1 B");
+            unit = QStringLiteral("%1 B");
 		}
 		else if(size < (1024.0 * 1024.0))
 		{
 			size /= 1024.0 ;
-			unit = QString::fromAscii("%1 KB");
+            unit = QStringLiteral("%1 KB");
 		}
 		else if(size < (1024.0 * 1024.0 * 1024.0))
 		{
 			size /= 1024.0 *1024.0; 
-			unit = QString::fromAscii("%1 MB");
+            unit = QStringLiteral("%1 MB");
 		}
 		else 
 		{
 			size /= 1024.0 * 1024.0 * 1024.0; 
-			unit = QString::fromAscii("%1 GB");
+            unit = QStringLiteral("%1 GB");
 		}
 		
 		QString filesize ( itemTemplate.arg ( tr ( "size" ) )
