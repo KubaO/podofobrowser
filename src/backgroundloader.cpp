@@ -11,7 +11,7 @@ BackgroundLoader::BackgroundLoader(PdfMemDocument* doc)
       m_pDoc(doc)
 {
     connect(&m_timer, SIGNAL(timeout()), SLOT(loadNextObject()));
-    qDebug("Beginning background load of %i objects", doc->GetObjects().GetSize());
+    qDebug("Beginning background load of %i objects", static_cast<int>(doc->GetObjects().GetSize()));
 }
 
 BackgroundLoader::~BackgroundLoader()

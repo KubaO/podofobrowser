@@ -365,6 +365,7 @@ void PoDoFoBrowser::UpdateMenus()
 // Triggered when the selected object in the list view changes
 void PoDoFoBrowser::treeSelectionChanged( const QModelIndex & current, const QModelIndex & previous )
 {
+    Q_UNUSED(previous);
     UpdateMenus();
 
     textStream->clear();
@@ -761,6 +762,8 @@ void PoDoFoBrowser::editReplace()
         bool bBackwards  = dlgui.checkBoxFindBackwards->isChecked();
         bool bSelected   = dlgui.checkBoxSelectedText->isChecked();
         bool bPrompt     = dlgui.checkBoxPromptOnReplace->isChecked();
+        Q_UNUSED(bFromCursor);
+        Q_UNUSED(bSelected);
 
         int nCount = 0;
 

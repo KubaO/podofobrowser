@@ -109,7 +109,7 @@ public:
 
     // Get the n'th child node of this object, or 0 if no such child
     // exists.
-    PdfObjectModelNode* GetChild(int n) const { if (IsPretendEmpty()) return NULL; EnsureChildrenLoaded(); return n < m_children.size() ? m_children[n] : 0; }
+    PdfObjectModelNode* GetChild(int n) const { if (IsPretendEmpty()) return NULL; EnsureChildrenLoaded(); return n < static_cast<int>(m_children.size()) ? m_children[n] : 0; }
 
     // Return the immediate parent of this object - a node for a reference
     // if object was referenced, otherwise the container in which the object
@@ -451,7 +451,7 @@ int PdfObjectModelNode::GetIndexInParent() const
         // We don't have a parent, ie we're in the top level table. This is a vector
         // of node pointers, so we can just find ourselves in that vector.
         const std::vector<PdfObjectModelNode*> & roots = static_cast<PdfObjectModelTree*>(m_pTree)->GetRoots();
-        for (int i = 0; i < roots.size(); ++i)
+        for (int i = 0; i < static_cast<int>(roots.size()); ++i)
         {
             if (roots[i] == this)
                 return i;
@@ -607,7 +607,7 @@ QModelIndex PdfObjectModel::index(int row, int column, const QModelIndex& parent
     {
         // We've been asked for an item in the top-level table. We currently only
         // support one-item trees (single rooted) so just return the root node.
-        if (row >= 0 && row < static_cast<PdfObjectModelTree*>(m_pTree)->GetRoots().size())
+        if (row >= 0 && row < static_cast<int>(static_cast<PdfObjectModelTree*>(m_pTree)->GetRoots().size()))
             return createIndex(row, column, static_cast<PdfObjectModelTree*>(m_pTree)->GetRoot(row));
         else
             return QModelIndex();
@@ -693,6 +693,7 @@ QVariant PdfObjectModel::data(const QModelIndex& index, int role) const
                                  iconFileName = node->IsValidReference() ? ":/icons/reference.png" : ":/icons/dangling_reference.png";
                                  break;
                 case ePdfDataType_RawData: iconFileName = ""; break;
+                case ePdfDataType_Unknown: break;
             }
                     ret = QPixmap(QString::fromUtf8(iconFileName));
                     break;
@@ -848,8 +849,9 @@ int PdfObjectModel::rowCount(const QModelIndex &parent) const
 
 int PdfObjectModel::columnCount(const QModelIndex &parent) const
 {
-    //if (!parent.isValid())
-    //    return 0;
+    if (false) // FIXME: dead code
+        if (!parent.isValid())
+            return 0;
     return 3;
 }
 
@@ -874,6 +876,7 @@ int PdfObjectModel::FindObject( const PoDoFo::PdfReference & ref )
 
 bool PdfObjectModel::setData ( const QModelIndex & index, const QVariant & value, int role )
 {
+    Q_UNUSED(role);
     if (!index.isValid() || index.column() != Column_RawValue)
         return false;
     if (value.isNull() || !value.isValid() || !value.canConvert<QByteArray>())
@@ -885,6 +888,7 @@ bool PdfObjectModel::setData ( const QModelIndex & index, const QVariant & value
 
     PdfObjectModelNode* node = static_cast<PdfObjectModelNode*>(index.internalPointer());
     const PdfObject* obj = node->GetObject();
+    Q_UNUSED(obj);
 
     // Container objects need to inform the model implementation that
     // the tree structure may change after they're edited. To do this we

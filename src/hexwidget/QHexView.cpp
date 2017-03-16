@@ -737,10 +737,11 @@ bool QHexView::isSelected(int index) const {
 // Name: 
 //------------------------------------------------------------------------------
 void QHexView::drawComments(QPainter &painter, unsigned int offset, unsigned int row) const {
-	
+    Q_UNUSED(offset);
 	painter.setPen(QPen(palette().text().color()));
 	
 	const address_t address	= m_AddressOffset + offset;
+    Q_UNUSED(address);
 	QString comment;
 	
     /*
@@ -1074,7 +1075,7 @@ QByteArray QHexView::selectedBytes() const {
 			fetchData(i, 1);
 			// The fetch must not fail, or we'll try to access a negative
 			// index, overflow, and read unallocated memory.
-			Q_ASSERT(i >= m_bufOffset);
+            Q_ASSERT(i >= static_cast<int>(m_bufOffset));
 			ret.push_back(dataRef[i - m_bufOffset]);
 			//qDebug("i: %i, o: %i, data: %c (bufstate: %i + %i)", i, i - m_bufOffset, dataRef[i - m_bufOffset], m_bufOffset, m_buf.size());
 		}
