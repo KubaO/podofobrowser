@@ -205,8 +205,6 @@ private:
     // Object tracked by this node
     PdfObject* m_pObject;
 
-    ParentageType m_parentType;
-
     // Parent node. The meaning of this pointer varies depending on the parentage
     // relationship:
     //
@@ -215,6 +213,8 @@ private:
     // Referenced: parent is the node for the reference object in the parent.
     //             Its parent will be the container for this object.
     PdfObjectModelNode * m_pParent;
+
+    ParentageType m_parentType;
 
     // Key under which item appears in containing dictionary. Empty for arrays
     // and referenced objects.
@@ -306,8 +306,8 @@ PdfObjectModelNode::PdfObjectModelNode(PdfObjectModelTree * tree,
       m_pTree(tree),
       m_pObject(object),
       m_pParent(parent),
-      m_parentKey(parentKey),
       m_parentType(parentType),
+      m_parentKey(parentKey),
       m_children()
 {
     if (parentType != PT_Root && !parent)
