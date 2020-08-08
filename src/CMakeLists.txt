@@ -1,4 +1,4 @@
-QT4_WRAP_UI(podofobrowser_UIC_HEADERS
+QT5_WRAP_UI(podofobrowser_UIC_HEADERS
 	podofoaboutdlg.ui
 	podofobrowserbase.ui
 	podofofinddlg.ui
@@ -14,13 +14,13 @@ SET(podofobrowser_MOC_HEADERS
 	pdfobjectmodel.h
 	hexwidget/QHexView.h
 	)
-QT4_WRAP_CPP(podofobrowser_MOC_SRCS ${podofobrowser_MOC_HEADERS})
+QT5_WRAP_CPP(podofobrowser_MOC_SRCS ${podofobrowser_MOC_HEADERS})
 
 # Qt resources such as icons to be embedded in the executable
 SET(podofobrowser_RSRC_FILES
 	podofobrowserrsrc.qrc
 	)
-QT4_ADD_RESOURCES(podofobrowser_QRC_SRCS ${podofobrowser_RSRC_FILES})
+QT5_ADD_RESOURCES(podofobrowser_QRC_SRCS ${podofobrowser_RSRC_FILES})
 
 # WTF does this not get done for us?
 SET_SOURCE_FILES_PROPERTIES(
@@ -54,23 +54,12 @@ ELSE(NOT WIN32)
 ENDIF(NOT WIN32)
 
 TARGET_LINK_LIBRARIES(podofobrowser
-	${QT_LIBRARIES}
+    Qt5::Widgets
 	${LIBPODOFO_LIB}
-	${LIBFREETYPE_LIB}
-	${extra_libs}
-	${LIBJPEG_LIB}
-	${LIBZ_LIB}
-	${stlport_libraries_if_use_stlport}
 	)
 
 ADD_DEFINITIONS(
 	${LIBPODOFO_CFLAGS}
-	${QT_DEFINITIONS}
-	-DQT_CORE_LIB
-	-DQT_GUI_LIB
-	-DQT_THREAD_SUPPORT
-	-DQT_NO_CAST_FROM_ASCII
-	-DQT_NO_CAST_TO_ASCII
 	)
 
 # For an explanation of QT_NO_CAST_FROM_ASCII and QT_NO_CAST_TO_ASCII see:
@@ -79,7 +68,6 @@ ADD_DEFINITIONS(
 # respectively.
 
 INCLUDE_DIRECTORIES(
-	${QT_INCLUDES}
 	${PODOFO_INCLUDES}
 	${CMAKE_CURRENT_SOURCE_DIR} 
 	${CMAKE_CURRENT_BINARY_DIR}
