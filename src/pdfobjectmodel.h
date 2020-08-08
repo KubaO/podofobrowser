@@ -3,7 +3,7 @@
 
 #include <utility>
 
-#include <QAbstractTableModel>
+#include <QAbstractItemModel>
 #include <QMap>
 
 #include <podofo/podofo.h>
@@ -35,7 +35,7 @@ namespace PoDoFo {
  *
  * All are Qt::DisplayRole roles with string values.
  */
-class PdfObjectModel : public QAbstractTableModel
+class PdfObjectModel : public QAbstractItemModel
 {
     Q_OBJECT
 
