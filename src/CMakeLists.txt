@@ -16,6 +16,11 @@ SET(podofobrowser_MOC_HEADERS
 	)
 QT5_WRAP_CPP(podofobrowser_MOC_SRCS ${podofobrowser_MOC_HEADERS})
 
+SET(podofobrowser_PLAIN_HEADERS
+    podofoinfodlg.h
+    podofoutil.h
+    )
+
 # Qt resources such as icons to be embedded in the executable
 SET(podofobrowser_RSRC_FILES
 	podofobrowserrsrc.qrc
@@ -39,6 +44,8 @@ ADD_EXECUTABLE(podofobrowser
 	hexwidget/QHexView.cpp
 	${podofobrowser_QRC_SRCS}
 	${podofobrowser_MOC_SRCS}
+    ${podofobrowser_MOC_HEADERS}
+    ${podofobrowser_PLAIN_HEADERS}
 	)
 
 IF(NOT WIN32)
