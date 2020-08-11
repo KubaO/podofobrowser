@@ -493,7 +493,7 @@ void PdfObjectModelNode::SetData(const PdfVariant& variant)
 
 
 PdfObjectModel::PdfObjectModel(PdfMemDocument* doc, QObject* parent, bool catalogRooted)
-    : QAbstractTableModel(parent), m_bDocChanged(false), m_pTree(0)
+    : QAbstractItemModel(parent), m_bDocChanged(false), m_pTree(0)
 {
     if (catalogRooted)
         setupModelData_CatalogRooted(doc);
