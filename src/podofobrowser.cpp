@@ -225,7 +225,7 @@ void PoDoFoBrowser::saveConfig()
 
 void PoDoFoBrowser::clear()
 {
-    m_filename = QString::null;
+    m_filename = QString();
     setWindowTitle( tr("PoDoFoBrowser") );
 
     labelStream->setText( QString::fromUtf8("") );
@@ -1016,7 +1016,7 @@ void PoDoFoBrowser::toolsToHex()
 			    this, tr("PoDoFoBrowser: To Hex"),
 			    tr("Please input a string (7-bit ASCII only):") );
 
-    if( QString::null != text ) 
+    if( !text.isEmpty() )
     {
         try {
 	    // FIXME XXX TODO big bad encoding assumption
@@ -1042,7 +1042,7 @@ void PoDoFoBrowser::toolsFromHex()
 		    		this, tr("PoDoFoBrowser: From Hex"),
 				tr("Please input a hex string:") );
 
-    if( QString::null != text ) 
+    if( !text.isEmpty() )
     {
         try {
             // This encoding assumption should be safe since we're reading hex strings

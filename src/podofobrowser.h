@@ -43,7 +43,7 @@ class PoDoFoBrowser: public QMainWindow, private Ui::PoDoFoBrowserBase
     Q_OBJECT
 
  public:
-    PoDoFoBrowser( const QString & filename = QString::null );
+    PoDoFoBrowser( const QString & filename = QString() );
     ~PoDoFoBrowser();
 
  private slots:
