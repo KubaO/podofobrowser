@@ -28,7 +28,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <QMenu>
 #include <QFontDialog>
 #include <QClipboard>
-#include <QSignalMapper>
 #include <QPalette>
 #include <cctype>
 #include <climits>
@@ -131,10 +130,12 @@ void QHexView::setFont(const QFont &f) {
 // Name: addToggleActionToMenu(QMenu *menu, const QString &caption, bool checked, QObject *reciever, const char *slot)
 // Desc: convinience function used to add a checkable menu item to the context menu
 //------------------------------------------------------------------------------
-QAction *QHexView::addToggleActionToMenu(QMenu *menu, const QString &caption, bool checked, QObject *reciever, const char *slot) {
+QAction *QHexView::addToggleActionToMenu(QMenu *menu, const QString &caption, bool checked, QObject *reciever, const char *slot, int width) {
 	QAction *const action = new QAction(caption, menu);
     action->setCheckable(true);
     action->setChecked(checked);
+    if (width)
+        action->setData(width);
 	menu->addAction(action);
 	connect(action, SIGNAL(toggled(bool)), reciever, slot);
 	return action;
@@ -155,37 +156,18 @@ QMenu *QHexView::createStandardContextMenu() {
 	addToggleActionToMenu(menu, tr("Show &Ascii"), m_ShowAscii, this, SLOT(setShowAsciiDump(bool)));
     addToggleActionToMenu(menu, tr("Show &Comments"), m_ShowComments, this, SLOT(setShowComments(bool)));
 
-	QSignalMapper *wordWidthMapper = new QSignalMapper(this);
-
 	QMenu *const wordMenu = new QMenu(tr("Set Word Width"), this);
-	QAction *const a1 = addToggleActionToMenu(wordMenu, tr("1 Byte"), m_WordWidth == 1, wordWidthMapper, SLOT(map()));
-	QAction *const a2 = addToggleActionToMenu(wordMenu, tr("2 Bytes"), m_WordWidth == 2, wordWidthMapper, SLOT(map()));
-	QAction *const a3 = addToggleActionToMenu(wordMenu, tr("4 Bytes"), m_WordWidth == 4, wordWidthMapper, SLOT(map()));
-	QAction *const a4 = addToggleActionToMenu(wordMenu, tr("8 Bytes"), m_WordWidth == 8, wordWidthMapper, SLOT(map()));
+    addToggleActionToMenu(wordMenu, tr("1 Byte"), m_WordWidth == 1, this, SLOT(setWordWidth()), 1);
+    addToggleActionToMenu(wordMenu, tr("2 Bytes"), m_WordWidth == 2, this, SLOT(setWordWidth()), 2);
+    addToggleActionToMenu(wordMenu, tr("4 Bytes"), m_WordWidth == 4, this, SLOT(setWordWidth()), 4);
+    addToggleActionToMenu(wordMenu, tr("8 Bytes"), m_WordWidth == 8, this, SLOT(setWordWidth()), 8);
 	
-	wordWidthMapper->setMapping(a1, 1);
-	wordWidthMapper->setMapping(a2, 2);
-	wordWidthMapper->setMapping(a3, 4);
-	wordWidthMapper->setMapping(a4, 8);
-	
-	connect(wordWidthMapper, SIGNAL(mapped(int)), SLOT(setWordWidth(int)));
-	
-	QSignalMapper *rowWidthMapper = new QSignalMapper(this);
-
 	QMenu *const rowMenu = new QMenu(tr("Set Row Width"), this);
-	QAction *const a5 = addToggleActionToMenu(rowMenu, tr("1 Word"), m_RowWidth == 1, rowWidthMapper, SLOT(map()));
-	QAction *const a6 = addToggleActionToMenu(rowMenu, tr("2 Words"), m_RowWidth == 2, rowWidthMapper, SLOT(map()));
-	QAction *const a7 = addToggleActionToMenu(rowMenu, tr("4 Words"), m_RowWidth == 4, rowWidthMapper, SLOT(map()));
-	QAction *const a8 = addToggleActionToMenu(rowMenu, tr("8 Words"), m_RowWidth == 8, rowWidthMapper, SLOT(map()));
-	QAction *const a9 = addToggleActionToMenu(rowMenu, tr("16 Words"), m_RowWidth == 16, rowWidthMapper, SLOT(map()));
-
-	rowWidthMapper->setMapping(a5, 1);
-	rowWidthMapper->setMapping(a6, 2);
-	rowWidthMapper->setMapping(a7, 4);
-	rowWidthMapper->setMapping(a8, 8);
-	rowWidthMapper->setMapping(a9, 16);
-	
-	connect(rowWidthMapper, SIGNAL(mapped(int)), SLOT(setRowWidth(int)));
+    addToggleActionToMenu(rowMenu, tr("1 Word"), m_RowWidth == 1, this, SLOT(setRowWidth()), 1);
+    addToggleActionToMenu(rowMenu, tr("2 Words"), m_RowWidth == 2, this, SLOT(setRowWidth()), 2);
+    addToggleActionToMenu(rowMenu, tr("4 Words"), m_RowWidth == 4, this, SLOT(setRowWidth()), 4);
+    addToggleActionToMenu(rowMenu, tr("8 Words"), m_RowWidth == 8, this, SLOT(setRowWidth()), 8);
+    addToggleActionToMenu(rowMenu, tr("16 Words"), m_RowWidth == 16, this, SLOT(setRowWidth()), 16);
 
 	menu->addSeparator();
 	menu->addMenu(wordMenu);
@@ -478,8 +460,10 @@ void QHexView::setShowAsciiDump(bool show) {
 // Name: setRowWidth(int rowWidth)
 // Desc: sets the row width (units is words)
 //------------------------------------------------------------------------------
-void QHexView::setRowWidth(int rowWidth) {
-	m_RowWidth = rowWidth;
+void QHexView::setRowWidth() {
+    QAction *action = qobject_cast<QAction*>(sender());
+
+    m_RowWidth = action->data().toInt();
 	
 	updateScrollbars();
 	repaint();
@@ -489,8 +473,10 @@ void QHexView::setRowWidth(int rowWidth) {
 // Name: setWordWidth(int wordWidth)
 // Desc: sets how many bytes represent a word
 //------------------------------------------------------------------------------
-void QHexView::setWordWidth(int wordWidth) {
-	m_WordWidth = wordWidth;
+void QHexView::setWordWidth() {
+    QAction *action = qobject_cast<QAction*>(sender());
+
+    m_WordWidth = action->data().toInt();
 	
 	updateScrollbars();
 	repaint();

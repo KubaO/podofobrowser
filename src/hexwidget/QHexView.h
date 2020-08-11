@@ -74,8 +74,8 @@ public slots:
 	void setShowComments(bool);
 	//void setLineColor(QColor);
 	//void setAddressColor(QColor);
-	void setWordWidth(int);
-	void setRowWidth(int);
+    void setWordWidth();
+    void setRowWidth();
 	void setFont(const QFont &font);
 	void setShowAddressSeparator(bool value);
 	void repaint();
@@ -187,7 +187,7 @@ private:
 	
 private:
 	static bool isPrintable(unsigned int ch);
-	static QAction *addToggleActionToMenu(QMenu *menu, const QString &caption, bool checked, QObject *reciever, const char *slot);
+    static QAction *addToggleActionToMenu(QMenu *menu, const QString &caption, bool checked, QObject *reciever, const char *slot, int width = 0);
 	
 private:
 	address_t m_Origin;
